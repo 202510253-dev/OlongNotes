@@ -29,7 +29,7 @@ app.use('/api/questions', questionsRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/admin', adminRoutes)
 
-// Health check — confirms server is running
+// Health check (this where we can confirm if the server is up or down)
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', project: 'OlongNotes' })
 })
