@@ -1,6 +1,17 @@
-// Checks that the logged-in user has role = admin (must be private)
+// adminOnly middleware
+// Runs AFTER auth middleware AND never standalone
+// Checks req.user.role === 'admin' (STRICTLY)
+// Returns 403 if not admin
+
 const adminOnly = (req, res, next) => {
-    // implementation set up
+    if (!req.user) {
+        return res.status(401).json({ message: 'Unauthorized.' })
+    }
+
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Forbidden. Admin access only.' })
+    }
+
     next()
 }
 

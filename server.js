@@ -29,9 +29,27 @@ app.use('/api/questions', questionsRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/admin', adminRoutes)
 
-// Health check (this where we can confirm if the server is up or down)
+// Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', project: 'OlongNotes' })
+})
+
+// Temporary test routes — remove before Phase 8
+const auth = require('./middleware/auth')
+const adminOnly = require('./middleware/adminOnly')
+
+app.get('/test/protected', auth, (req, res) => {
+    res.json({
+        message: 'You are authenticated',
+        user: req.user
+    })
+})
+
+app.get('/test/admin', auth, adminOnly, (req, res) => {
+    res.json({
+        message: 'You are an admin',
+        user: req.userB
+    })
 })
 
 // Start server
