@@ -34,24 +34,6 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', project: 'OlongNotes' })
 })
 
-// Temporary test routes — remove before Phase 8
-const auth = require('./middleware/auth')
-const adminOnly = require('./middleware/adminOnly')
-
-app.get('/test/protected', auth, (req, res) => {
-    res.json({
-        message: 'You are authenticated',
-        user: req.user
-    })
-})
-
-app.get('/test/admin', auth, adminOnly, (req, res) => {
-    res.json({
-        message: 'You are an admin',
-        user: req.userB
-    })
-})
-
 // Start server
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
