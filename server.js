@@ -5,6 +5,20 @@ require('dotenv').config()
 
 const app = express()
 
+// Global error handler — catches multer errors and anything else unhandled
+app.use((err, req, res, next) => {
+  // Multer file size error
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ message: 'File too large. Maximum size is 10MB.' })
+  }
+  // Multer file type error (thrown by fileFilter)
+  if (err.message === 'File type not allowed') {
+    return res.status(400).json({ message: 'File type not allowed. Accepted: PDF, Word, Excel, JPG, PNG.' })
+  }
+  // Everything else
+  console.error('Unhandled error:', err)
+  return res.status(500).json({ message: 'Server error. Please try again.' })
+})
 // Security middleware
 app.use(helmet())
 app.use(cors({

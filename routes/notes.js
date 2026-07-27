@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { supabase } = require('../supabase')
+const { supabase, supabaseAdmin } = require('../supabase')
 const { body, validationResult } = require('express-validator')
 const auth = require('../middleware/auth')
 const multer = require('multer')
@@ -19,6 +19,8 @@ const upload = multer({
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/vnd.ms-excel',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
             'image/jpeg',
             'image/png'
         ]
@@ -31,96 +33,107 @@ const upload = multer({
 })
 
 // POST /api/notes - verified or limited only
-router.post('/', auth, upload.single('file'), async (req, res) => {
+router.post('/', auth, (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) return next(err) // passes to global error handler in server.js
+    next()
+  })
+}, async (req, res) => {
 
-    // Check role - only limited or verified can upload
-    if (!['limited', 'verified', 'admin'].includes(req.user.role)) {
-        return res.status(403).json({ message: 'Only contributors can upload notes.' })
+  if (!['limited', 'verified', 'admin'].includes(req.user.role)) {
+    return res.status(403).json({ message: 'Only contributors can upload notes.' })
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded.' })
+  }
+
+  const { title, subject_id, school_id, grade_level, annotation } = req.body
+
+  if (!title || !subject_id || !grade_level) {
+    return res.status(400).json({ message: 'Title, subject, and grade level are required.' })
+  }
+
+  const fileExt = req.file.originalname.split('.').pop()
+  const fileName = `${uuidv4()}.${fileExt}`
+  const filePath = `notes/${fileName}`
+
+  try {
+    // Upload file to Supabase Storage
+    const { error: storageError } = await supabase.storage
+      .from('olongnotes')
+      .upload(filePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false
+      })
+
+    if (storageError) {
+      console.error('Storage upload error:', storageError)
+      return res.status(500).json({ message: 'File upload failed. Please try again.' })
     }
 
-    // Check file exists
-    if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded.' })
+    // Get the public URL
+    const { data: urlData } = supabase.storage
+      .from('olongnotes')
+      .getPublicUrl(filePath)
+
+    const fileUrl = urlData.publicUrl
+
+    // Save note record to database
+    const { data: note, error: dbError } = await supabase
+      .from('notes')
+      .insert({
+        title,
+        subject_id: parseInt(subject_id),
+        school_id: school_id ? parseInt(school_id) : null,
+        grade_level,
+        annotation: annotation || null,
+        file_url: fileUrl,
+        file_type: req.file.mimetype,
+        file_size: req.file.size,
+        user_id: req.user.id,
+        status: req.user.role === 'admin' ? 'published' : 'pending',
+        download_count: 0,
+        view_count: 0,
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    if (dbError) {
+      console.error('DB insert error:', dbError)
+      // FIX 4 — orphan cleanup: DB failed but file already uploaded, remove it
+      await supabase.storage
+        .from('olongnotes')
+        .remove([filePath])
+      return res.status(500).json({ message: 'Could not save note. Please try again.' })
     }
 
-    const { title, subject_id, school_id, grade_level, annotation } = req.body
+    return res.status(201).json({
+      message: 'Note uploaded successfully. It will appear after admin review.',
+      note
+    })
 
-    // Validate required fields
-    if (!title || !subject_id || !grade_level) {
-        return res.status(400).json({ message: 'Title, subject, and grade level are required.' })
-    }
-
-    try {
-        // Generate safe unique filename
-        const fileExt = req.file.originalname.split('.').pop()
-        const fileName = `${uuidv4()}.${fileExt}`
-        const filePath = `notes/${fileName}`
-
-        // Upload file to Supabase Storage
-        const { error: storageError } = await supabase.storage
-            .from('olongnotes')
-            .upload(filePath, req.file.buffer, {
-                contentType: req.file.mimetype,
-                upsert: false
-            })
-
-        if (storageError) {
-            console.error('Storage upload error:', storageError)
-            return res.status(500).json({ message: 'File upload failed. Please try again.' })
-        }
-
-        // Get the public URL
-        const { data: urlData } = supabase.storage
-            .from('olongnotes')
-            .getPublicUrl(filePath)
-
-        const fileUrl = urlData.publicUrl
-
-        // Save note record to database
-        const { data: note, error: dbError } = await supabase
-            .from('notes')
-            .insert({
-                title,
-                subject_id: parseInt(subject_id),
-                school_id: school_id ? parseInt(school_id) : null,
-                grade_level,
-                annotation: annotation || null,
-                file_url: fileUrl,
-                file_type: req.file.mimetype,
-                file_size: req.file.size,
-                user_id: req.user.id,
-                status: req.user.role === 'admin' ? 'published' : 'pending',
-                download_count: 0,
-                view_count: 0,
-                created_at: new Date().toISOString()
-            })
-            .select()
-            .single()
-
-        if (dbError) {
-            console.error('DB insert error:', dbError)
-            return res.status(500).json({ message: 'Could not save note. Please try again.' })
-        }
-
-        return res.status(201).json({
-            message: 'Note uploaded successfully. It will appear after admin review.',
-            note
-        })
-
-    } catch (err) {
-        console.error('Upload error:', err)
-        return res.status(500).json({ message: 'Server error. Please try again.' })
-    }
+  } catch (err) {
+    console.error('Upload error:', err)
+    // Also attempt cleanup on unexpected errors
+    await supabase.storage.from('olongnotes').remove([filePath]).catch(() => {})
+    return res.status(500).json({ message: 'Server error. Please try again.' })
+  }
 })
 
 // GET /api/notes - public, no auth required
 router.get('/', async (req, res) => {
-    const { school, grade_level, subject, file_type } = req.query
+  const { school, grade_level, subject, file_type } = req.query
 
-    try {
-        let query = supabase
-            .from('notes')
-            .select(`
+  // Pagination — default 20 per page, max 100
+  const pageLimit = Math.min(parseInt(req.query.limit) || 20, 100)
+  const pageOffset = parseInt(req.query.offset) || 0
+
+  try {
+    let query = supabase
+      .from('notes')
+      .select(`
         id,
         title,
         annotation,
@@ -135,29 +148,37 @@ router.get('/', async (req, res) => {
         users ( user_name ),
         schools ( school_name ),
         subjects ( subject_name )
-      `)
-            .eq('status', 'published')
-            .order('created_at', { ascending: false })
+      `, { count: 'exact' })
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .range(pageOffset, pageOffset + pageLimit - 1)
 
-        // Apply filters only if provided
-        if (school) query = query.eq('school_id', parseInt(school))
-        if (grade_level) query = query.eq('grade_level', grade_level)
-        if (subject) query = query.eq('subject_id', parseInt(subject))
-        if (file_type) query = query.eq('file_type', file_type)
+    if (school) query = query.eq('school_id', parseInt(school))
+    if (grade_level) query = query.eq('grade_level', grade_level)
+    if (subject) query = query.eq('subject_id', parseInt(subject))
+    if (file_type) query = query.eq('file_type', file_type)
 
-        const { data: notes, error } = await query
+    const { data: notes, error, count } = await query
 
-        if (error) {
-            console.error('Fetch notes error:', error)
-            return res.status(500).json({ message: 'Could not fetch notes.' })
-        }
-
-        return res.status(200).json(notes)
-
-    } catch (err) {
-        console.error('GET /api/notes error:', err)
-        return res.status(500).json({ message: 'Server error.' })
+    if (error) {
+      console.error('Fetch notes error:', error)
+      return res.status(500).json({ message: 'Could not fetch notes.' })
     }
+
+    return res.status(200).json({
+      notes,
+      pagination: {
+        total: count,
+        limit: pageLimit,
+        offset: pageOffset,
+        has_more: (pageOffset + pageLimit) < count
+      }
+    })
+
+  } catch (err) {
+    console.error('GET /api/notes error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
 })
 
 // GET /api/notes/:id - public, increments view_count
@@ -191,11 +212,8 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Note not found.' })
         }
 
-        // Increment view_count
-        await supabase
-            .from('notes')
-            .update({ view_count: note.view_count + 1 })
-            .eq('id', parseInt(id))
+        // Increment view_count — atomic, no race condition
+        await supabase.rpc('increment_view_count', { note_id: parseInt(id) })
 
         return res.status(200).json(note)
 
@@ -207,75 +225,113 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/notes/:id/like - auth required, toggle
 router.post('/:id/like', auth, async (req, res) => {
-    const noteId = parseInt(req.params.id)
-    const userId = req.user.id
+  const noteId = parseInt(req.params.id)
+  const userId = req.user.id
 
-    try {
-        // Check if like already exists
-        const { data: existing } = await supabase
-            .from('likes')
-            .select('id')
-            .eq('note_id', noteId)
-            .eq('user_id', userId)
-            .single()
+  try {
+    const { data: existing } = await supabase
+      .from('likes')
+      .select('id')
+      .eq('note_id', noteId)
+      .eq('user_id', userId)
+      .maybeSingle()
 
-        if (existing) {
-            // Already liked - remove it (toggle off)
-            await supabase
-                .from('likes')
-                .delete()
-                .eq('note_id', noteId)
-                .eq('user_id', userId)
+    if (existing) {
+      const { error: deleteError } = await supabase
+        .from('likes')
+        .delete()
+        .eq('note_id', noteId)
+        .eq('user_id', userId)
 
-            return res.status(200).json({ message: 'Like removed.', liked: false })
-        } else {
-            // Not liked yet — add it (toggle on)
-            await supabase
-                .from('likes')
-                .insert({ note_id: noteId, user_id: userId, created_at: new Date().toISOString() })
+      if (deleteError) {
+        console.error('Like delete error:', deleteError)
+        return res.status(500).json({ message: 'Could not remove like.' })
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('likes')
+        .insert({ note_id: noteId, user_id: userId, created_at: new Date().toISOString() })
 
-            return res.status(201).json({ message: 'Note liked.', liked: true })
+      if (insertError) {
+        if (insertError.code !== '23505') {
+          console.error('Like insert error:', insertError)
+          return res.status(500).json({ message: 'Could not like note.' })
         }
-
-    } catch (err) {
-        console.error('Like error:', err)
-        return res.status(500).json({ message: 'Server error.' })
+        // 23505 = race condition, another request won — treat as success
+      }
     }
+
+    // Return new count
+    const { count } = await supabase
+      .from('likes')
+      .select('*', { count: 'exact', head: true })
+      .eq('note_id', noteId)
+
+    return res.status(existing ? 200 : 201).json({
+      message: existing ? 'Like removed.' : 'Note liked.',
+      liked: !existing,
+      likes_count: count
+    })
+
+  } catch (err) {
+    console.error('Like error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
 })
 
 // POST /api/notes/:id/bookmark - auth required, toggle
 router.post('/:id/bookmark', auth, async (req, res) => {
-    const noteId = parseInt(req.params.id)
-    const userId = req.user.id
+  const noteId = parseInt(req.params.id)
+  const userId = req.user.id
 
-    try {
-        const { data: existing } = await supabase
-            .from('bookmarks')
-            .select('id')
-            .eq('note_id', noteId)
-            .eq('user_id', userId)
-            .single()
+  try {
+    const { data: existing } = await supabase
+      .from('bookmarks')
+      .select('id')
+      .eq('note_id', noteId)
+      .eq('user_id', userId)
+      .maybeSingle()
 
-        if (existing) {
-            await supabase
-                .from('bookmarks')
-                .delete()
-                .eq('note_id', noteId)
-                .eq('user_id', userId)
+    if (existing) {
+      const { error: deleteError } = await supabase
+        .from('bookmarks')
+        .delete()
+        .eq('note_id', noteId)
+        .eq('user_id', userId)
 
-            return res.status(200).json({ message: 'Bookmark removed.', bookmarked: false })
-        } else {
-            await supabase
-                .from('bookmarks')
-                .insert({ note_id: noteId, user_id: userId, created_at: new Date().toISOString() })
+      if (deleteError) {
+        console.error('Bookmark delete error:', deleteError)
+        return res.status(500).json({ message: 'Could not remove bookmark.' })
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('bookmarks')
+        .insert({ note_id: noteId, user_id: userId, created_at: new Date().toISOString() })
 
-            return res.status(201).json({ message: 'Note bookmarked.', bookmarked: true })
+      if (insertError) {
+        if (insertError.code !== '23505') {
+          console.error('Bookmark insert error:', insertError)
+          return res.status(500).json({ message: 'Could not bookmark note.' })
         }
-
-    } catch (err) {
-        console.error('Bookmark error:', err)
-        return res.status(500).json({ message: 'Server error.' })
+      }
     }
+
+    // Return new count
+    const { count } = await supabase
+      .from('bookmarks')
+      .select('*', { count: 'exact', head: true })
+      .eq('note_id', noteId)
+
+    return res.status(existing ? 200 : 201).json({
+      message: existing ? 'Bookmark removed.' : 'Note bookmarked.',
+      bookmarked: !existing,
+      bookmarks_count: count
+    })
+
+  } catch (err) {
+    console.error('Bookmark error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
 })
 
 // GET /api/notes/:id/download - public, increments download_count
@@ -294,11 +350,8 @@ router.get('/:id/download', async (req, res) => {
             return res.status(404).json({ message: 'Note not found.' })
         }
 
-        // Increment download count
-        await supabase
-            .from('notes')
-            .update({ download_count: note.download_count + 1 })
-            .eq('id', noteId)
+        // Increment download count — atomic, no race condition
+        await supabase.rpc('increment_download_count', { note_id: noteId })
 
         return res.status(200).json({ file_url: note.file_url })
 
@@ -310,88 +363,108 @@ router.get('/:id/download', async (req, res) => {
 
 // DELETE /api/notes/:id and owner or admin only
 router.delete('/:id', auth, async (req, res) => {
-    const noteId = parseInt(req.params.id)
+  const noteId = parseInt(req.params.id)
 
-    try {
-        // Fetch the note first to check ownership
-        const { data: note, error: fetchError } = await supabase
-            .from('notes')
-            .select('id, user_id, file_url')
-            .eq('id', noteId)
-            .single()
+  try {
+    const { data: note, error: fetchError } = await supabase
+      .from('notes')
+      .select('id, user_id, file_url')
+      .eq('id', noteId)
+      .single()
 
-        if (fetchError || !note) {
-            return res.status(404).json({ message: 'Note not found.' })
-        }
-
-        // Only owner or admin can delete
-        if (note.user_id !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'You can only delete your own notes.' })
-        }
-
-        // Delete from database
-        const { error: deleteError } = await supabase
-            .from('notes')
-            .delete()
-            .eq('id', noteId)
-
-        if (deleteError) {
-            return res.status(500).json({ message: 'Could not delete note.' })
-        }
-
-        // Log to activity_log
-        await supabase
-            .from('activity_log')
-            .insert({
-                user_id: req.user.id,
-                note_id: noteId,
-                activity_type: 'note_deleted',
-                description: `Note ${noteId} deleted by ${req.user.role === 'admin' ? 'admin' : 'owner'}`,
-                created_at: new Date().toISOString()
-            })
-
-        return res.status(200).json({ message: 'Note deleted successfully.' })
-
-    } catch (err) {
-        console.error('Delete error:', err)
-        return res.status(500).json({ message: 'Server error.' })
+    if (fetchError || !note) {
+      return res.status(404).json({ message: 'Note not found.' })
     }
+
+    if (note.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only delete your own notes.' })
+    }
+
+    // Delete from database first
+    const { error: deleteError } = await supabase
+      .from('notes')
+      .delete()
+      .eq('id', noteId)
+
+    if (deleteError) {
+      return res.status(500).json({ message: 'Could not delete note.' })
+    }
+
+    // FIX 5 — delete file from Storage after DB row is gone
+    if (note.file_url) {
+      const urlParts = note.file_url.split('/storage/v1/object/public/olongnotes/')
+      const filePath = urlParts[1]
+      if (filePath) {
+        const { error: storageError } = await supabaseAdmin.storage
+          .from('olongnotes')
+          .remove([filePath])
+        if (storageError) {
+          console.error('Storage delete error (file may be orphaned):', storageError)
+        }
+      }
+    }
+
+    // FIX 13 — activity log with error capture
+    const { error: logError } = await supabase
+      .from('activity_log')
+      .insert({
+        user_id: req.user.id,
+        target_type: 'note',
+        target_id: noteId,
+        activity_type: 'note_deleted',
+        description: `Note ${noteId} deleted by ${req.user.role === 'admin' ? 'admin' : 'owner'}`,
+        created_at: new Date().toISOString()
+      })
+
+    if (logError) {
+      console.error('Activity log write failed:', logError)
+    }
+
+    return res.status(200).json({ message: 'Note deleted successfully.' })
+
+  } catch (err) {
+    console.error('Delete error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
 })
 
 // POST /api/notes/:id/report and auth required
 router.post('/:id/report', auth, async (req, res) => {
-    const noteId = parseInt(req.params.id)
+  const noteId = parseInt(req.params.id)
+  const reason = req.body?.reason
 
-    // Guard  missing body
-    const reason = req.body?.reason
+  if (!reason) {
+    return res.status(400).json({ message: 'A reason is required to report a note.' })
+  }
 
-    if (!reason) {
-        return res.status(400).json({ message: 'A reason is required to report a note.' })
+  try {
+    const { data: report, error } = await supabase
+      .from('reports')
+      .insert({
+        reporter_id: req.user.id,
+        target_type: 'note',
+        target_id: noteId,
+        reason,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Report insert error:', error)
+      return res.status(500).json({ message: 'Could not submit report.' })
     }
 
-    try {
-        const { error } = await supabase
-            .from('reports')
-            .insert({
-                reporter_id: req.user.id,
-                target_type: 'note',
-                target_id: noteId,
-                reason,
-                status: 'pending',
-                created_at: new Date().toISOString()
-            })
+    return res.status(201).json({
+      message: 'Report submitted. Our team will review it.',
+      report_id: report.id
+    })
 
-        if (error) {
-            console.error('Report error:', error)
-            return res.status(500).json({ message: 'Could not submit report.' })
-        }
-
-        return res.status(201).json({ message: 'Report submitted. Our team will review it.' })
-
-    } catch (err) {
-        console.error('Report error:', err)
-        return res.status(500).json({ message: 'Server error.' })
-    }
+  } catch (err) {
+    console.error('Report error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
 })
 // GET /api/notes
 // GET /api/notes/:id

@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { supabase } = require('../supabase')
 const { body, validationResult } = require('express-validator')
+const auth = require ('../middleware/auth')
 
 // This will acts as the api/auth/register
 // Take note: Public - Anyone can create an account
@@ -145,7 +146,7 @@ router.post('/login', [
 // POST api/auth/logout
 // PROTECTED - must be logged in to log out
 
-router.post('/logout', async (req, res) => {
+router.post('/logout', auth, async (req, res) => {
     try {
         const { error } = await supabase.auth.signOut()
 
