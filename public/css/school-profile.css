@@ -1,0 +1,376 @@
+/* ---------------------------------------------------------
+   SCHOOL PROFILE
+--------------------------------------------------------- */
+
+.school-profile {
+  padding: 40px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Hero */
+.school-profile__hero {
+  background: linear-gradient(155deg, var(--navy-900, #101a3a) 0%, var(--navy-800, #16244d) 100%);
+  border-radius: 20px;
+  padding: 32px 40px;
+  color: #ffffff;
+}
+
+.school-profile__hero-title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: clamp(1.7rem, 2vw + 1rem, 2.3rem);
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #ffffff;
+}
+
+.school-profile__hero-text {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Toolbar (back link only) */
+.school-profile__toolbar {
+  display: flex;
+  align-items: center;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  text-decoration: none;
+  padding: 6px 2px;
+}
+
+.back-link:hover {
+  color: var(--accent-blue, #3d6bf0);
+}
+
+/* Layout */
+.school-profile__layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.school-profile__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 92px;
+}
+
+.sidebar-block {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 18px 18px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-block__title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0 0 12px;
+}
+
+/* School card */
+.school-card__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.school-card__badge {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #ffffff;
+  background: var(--accent-blue, #3d6bf0);
+}
+
+.school-card__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.school-card__info strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
+.school-card__info em {
+  font-style: normal;
+  font-size: 0.78rem;
+  color: var(--gray-600, #8891a0);
+  margin-top: 2px;
+}
+
+/* Subject search */
+.subject-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--navy-100, #f2f4f8);
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 12px;
+  color: var(--gray-600, #8891a0);
+}
+
+.subject-search:focus-within {
+  box-shadow: 0 0 0 2px var(--accent-blue, #3d6bf0);
+}
+
+.subject-search input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--text-heading);
+  outline: none;
+}
+
+.subject-search input::placeholder {
+  color: var(--gray-600, #9aa2b1);
+}
+
+.subject-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subject-list__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-600, #5b6472);
+  background: none;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.subject-list__item:hover {
+  background: var(--navy-100, #f2f4f8);
+  color: var(--text-heading);
+}
+
+.subject-list__item.is-active {
+  background: var(--navy-900, #101a3a);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Documents panel */
+.school-profile__main {
+  background: var(--navy-100, #f2f4f8);
+  border-radius: 16px;
+  padding: 22px 24px 26px;
+}
+
+.school-profile__section-title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 16px;
+}
+
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.doc-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 18px 16px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.doc-card__file-icon {
+  color: var(--accent-blue, #3d6bf0);
+}
+
+.doc-badge {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.doc-badge--pdf {
+  background: rgba(224, 85, 111, 0.12);
+  color: #d1435f;
+}
+
+.doc-badge--docx {
+  background: rgba(61, 107, 240, 0.12);
+  color: var(--accent-blue, #3d6bf0);
+}
+
+.doc-card__title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.doc-card__caption {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-600, #5b6472);
+  line-height: 1.4;
+  margin: 3px 0 10px;
+}
+
+.doc-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.doc-card__tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--accent-blue, #3d6bf0);
+  background: rgba(61, 107, 240, 0.1);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.doc-card__author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.doc-card__avatar {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--avatar-tint, var(--accent-blue, #3d6bf0));
+}
+
+.doc-card__author span {
+  font-size: 0.78rem;
+  color: var(--gray-600, #5b6472);
+}
+
+.doc-card__author strong {
+  color: var(--text-heading);
+  font-weight: 600;
+}
+
+.doc-card__stats {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.doc-card__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--gray-600, #5b6472);
+}
+
+.doc-card__stat--rating svg {
+  color: #e0b23c;
+}
+
+.doc-card__stat--downloads svg {
+  color: var(--gray-600, #9aa2b1);
+}
+
+.doc-card__open {
+  margin-top: auto;
+  align-self: stretch;
+}
+
+.doc-empty {
+  text-align: center;
+  color: var(--gray-600, #8891a0);
+  font-size: 0.9rem;
+  padding: 40px 10px;
+}
+
+/* ---------------------------------------------------------
+   Responsive
+--------------------------------------------------------- */
+@media (max-width: 900px) {
+  .school-profile__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .school-profile__sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .school-profile__hero {
+    padding: 26px 24px;
+  }
+
+  .doc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}

@@ -1,0 +1,394 @@
+/* ---------------------------------------------------------
+   SCHOOLS DIRECTORY
+--------------------------------------------------------- */
+
+.schools-hub {
+  padding: 40px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------------------------------------------------------
+   Hero
+--------------------------------------------------------- */
+.schools-hero {
+  background: linear-gradient(155deg, var(--navy-900, #101a3a) 0%, var(--navy-800, #16244d) 100%);
+  border-radius: 20px;
+  padding: 32px 40px;
+  color: #ffffff;
+}
+
+.schools-hero__title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: clamp(1.7rem, 2vw + 1rem, 2.3rem);
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #ffffff;
+}
+
+.schools-hero__text {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------
+   Toolbar
+--------------------------------------------------------- */
+.schools-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.schools-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--navy-100, #f2f4f8);
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: var(--gray-600, #8891a0);
+  transition: box-shadow 0.15s ease;
+}
+
+.schools-search:focus-within {
+  box-shadow: 0 0 0 2px var(--accent-blue, #3d6bf0);
+}
+
+.schools-search svg {
+  flex-shrink: 0;
+}
+
+.schools-search input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text-heading);
+  outline: none;
+}
+
+.schools-search input::placeholder {
+  color: var(--gray-600, #9aa2b1);
+}
+
+.view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  background: var(--navy-100, #f2f4f8);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-600, #5b6472);
+  background: none;
+  border: none;
+  border-radius: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.view-toggle__btn:hover {
+  color: var(--text-heading);
+}
+
+.view-toggle__btn.is-active {
+  background: var(--surface);
+  color: var(--text-heading);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------------------------------------------------------
+   Layout: sidebar + results
+--------------------------------------------------------- */
+.schools-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.schools-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 92px;
+}
+
+.sidebar-block {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 18px 18px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-block__title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0 0 12px;
+}
+
+.category-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-list__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--gray-600, #5b6472);
+  background: none;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.category-list__item:hover {
+  background: var(--navy-100, #f2f4f8);
+  color: var(--text-heading);
+}
+
+.category-list__item.is-active {
+  background: var(--navy-900, #101a3a);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.letter-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.letter-btn {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  background: var(--navy-100, #f2f4f8);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.letter-btn:hover {
+  background: var(--gray-100);
+}
+
+.letter-btn.is-active {
+  background: var(--navy-900, #101a3a);
+  color: #ffffff;
+}
+
+.letter-btn:disabled {
+  color: var(--gray-600, #c3c8d2);
+  cursor: not-allowed;
+}
+
+.letter-btn:disabled:hover {
+  background: var(--navy-100, #f2f4f8);
+}
+
+/* ---------------------------------------------------------
+   Results
+--------------------------------------------------------- */
+.schools-results {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 20px 22px 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* List view: two-column, top-to-bottom flow */
+.schools-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  column-count: 2;
+  column-gap: 28px;
+  max-height: 560px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-100) transparent;
+}
+
+.schools-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.schools-list::-webkit-scrollbar-thumb {
+  background: var(--gray-100);
+  border-radius: 999px;
+}
+
+.school-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  break-inside: avoid;
+  padding: 11px 4px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+  text-decoration: none;
+}
+
+.school-row:hover {
+  background: var(--navy-100, #f2f4f8);
+  transform: translateX(2px);
+}
+
+.school-row__icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-blue, #3d6bf0);
+  background: color-mix(in srgb, var(--accent-blue, #3d6bf0) 12%, #ffffff);
+}
+
+.school-row__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.school-row__chevron {
+  flex-shrink: 0;
+  color: var(--gray-600, #9aa2b1);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.school-row:hover .school-row__chevron {
+  color: var(--accent-blue, #3d6bf0);
+  transform: translateX(2px);
+}
+
+/* Grid view: card layout */
+.schools-list.is-grid {
+  column-count: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-height: none;
+  overflow: visible;
+}
+
+.schools-list.is-grid .school-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--navy-100, #eef1f6);
+  padding: 16px;
+}
+
+.schools-list.is-grid .school-row:hover {
+  border-color: var(--accent-blue, #3d6bf0);
+  transform: translateY(-2px);
+}
+
+.schools-list.is-grid .school-row__name {
+  white-space: normal;
+  font-size: 0.9rem;
+}
+
+.schools-list.is-grid .school-row__chevron {
+  align-self: flex-end;
+  margin-top: -6px;
+}
+
+.schools-empty {
+  text-align: center;
+  color: var(--gray-600, #8891a0);
+  font-size: 0.9rem;
+  padding: 40px 10px;
+}
+
+.schools-viewall {
+  display: block;
+  margin: 18px auto 0;
+}
+
+/* ---------------------------------------------------------
+   Responsive
+--------------------------------------------------------- */
+@media (max-width: 900px) {
+  .schools-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .schools-sidebar {
+    position: static;
+  }
+
+  .schools-list {
+    column-count: 1;
+  }
+
+  .schools-list.is-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .schools-hero {
+    padding: 26px 24px;
+  }
+
+  .schools-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .view-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .schools-list.is-grid {
+    grid-template-columns: 1fr;
+  }
+}

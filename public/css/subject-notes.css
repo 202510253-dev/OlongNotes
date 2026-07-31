@@ -1,0 +1,64 @@
+/* ---------------------------------------------------------
+   BROWSE NOTES (by subject)
+--------------------------------------------------------- */
+
+.subject-notes {
+  padding: 40px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.subject-notes__toolbar {
+  display: flex;
+  align-items: center;
+}
+
+/* Header panel — light rounded card, matches the reference screenshot */
+.subject-notes__header {
+  background: var(--navy-100, #f2f4f8);
+  border-radius: 20px;
+  padding: 28px 32px;
+}
+
+.subject-notes__title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: clamp(1.5rem, 1.6vw + 1rem, 2rem);
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 8px;
+}
+
+.subject-notes__subtitle {
+  font-size: 0.92rem;
+  color: var(--gray-600, #5b6472);
+  margin: 0;
+}
+
+/* Same .doc-card component/size as school-profile.css — just force
+   a fixed 4-per-row grid instead of the auto-fill layout. */
+.doc-grid--subject-notes {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1180px) {
+  .doc-grid--subject-notes {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .doc-grid--subject-notes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .doc-grid--subject-notes {
+    grid-template-columns: 1fr;
+  }
+
+  .subject-notes__header {
+    padding: 22px 22px;
+  }
+}

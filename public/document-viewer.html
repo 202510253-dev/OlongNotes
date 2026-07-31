@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Viewer - OlongNotes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/document-viewer.css" />
+</head>
+<body class="viewer-body">
+
+  <!-- ===================== VIEWER TOP BAR ===================== -->
+  <header class="viewer-topbar">
+    <a href="javascript:history.back()" class="viewer-topbar__back" aria-label="Back">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 4-7 8 7 8M4.5 12H20"/></svg>
+    </a>
+    <a href="index.html" class="viewer-topbar__brand">
+      <img src="img/olongnotes.png" alt="" />
+      <span>OlongNotes</span>
+    </a>
+    <span class="viewer-topbar__doc-name" id="viewerDocName">Document</span>
+  </header>
+
+  <!-- ===================== VIEWER LAYOUT ===================== -->
+  <main class="viewer-layout">
+
+    <!-- Document panel -->
+    <section class="viewer-panel">
+      <div class="viewer-toolbar">
+        <button class="viewer-tool" type="button" id="toggleSidebarBtn" aria-label="Toggle panel">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M9 4v16"/></svg>
+        </button>
+
+        <div class="viewer-toolbar__divider"></div>
+
+        <button class="viewer-tool" type="button" id="prevPageBtn" aria-label="Previous page">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+        </button>
+        <span class="viewer-pageindicator">
+          <span id="currentPage">1</span> / <span id="totalPages">12</span>
+        </span>
+        <button class="viewer-tool" type="button" id="nextPageBtn" aria-label="Next page">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
+
+        <div class="viewer-toolbar__divider"></div>
+
+        <button class="viewer-tool" type="button" id="zoomOutBtn" aria-label="Zoom out">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+        </button>
+        <span class="viewer-zoomlevel" id="zoomLevel">100%</span>
+        <button class="viewer-tool" type="button" id="zoomInBtn" aria-label="Zoom in">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+
+        <div class="viewer-toolbar__divider"></div>
+
+        <button class="viewer-tool" type="button" id="fullscreenBtn" aria-label="Fullscreen">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H4v4M16 3h4v4M8 21H4v-4M16 21h4v-4"/></svg>
+        </button>
+        <button class="viewer-tool" type="button" id="resetBtn" aria-label="Reset view">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v5h-5"/></svg>
+        </button>
+
+        <div class="viewer-toolbar__spacer"></div>
+
+        <button class="viewer-tool" type="button" id="downloadBtn" aria-label="Download">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/></svg>
+        </button>
+        <button class="viewer-tool" type="button" id="printBtn" aria-label="Print">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M6 14h12v7H6z"/></svg>
+        </button>
+        <button class="viewer-tool" type="button" id="moreBtn" aria-label="More options">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </div>
+
+      <div class="viewer-scrollarea" id="viewerScrollarea">
+        <div class="viewer-page" id="viewerPage" style="transform: scale(1);">
+          <!-- Page content injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Info sidebar -->
+    <aside class="viewer-sidebar" id="viewerSidebar">
+
+      <div class="viewer-card">
+        <h2 class="viewer-card__title">
+          <span class="viewer-card__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/></svg>
+          </span>
+          Document Information
+        </h2>
+
+        <ul class="info-list">
+          <li class="info-row">
+            <span class="info-row__icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
+            </span>
+            <span class="info-row__body">
+              <strong>Course</strong>
+              <em id="infoCourse">Computer Science</em>
+            </span>
+          </li>
+          <li class="info-row">
+            <span class="info-row__icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+            </span>
+            <span class="info-row__body">
+              <strong>School</strong>
+              <em id="infoSchool">Gordon College</em>
+            </span>
+          </li>
+          <li class="info-row">
+            <span class="info-row__icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+            </span>
+            <span class="info-row__body">
+              <strong>UserName</strong>
+              <em id="infoAuthor">Celine Aire</em>
+            </span>
+          </li>
+          <li class="info-row">
+            <span class="info-row__icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>
+            </span>
+            <span class="info-row__body">
+              <strong>Caption</strong>
+              <em id="infoCaption">Basic discussion about the topic.</em>
+            </span>
+          </li>
+          <li class="info-row">
+            <span class="info-row__icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 3.1 6.5 7.1.9-5.2 4.9 1.4 7-6.4-3.5-6.4 3.5 1.4-7-5.2-4.9 7.1-.9Z"/></svg>
+            </span>
+            <span class="info-row__body">
+              <strong>Grade Level</strong>
+              <em id="infoGradeLevel">College Level</em>
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="viewer-card">
+        <h2 class="viewer-card__title">
+          <span class="viewer-card__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+          </span>
+          Statistics
+        </h2>
+
+        <div class="stat-grid">
+          <div class="stat-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="stat-box__icon stat-box__icon--like"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
+            <strong id="statLikes">120</strong>
+            <span>Likes</span>
+          </div>
+          <div class="stat-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stat-box__icon stat-box__icon--download"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/></svg>
+            <strong id="statDownloads">2,300</strong>
+            <span>Downloads</span>
+          </div>
+          <div class="stat-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="stat-box__icon stat-box__icon--file"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/></svg>
+            <strong id="statFileType">PDF</strong>
+            <span>File Type</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="viewer-card">
+        <h2 class="viewer-card__title">
+          <span class="viewer-card__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>
+          </span>
+          Actions
+        </h2>
+
+        <div class="action-grid">
+          <button class="action-box" type="button" id="likeBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="action-box__icon"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
+            <span>Like</span>
+          </button>
+          <button class="action-box" type="button" id="saveBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="action-box__icon"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4-7 4V4.5a1 1 0 0 1 1-1Z"/></svg>
+            <span>Save</span>
+          </button>
+          <button class="action-box" type="button" id="reportBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="action-box__icon"><path d="M5 3v18"/><path d="M5 4h11l-1.5 4L16 12H5"/></svg>
+            <span>Report</span>
+          </button>
+        </div>
+
+        <div class="action-banner" id="actionBanner" hidden>
+          <span class="action-banner__icon" aria-hidden="true" id="actionBannerIcon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
+          </span>
+          <span id="actionBannerText">Thank you! Your like helps others discover and trust quality notes.</span>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ===================== REPORT MODAL ===================== -->
+  <div class="report-modal" id="reportModal" hidden>
+    <div class="report-modal__backdrop" id="reportModalBackdrop"></div>
+    <div class="report-modal__panel" role="dialog" aria-modal="true" aria-label="Report this document">
+      <button class="report-modal__close" type="button" id="reportModalClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+
+      <h3 class="report-modal__title">Report this document</h3>
+      <p class="report-modal__subtitle">Let us know what's wrong. Your report is anonymous.</p>
+
+      <div class="report-modal__options" id="reportOptions">
+        <button class="report-option" type="button" data-reason="Inappropriate content">Inappropriate content</button>
+        <button class="report-option" type="button" data-reason="Copyrighted material">Copyrighted material</button>
+        <button class="report-option" type="button" data-reason="Incorrect information">Incorrect information</button>
+        <button class="report-option" type="button" data-reason="Spam or misleading">Spam or misleading</button>
+        <button class="report-option" type="button" data-reason="Other">Other</button>
+      </div>
+
+      <div class="report-modal__other" id="reportOtherSection" hidden>
+        <input type="text" class="report-modal__other-input" id="reportOtherInput" placeholder="Type your reason..." />
+      </div>
+
+      <button class="btn btn--primary report-modal__done" type="button" id="reportModalDone" disabled>Done</button>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/document-viewer.js"></script>
+</body>
+</html>

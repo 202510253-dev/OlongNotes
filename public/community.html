@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse — OlongNotes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/browse-community.css" />
+</head>
+<body>
+
+  <!-- ===================== SIDE DRAWER MENU ===================== -->
+  <div class="side-drawer" id="sideDrawer" aria-hidden="true">
+    <div class="side-drawer__backdrop" id="sideDrawerBackdrop"></div>
+
+    <nav class="side-drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+      <div class="side-drawer__head">
+        <a href="index.html" class="side-drawer__brand">
+          <img src="img/olongnotes.png" alt="" />
+          <span class="side-drawer__brand-title">OlongNotes</span>
+        </a>
+        <button class="side-drawer__close" id="sideDrawerClose" type="button" aria-label="Close menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+        </button>
+      </div>
+
+      <div class="side-drawer__nav">
+        <a class="side-drawer__link" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5a1 1 0 0 0 1 1h3.5v-6h3v6H17a1 1 0 0 0 1-1V10"/></svg>
+          Home
+        </a>
+        <a class="side-drawer__link" href="community.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          Browse
+        </a>
+        <a class="side-drawer__link" href="schools.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
+          Schools
+        </a>
+        <a class="side-drawer__link" href="subjects.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+          Subjects
+        </a>
+        <a class="side-drawer__link" href="contributors.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8" r="3"/><path d="M2.5 19c1-3 3.3-4.6 6-4.6s5 1.6 6 4.6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.3 14.6c2.1.3 3.7 1.7 4.4 3.9"/></svg>
+          Top Contributors
+        </a>
+        <a class="side-drawer__link" href="recent-activities.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+          Recent Activities
+        </a>
+      </div>
+
+      <div class="side-drawer__foot">© 2026 OlongNotes</div>
+    </nav>
+  </div>
+
+  <!-- ===================== NAVIGATION BAR ===================== -->
+  <header class="navbar" id="navbar">
+    <div class="navbar__inner container">
+      <button class="navbar__burger" id="navBurger" type="button" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <a href="index.html" class="navbar__brand">
+        <span class="navbar__logo" aria-hidden="true">
+          <img src="img/olongnotes.png" alt="OlongNotes logo" />
+        </span>
+        <span class="navbar__title-group">
+          <span class="navbar__title">OlongNotes</span>
+          <span class="navbar__tagline">Knowledge shared, Future shared</span>
+        </span>
+      </a>
+
+      <nav class="navbar__links" id="navLinks" aria-label="Primary">
+        <a href="community.html" class="is-active">Browse</a>
+        <a href="schools.html">Schools</a>
+        <a href="subjects.html">Subjects</a>
+        <a href="index.html#about">About</a>
+      </nav>
+
+      <div class="navbar__search">
+        <label class="navbar__search-field">
+          <span class="sr-only">Search notes, schools, and subjects</span>
+          <input type="search" placeholder="Search questions..." aria-label="Search notes, schools, subjects" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </label>
+      </div>
+
+      <div class="navbar__actions">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme" aria-pressed="false">
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <span class="theme-toggle__track"><span class="theme-toggle__thumb"></span></span>
+          <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+        </button>
+
+        <button class="btn btn--outline btn--sm" type="button" id="navLoginBtn">Log In</button>
+        <button class="btn btn--primary btn--sm" type="button" id="navSignupBtn">Sign Up</button>
+
+        <button class="profile-icon" type="button" aria-label="Profile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="siteMain">
+    <!-- ===================== COMMUNITY HUB (Browse) ===================== -->
+    <section class="community-hub container">
+
+      <!-- Ask-a-question hero (full width) -->
+      <div class="community-hero">
+        <div class="community-hero__content">
+          <span class="community-hero__eyebrow">The OlongNotes Community</span>
+          <h1 class="community-hero__title">What do you need to know today?</h1>
+          <p class="community-hero__text">Ask a question and get help from our community of learners and contributors.</p>
+        </div>
+        <div class="community-hero__art" aria-hidden="true">
+          <svg viewBox="0 0 220 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M28 118c-2 22 6 38 6 38s24-6 34-24c22 4 44-10 46-32 2-24-18-44-44-46-26-2-48 16-50 40-1 8 0 16 8 24Z" fill="rgba(255,255,255,0.06)"/>
+            <rect x="86" y="18" width="86" height="66" rx="14" fill="var(--accent-blue, #3d6bf0)"/>
+            <path d="M104 84l-10 20 26-20h-16Z" fill="var(--accent-blue, #3d6bf0)"/>
+            <rect x="50" y="68" width="78" height="60" rx="14" fill="#ffffff"/>
+            <path d="M70 128l-8 18 24-18H70Z" fill="#ffffff"/>
+            <circle cx="70" cy="98" r="4.5" fill="var(--navy-900, #101a3a)"/>
+            <circle cx="89" cy="98" r="4.5" fill="var(--navy-900, #101a3a)"/>
+            <circle cx="108" cy="98" r="4.5" fill="var(--navy-900, #101a3a)"/>
+            <circle cx="176" cy="30" r="15" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="7"/>
+            <rect x="171" y="44" width="10" height="14" rx="4" fill="rgba(255,255,255,0.5)"/>
+            <path d="M14 46l10 4M18 34l11 1M20 60l9-3" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="community-hub__grid">
+
+        <!-- LEFT COLUMN -->
+        <div class="community-hub__col community-hub__col--main">
+
+          <!-- Questions feed -->
+          <div class="questions-panel">
+
+            <!-- Status tabs -->
+            <div class="questions-tabs" role="tablist" aria-label="Filter questions by status">
+              <button class="questions-tab is-active" type="button" role="tab" aria-selected="true">All</button>
+              <button class="questions-tab" type="button" role="tab" aria-selected="false">Unanswered</button>
+              <button class="questions-tab" type="button" role="tab" aria-selected="false">Answered</button>
+              <button class="questions-tab" type="button" role="tab" aria-selected="false">My Questions</button>
+            </div>
+
+            <!-- Filter row -->
+            <div class="questions-panel__filters">
+              <div class="dropdown-filter" data-filter="grade">
+                <button class="filter-select" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="filter-select__label">All Grades</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <ul class="dropdown-filter__menu" role="listbox" hidden>
+                  <li class="dropdown-filter__option is-active" role="option" data-value="all">All Grades</li>
+                  <li class="dropdown-filter__option" role="option" data-value="9">Grade 9</li>
+                  <li class="dropdown-filter__option" role="option" data-value="10">Grade 10</li>
+                  <li class="dropdown-filter__option" role="option" data-value="11">Grade 11</li>
+                  <li class="dropdown-filter__option" role="option" data-value="12">Grade 12</li>
+                </ul>
+              </div>
+
+              <div class="dropdown-filter" data-filter="subject">
+                <button class="filter-select" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="filter-select__label">All Subjects</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <ul class="dropdown-filter__menu" role="listbox" hidden>
+                  <li class="dropdown-filter__option is-active" role="option" data-value="all">All Subjects</li>
+                  <li class="dropdown-filter__option" role="option" data-value="mathematics">Mathematics</li>
+                  <li class="dropdown-filter__option" role="option" data-value="physics">Physics</li>
+                  <li class="dropdown-filter__option" role="option" data-value="chemistry">Chemistry</li>
+                  <li class="dropdown-filter__option" role="option" data-value="biology">Biology</li>
+                  <li class="dropdown-filter__option" role="option" data-value="english">English</li>
+                </ul>
+              </div>
+
+              <div class="dropdown-filter" data-filter="sort">
+                <button class="filter-select" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="filter-select__label">Latest</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <ul class="dropdown-filter__menu" role="listbox" hidden>
+                  <li class="dropdown-filter__option is-active" role="option" data-value="latest">Latest</li>
+                  <li class="dropdown-filter__option" role="option" data-value="oldest">Oldest</li>
+                  <li class="dropdown-filter__option" role="option" data-value="most-liked">Most Liked</li>
+                  <li class="dropdown-filter__option" role="option" data-value="most-answers">Most Answers</li>
+                </ul>
+              </div>
+            </div>
+
+            <ul class="question-list" id="questionList">
+
+              <!-- Q1 -->
+              <li class="question-row" data-question-id="q1" data-status="answered" data-mine="false" data-grade="11" data-subject="physics" data-timestamp="15" data-answers="4">
+                <span class="question-row__avatar" style="--avatar-tint:#3d6bf0" aria-hidden="true">J</span>
+                <div class="question-row__body">
+                  <div class="question-row__top">
+                    <span class="question-row__meta-line">
+                      <span class="question-row__subject" style="--subject-tint:#3d6bf0">Physics</span>
+                      <span class="question-row__dot">&middot;</span>
+                      <span class="question-row__grade">Grade 11</span>
+                      <span class="question-row__dot">&middot;</span>
+                      <span class="question-row__time">15 mins ago</span>
+                    </span>
+                    <span class="status-badge status-badge--answered">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg>
+                      Answered
+                    </span>
+                  </div>
+
+                  <p class="question-row__text">A ball is thrown vertically upward with a velocity of 20 m/s. How long will it take to reach the highest point?</p>
+                  <p class="question-row__desc">What formula should I use to solve this? I know the final velocity is 0 at the highest point, but I'm not sure how to find the time.</p>
+
+                  <div class="question-row__tags">
+                    <span class="tag" style="--tag-tint:#3d6bf0">#Physics</span>
+                    <span class="tag" style="--tag-tint:#3d6bf0">#Motion</span>
+                    <span class="tag" style="--tag-tint:#3d6bf0">#Kinematics</span>
+                  </div>
+
+                  <div class="question-row__footer">
+                    <button class="like-btn" type="button" aria-pressed="false" data-count="25">
+                      <svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
+                      <span class="like-btn__count">25</span>
+                    </button>
+                    <span class="stat-count">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+                      <span class="answer-count">4 Answers</span>
+                    </span>
+                    <button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>
+                  </div>
+                </div>
+              </li>
+
+              <!-- Q2 -->
+              <li class="question-row" data-question-id="q2" data-status="unanswered" data-mine="false" data-grade="9" data-subject="mathematics" data-timestamp="60" data-answers="2">
+                <span class="question-row__avatar" style="--avatar-tint:#e7833b" aria-hidden="true">M</span>
+                <div class="question-row__body">
+                  <div class="question-row__top">
+                    <span class="question-row__meta-line">
+                      <span class="question-row__subject" style="--subject-tint:#e7833b">Mathematics</span>
+                      <span class="question-row__dot">&middot;</span>
+                      <span class="question-row__grade">Grade 9</span>
+                      <span class="question-row__dot">&middot;</span>
+                      <span class="question-row__time">1 hour ago</span>
+                    </span>
+                    <span class="status-badge status-badge--unanswered">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                      Unanswered
+                    </span>
+                  </div>
+
+                  <p class="question-row__text">Can you help me solve x: 7x + 4/5 = 15 ?</p>
+                  <p class="question-row__desc">I tried isolating x but I keep getting a different answer. Where did I go wrong?</p>
+
+                  <div class="question-row__tags">
+                    <span class="tag" style="--tag-tint:#e7833b">#Algebra</span>
+                    <span class="tag" style="--tag-tint:#e7833b">#Equations</span>
+                    <span class="tag" style="--tag-tint:#e7833b">#Linear</span>
+                  </div>
+
+                  <div class="question-row__footer">
+                    <button class="like-btn" type="button" aria-pressed="false" data-count="14">
+                      <svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
+                      <span class="like-btn__count">14</span>
+                    </button>
+                    <span class="stat-count">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+                      <span class="answer-count">2 Answers</span>
+                    </span>
+                    <button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>
+                  </div>
+                </div>
+              </li>
+
+              <!-- Q3 -->
+              <li class="question-row" data-question-id="q3" data-status="answered" data-mine="false" data-grade="10" data-subject="chemistry" data-timestamp="120" data-answers="2">
+                <span class="question-row__avatar" style="--avatar-tint:#8b5cf6" aria-hidden="true">A</span>
+                <div class="question-row__body">
+                  <div class="question-row__top">
+                    <span class="question-row__meta-line">
+                      <span class="question-row__subject" style="--subject-tint:#8b5cf6">Chemistry</span>
+                      <span class="question-row__dot">&middot;</span>
+                      <span class="question-row__grade">Grade 10</span>
+                      <span class="question-row__dot">&middot;</span>
+                      <span class="question-row__time">2 hours ago</span>
+                    </span>
+                    <span class="status-badge status-badge--answered">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg>
+                      Answered
+                    </span>
+                  </div>
+
+                  <p class="question-row__text">What is the balanced chemical equation for photosynthesis?</p>
+                  <p class="question-row__desc">I keep forgetting the coefficients. Can someone help?</p>
+
+                  <div class="question-row__tags">
+                    <span class="tag" style="--tag-tint:#8b5cf6">#Chemistry</span>
+                    <span class="tag" style="--tag-tint:#8b5cf6">#Photosynthesis</span>
+                    <span class="tag" style="--tag-tint:#8b5cf6">#Biology</span>
+                  </div>
+
+                  <div class="question-row__footer">
+                    <button class="like-btn" type="button" aria-pressed="false" data-count="19">
+                      <svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
+                      <span class="like-btn__count">19</span>
+                    </button>
+                    <span class="stat-count">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+                      <span class="answer-count">2 Answers</span>
+                    </span>
+                    <button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>
+                  </div>
+                </div>
+              </li>
+
+              <!-- Q4 -->
+              <li class="question-row" data-question-id="q4" data-status="unanswered" data-mine="false" data-grade="12" data-subject="biology" data-timestamp="180" data-answers="2">
+                <span class="question-row__avatar" style="--avatar-tint:#2e9e5b" aria-hidden="true">R</span>
+                <div class="question-row__body">
+                  <div class="question-row__top">
+                    <span class="question-row__meta-line">
+                      <span class="question-row__subject" style="--subject-tint:#2e9e5b">Biology</span>
+                      <span class="question-row__dot">&middot;</span>
+                      <span class="question-row__grade">Grade 12</span>
+                      <span class="question-row__dot">&middot;</span>
+                      <span class="question-row__time">3 hours ago</span>
+                    </span>
+                    <span class="status-badge status-badge--unanswered">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                      Unanswered
+                    </span>
+                  </div>
+
+                  <p class="question-row__text">What are the functions of mitochondria in a cell?</p>
+                  <p class="question-row__desc">I need a simple explanation for my biology assignment.</p>
+
+                  <div class="question-row__tags">
+                    <span class="tag" style="--tag-tint:#2e9e5b">#Biology</span>
+                    <span class="tag" style="--tag-tint:#2e9e5b">#Cells</span>
+                    <span class="tag" style="--tag-tint:#2e9e5b">#Mitochondria</span>
+                  </div>
+
+                  <div class="question-row__footer">
+                    <button class="like-btn" type="button" aria-pressed="false" data-count="12">
+                      <svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
+                      <span class="like-btn__count">12</span>
+                    </button>
+                    <span class="stat-count">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+                      <span class="answer-count">2 Answers</span>
+                    </span>
+                    <button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>
+                  </div>
+                </div>
+              </li>
+
+            </ul>
+            <p class="questions-empty" id="questionsEmpty" hidden>No questions to show here yet.</p>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="community-hub__col community-hub__col--side">
+
+          <!-- Trending subjects -->
+          <div class="side-panel">
+            <h2 class="side-panel__title">Trending Subjects</h2>
+
+            <ul class="trending-list">
+              <li class="trending-item">
+                <span class="trending-item__icon" style="--stat-tint:#3d6bf0" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+                </span>
+                <span class="trending-item__name">Mathematics</span>
+                <span class="trending-item__count">2,845 questions</span>
+              </li>
+
+              <li class="trending-item">
+                <span class="trending-item__icon" style="--stat-tint:#2e9e5b" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3h5l1 4-2 2 3 8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3l3-8-2-2Z"/></svg>
+                </span>
+                <span class="trending-item__name">Physics</span>
+                <span class="trending-item__count">2,317 questions</span>
+              </li>
+
+              <li class="trending-item">
+                <span class="trending-item__icon" style="--stat-tint:#8b5cf6" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c2 2.5 3 5 3 8s-1 5.5-3 8c-2-2.5-3-5-3-8s1-5.5 3-8Z"/><path d="M4 12h16"/></svg>
+                </span>
+                <span class="trending-item__name">Biology</span>
+                <span class="trending-item__count">1,892 questions</span>
+              </li>
+
+              <li class="trending-item">
+                <span class="trending-item__icon" style="--stat-tint:#e0556f" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5h6l-1 5h3l-8 12 1.5-8H7l2-9Z"/></svg>
+                </span>
+                <span class="trending-item__name">Chemistry</span>
+                <span class="trending-item__count">1,620 questions</span>
+              </li>
+
+              <li class="trending-item">
+                <span class="trending-item__icon" style="--stat-tint:#e0b23c" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 12 3l8 3.5v3L12 13 4 9.5v-3Z"/><path d="M7 11v5c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2v-5"/></svg>
+                </span>
+                <span class="trending-item__name">English</span>
+                <span class="trending-item__count">1,256 questions</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Top contributors -->
+          <div class="side-panel">
+            <div class="side-panel__head">
+              <h2 class="side-panel__title">Top Contributors</h2>
+              <a href="contributors.html" class="side-panel__viewall">View All</a>
+            </div>
+
+            <ul class="contributor-list">
+              <li class="contributor-item">
+                <span class="contributor-item__avatar" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+                </span>
+                <div class="contributor-item__body">
+                  <p class="contributor-item__name">Maria Santos</p>
+                  <p class="contributor-item__meta">145 answers</p>
+                </div>
+                <span class="rank-badge rank-badge--1">1</span>
+              </li>
+
+              <li class="contributor-item">
+                <span class="contributor-item__avatar" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+                </span>
+                <div class="contributor-item__body">
+                  <p class="contributor-item__name">John Dela Cruz</p>
+                  <p class="contributor-item__meta">101 answers</p>
+                </div>
+                <span class="rank-badge rank-badge--2">2</span>
+              </li>
+
+              <li class="contributor-item">
+                <span class="contributor-item__avatar" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+                </span>
+                <div class="contributor-item__body">
+                  <p class="contributor-item__name">Kent Morales</p>
+                  <p class="contributor-item__meta">98 answers</p>
+                </div>
+                <span class="rank-badge rank-badge--3">3</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== QUESTION DETAIL MODAL ===================== -->
+    <div class="question-modal" id="questionModal" aria-hidden="true">
+      <div class="question-modal__inner container">
+        <button class="question-modal__back" type="button" id="modalBackBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 5-7 7 7 7M4 12h16"/></svg>
+          Back to Questions
+        </button>
+
+        <div class="question-modal__grid">
+          <!-- Question + comments -->
+          <div class="question-modal__main">
+            <div class="modal-question" id="modalQuestionContent">
+              <!-- populated by js/browse-community.js -->
+            </div>
+          </div>
+
+          <!-- Answer composer -->
+          <aside class="question-modal__side">
+            <div class="answer-composer">
+              <div class="answer-composer__head">
+                <span class="answer-composer__icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                </span>
+                <div>
+                  <p class="answer-composer__title">Add Your Answer</p>
+                  <p class="answer-composer__subtitle">Share your knowledge and help the community.</p>
+                </div>
+              </div>
+
+              <div class="answer-composer__field">
+                <textarea id="answerTextarea" placeholder="Write your answer here..."></textarea>
+                <div class="answer-composer__toolbar">
+                  <button class="toolbar-btn" type="button" data-format="bold" title="Bold" aria-label="Bold"><strong>B</strong></button>
+                  <button class="toolbar-btn toolbar-btn--italic" type="button" data-format="italic" title="Italic" aria-label="Italic">I</button>
+                  <button class="toolbar-btn" type="button" data-format="list" title="Bulleted list" aria-label="Bulleted list">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="answer-composer__actions">
+                <button class="btn btn--outline btn--sm" type="button" id="answerCancelBtn">Cancel</button>
+                <button class="btn btn--accent-blue btn--sm" type="button" id="answerPostBtn">Post Answer</button>
+              </div>
+
+              <div class="answer-composer__tip">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3Z"/></svg>
+                <span>
+                  <strong>Be kind and helpful.</strong>
+                  Your answer can make a big difference!
+                </span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== ASK YOUR QUESTION MODAL ===================== -->
+    <div class="ask-modal" id="askModal" aria-hidden="true">
+      <div class="ask-modal__backdrop" id="askModalBackdrop"></div>
+
+      <div class="ask-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="askModalTitle">
+        <button class="ask-modal__close" type="button" id="askModalClose" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+        </button>
+
+        <div class="ask-modal__head">
+          <span class="ask-modal__icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/><circle cx="8" cy="11.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="16" cy="11.5" r="0.9" fill="currentColor" stroke="none"/></svg>
+          </span>
+          <div>
+            <h2 class="ask-modal__title" id="askModalTitle">Ask Your Question</h2>
+            <p class="ask-modal__subtitle">Share your question with the community and get help from learners and contributors.</p>
+          </div>
+        </div>
+
+        <div class="ask-modal__body">
+          <div class="ask-field">
+            <label class="ask-field__label" for="askSubjectSelect">Subject <span class="ask-field__required">*</span></label>
+            <div class="ask-select">
+              <select id="askSubjectSelect">
+                <option value="" disabled selected>Select a subject</option>
+                <option value="mathematics">Mathematics</option>
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="biology">Biology</option>
+                <option value="english">English</option>
+              </select>
+              <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="ask-field">
+            <label class="ask-field__label" for="askTitleInput">Title <span class="ask-field__required">*</span></label>
+            <input class="ask-input" type="text" id="askTitleInput" maxlength="150" placeholder="Write a clear and specific title for your question" />
+          </div>
+
+          <div class="ask-field">
+            <label class="ask-field__label" for="askDescTextarea">Describe your question <span class="ask-field__required">*</span></label>
+            <div class="ask-editor">
+              <div class="ask-editor__toolbar">
+                <button class="toolbar-btn" type="button" data-format="bold" title="Bold" aria-label="Bold"><strong>B</strong></button>
+                <button class="toolbar-btn toolbar-btn--italic" type="button" data-format="italic" title="Italic" aria-label="Italic">I</button>
+                <span class="ask-editor__divider" aria-hidden="true"></span>
+                <button class="toolbar-btn" type="button" data-format="ordered-list" title="Numbered list" aria-label="Numbered list">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h1v3M4 6v0M4.5 13.5a1 1 0 1 1 1.6-1.2L4.4 14h1.7"/></svg>
+                </button>
+                <button class="toolbar-btn" type="button" data-format="list" title="Bulleted list" aria-label="Bulleted list">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>
+                </button>
+              </div>
+              <textarea id="askDescTextarea" maxlength="2000" placeholder="Provide more details about your question. Include what you've tried, what you're expecting, and any relevant information."></textarea>
+              <div class="ask-editor__counter"><span id="askDescCount">0</span> / 2000</div>
+            </div>
+          </div>
+
+          <div class="ask-field">
+            <label class="ask-field__label">Add tags <span class="ask-field__optional">(optional)</span></label>
+            <p class="ask-field__hint">Add up to 3 tags to help others find your question.</p>
+            <div class="ask-tags">
+              <input class="ask-input" type="text" id="askTagsInput" placeholder="e.g. Physics, Motion, Kinematics" />
+              <span class="ask-tags__count" id="askTagsCount">0 / 3</span>
+            </div>
+          </div>
+
+          <p class="ask-modal__error" id="askModalError" hidden>Please fill in the subject, title, and description before posting.</p>
+        </div>
+
+        <div class="ask-modal__footer">
+          <button class="btn btn--primary ask-modal__submit" type="button" id="askPostBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>
+            Post Question
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== FLOATING ASK QUESTION BUTTON ===================== -->
+    <button class="btn btn--primary ask-question-fab" type="button" id="askQuestionBtn">
+      <span class="ask-question-fab__icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </span>
+      <span class="ask-question-fab__label">Ask a Question</span>
+    </button>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer" id="about">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__brand navbar__brand--footer">
+          <span class="navbar__logo" aria-hidden="true">
+            <img src="img/olongnotes.png" alt="OlongNotes logo" />
+          </span>
+          <span class="navbar__title-group">
+            <span class="navbar__title navbar__title--light">OlongNotes</span>
+            <span class="navbar__tagline navbar__tagline--light">Knowledge shared, Future shared</span>
+          </span>
+        </a>
+        <p class="footer__desc">A free notes repository for students in Olongapo City.</p>
+      </div>
+
+      <div class="footer__col">
+        <h4>Explore</h4>
+        <a href="community.html">Browse Notes</a>
+        <a href="schools.html">Schools</a>
+        <a href="subjects.html">Subjects</a>
+        <a href="index.html#about">About Us</a>
+      </div>
+
+      <div class="footer__col">
+        <h4>Support</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Guidelines</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+
+      <div class="footer__col footer__col--connect">
+        <h4>Stay Connected</h4>
+        <p>Follow us for updates and announcements.</p>
+        <div class="footer__socials">
+          <a href="#" aria-label="Facebook"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 8.5h2.5V5.3S15 5 13.4 5C10.9 5 9.2 6.5 9.2 9.2v2.3H6.5V15h2.7v6h3.1v-6h2.6l.4-3.5h-3v-1.9c0-.9.3-1.1 1.2-1.1Z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17.2" cy="6.8" r="1"/></svg></a>
+          <a href="#" aria-label="Discord"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7.5 16.5c3 1.4 6 1.4 9 0M8.3 8.3c-2.4.6-3.6 2-4 4.3-.4 2.7 0 4.6 1.7 6 1 .8 2.1 1.2 2.1 1.2l.8-1.3M15.7 8.3c2.4.6 3.6 2 4 4.3.4 2.7 0 4.6-1.7 6-1 .8-2.1 1.2-2.1 1.2l-.8-1.3"/><circle cx="9.3" cy="13.2" r="1.1"/><circle cx="14.7" cy="13.2" r="1.1"/></svg></a>
+          <a href="#" aria-label="Email"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m4.5 6.5 7.5 6 7.5-6"/></svg></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>© 2026 OlongNotes. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/browse-community.js"></script>
+</body>
+</html>

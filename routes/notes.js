@@ -466,10 +466,6 @@ router.post('/:id/report', auth, async (req, res) => {
     return res.status(500).json({ message: 'Server error.' })
   }
 })
-// GET /api/notes
-// GET /api/notes/:id
-// POST /api/notes
-// DELETE /api/notes/:id
 
 module.exports = router
 
