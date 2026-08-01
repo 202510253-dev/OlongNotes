@@ -102,7 +102,6 @@ router.post('/', auth, (req, res, next) => {
 
     if (dbError) {
       console.error('DB insert error:', dbError)
-      // FIX 4 — orphan cleanup: DB failed but file already uploaded, remove it
       await supabase.storage
         .from('olongnotes')
         .remove([filePath])

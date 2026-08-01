@@ -177,53 +177,31 @@ function createModal({ panel, backdrop, closeBtn, bodyClass = 'modal-open', trig
    ROLE RESOLUTION
    ======================================================= */
 
-// Token comes from localStorage (set by login flow) — same key api.js uses.
-// We cache the user object under 'olongnotes_user' so applyRole() can read
-// role + username + initials without re-fetching. Cleared on logout.
-const USER_STORAGE_KEY = 'olongnotes_user';
+// Hardcode 'viewer' or 'user' here to pin the perspective while you
+// work on one side specifically. Leave null to fall back to the URL
+// param / localStorage / default below.
+const FORCE_ROLE = null;
 
-function readStoredUser() {
-  try {
-    const raw = localStorage.getItem(USER_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (_) {
-    return null;
-  }
-}
-function writeStoredUser(user) {
-  try {
-    if (user) localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-    else localStorage.removeItem(USER_STORAGE_KEY);
-  } catch (_) { /* private mode */ }
-}
+const ROLE_STORAGE_KEY = 'olongnotes_dev_role';
 
-// Used by applyRole() + the auth flow. Returns 'user' only if we actually
-// have BOTH a token AND a cached user record. Missing either → viewer.
-// We do NOT validate the token here — first protected call will 401 and
-// the auth flow handles that. This is "best-effort" session detection,
-// which matches how the prototype toggled roles.
+// Stand-in for whoever's "logged in" during the User preview.
+// Swap this for real profile data once Supabase auth is wired in.
+const MOCK_USER = {
+  name: 'Juan Dela Cruz',
+  initials: 'JD',
+};
+
 function resolveRole() {
-  const token = (window.OlongNotes && window.OlongNotes.getToken && window.OlongNotes.getToken()) || null;
-  const user = readStoredUser();
-  return (token && user) ? 'user' : 'viewer';
-}
+  if (FORCE_ROLE === 'viewer' || FORCE_ROLE === 'user') return FORCE_ROLE;
 
-// Returns a {name, initials, role} object — falls back to a neutral
-// placeholder if storage is empty. applyRole() reads from this.
-function currentDisplayUser() {
-  const u = readStoredUser();
-  if (!u) return null;
-  return {
-    name: u.username || 'Member',
-    initials: (u.username || '?').slice(0, 2).toUpperCase(),
-    role: u.role || 'user',
-  };
-}
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = params.get('role');
+  if (fromUrl === 'viewer' || fromUrl === 'user') return fromUrl;
 
-// EDIT 5: role gate for upload actions.
-function roleAllowedForUpload() {
-  const u = readStoredUser();
-  return u && ['limited', 'verified', 'admin'].includes(u.role);
+  const fromStorage = window.localStorage?.getItem(ROLE_STORAGE_KEY);
+  if (fromStorage === 'viewer' || fromStorage === 'user') return fromStorage;
+
+  return 'viewer';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -362,95 +340,49 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('navLoginBtn')?.addEventListener('click', () => openAuth('signin'));
     document.getElementById('navSignupBtn')?.addEventListener('click', () => openAuth('signup'));
 
-    // EDIT 3: real login + signup against /api/auth/*.
-    const ON = window.OlongNotes || {};
-    const esc = ON.escapeHtml || ((s) => String(s ?? ''));
-    const api = ON.api;
-    const setToken = ON.setToken;
-
-    const showAuthError = (msg) => {
-      let el = authCard.querySelector('.auth-form__error');
-      if (!el) {
-        el = document.createElement('div');
-        el.className = 'auth-form__error';
-        el.setAttribute('role', 'alert');
-        el.style.cssText = 'color:#c53030;background:#fed7d7;padding:8px 12px;border-radius:4px;margin:0 0 12px;font-size:13px;';
-        authCard.querySelector('h2')?.insertAdjacentElement('afterend', el);
-      }
-      el.textContent = msg;
-    };
-    const clearAuthError = () => {
-      const el = authCard.querySelector('.auth-form__error');
-      if (el) el.remove();
-    };
-
-    const [loginForm, createForm] = Array.from(authCard.querySelectorAll('form.auth-form'));
-
-    if (loginForm) {
-      loginForm.addEventListener('submit', async (e) => {
+    authCard.querySelectorAll('form').forEach((form) => {
+      form.addEventListener('submit', (e) => {
         e.preventDefault();
-        clearAuthError();
-        const inputs = loginForm.querySelectorAll('input');
-        const email = inputs[0]?.value?.trim() || '';
-        const password = inputs[1]?.value || '';
-        if (!email || !password) {
-          showAuthError('Email and password required.');
-          return;
-        }
-        try {
-          const data = await api.post('/auth/login', { email, password });
-          setToken(data.token);
-          writeStoredUser(data.user);
-          applyRole('user');
-          authModal.close();
-          loginForm.reset();
-        } catch (err) {
-          showAuthError(esc((err && err.message) || 'Login failed.'));
-        }
+        console.info('[OlongNotes] Auth form placeholder — not yet implemented.');
       });
-    }
-
-    if (createForm) {
-      createForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        clearAuthError();
-        // Form order from index.html: full name, email, password
-        const inputs = createForm.querySelectorAll('input');
-        const fullName = inputs[0]?.value?.trim() || '';
-        const email = inputs[1]?.value?.trim() || '';
-        const password = inputs[2]?.value || '';
-        if (!fullName || !email || !password) {
-          showAuthError('All fields required.');
-          return;
-        }
-        if (password.length < 8) {
-          showAuthError('Password must be at least 8 characters.');
-          return;
-        }
-        // Map full_name → username (server pattern: 3-20 chars, [a-zA-Z0-9_]).
-        const username = fullName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
-        if (username.length < 3) {
-          showAuthError('Username must be at least 3 characters.');
-          return;
-        }
-        try {
-          await api.post('/auth/register', { username, email, password });
-          // Register returns NO token. Chain a login.
-          const login = await api.post('/auth/login', { email, password });
-          setToken(login.token);
-          writeStoredUser(login.user);
-          applyRole('user');
-          authModal.close();
-          createForm.reset();
-        } catch (err) {
-          showAuthError(esc((err && err.message) || 'Sign-up failed.'));
-        }
-      });
-    }
+    });
   }
 
-  // EDIT 4: contrib-modal handler block — DELETED. See index.html for the
-  // matching HTML removal. heroContribBtn now opens auth-modal in signup mode.
+  /* ---------------- Become a Contributor modal (VIEWER path) ---------------- */
+  const contribForm = document.getElementById('contribForm');
+  const schoolIdInput = document.getElementById('schoolIdInput');
+  const fileDrop = document.getElementById('fileDrop');
+  const fileDropText = document.getElementById('fileDropText');
+  const DEFAULT_FILE_TEXT = 'Upload a photo or scan of your school ID';
+
+  const contribModal = createModal({
+    panel: document.getElementById('contribModal'),
+    backdrop: document.getElementById('contribBackdrop'),
+    closeBtn: document.getElementById('contribClose'),
+    bodyClass: 'contrib-modal-open',
+  });
+
+  document.getElementById('heroContribBtn')?.addEventListener('click', contribModal.open);
+
+  schoolIdInput?.addEventListener('change', () => {
+    const file = schoolIdInput.files?.[0];
+    fileDropText.textContent = file ? file.name : DEFAULT_FILE_TEXT;
+    fileDrop.classList.toggle('has-file', Boolean(file));
+  });
+
+  contribForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(contribForm);
+    const values = Object.fromEntries(formData.entries());
+    values.school_id = formData.get('school_id')?.name || null;
+
+    console.info('[OlongNotes] Become a Contributor — form placeholder, not yet implemented.', values);
+
+    contribModal.close();
+    contribForm.reset();
+    fileDropText.textContent = DEFAULT_FILE_TEXT;
+    fileDrop.classList.remove('has-file');
+  });
 
   /* ---------------- Upload Notes modal (USER only) ---------------- */
   const uploadForm = document.getElementById('uploadForm');
@@ -466,14 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bodyClass: 'upload-modal-open',
   });
 
-  // EDIT 6: heroUploadBtn now role-gates before opening.
-  document.getElementById('heroUploadBtn')?.addEventListener('click', () => {
-    if (!roleAllowedForUpload()) {
-      alert('You need to be a contributor (limited, verified, or admin) to upload. Contact an admin to upgrade your account.');
-      return;
-    }
-    uploadModal.open();
-  });
+  document.getElementById('heroUploadBtn')?.addEventListener('click', uploadModal.open);
 
   noteFileInput?.addEventListener('change', () => {
     const file = noteFileInput.files?.[0];
@@ -481,59 +406,28 @@ document.addEventListener('DOMContentLoaded', () => {
     noteFileDrop.classList.toggle('has-file', Boolean(file));
   });
 
-  // EDIT 5: real upload submit → POST /api/notes via api.upload().
-  if (uploadForm) {
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
+  uploadForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(uploadForm);
+    const values = Object.fromEntries(formData.entries());
+    values.note_file = formData.get('note_file')?.name || null;
 
-      const fd = new FormData(uploadForm);
-      const remapped = new FormData();
-      remapped.append('title', fd.get('title') || '');
-      remapped.append('annotation', fd.get('caption') || '');
-      remapped.append('subject_id', fd.get('subject_id') || '');
-      remapped.append('school_id', fd.get('school_id') || '');
-      remapped.append('grade_level', fd.get('grade_level') || '');
-      const file = fd.get('note_file');
-      if (file && file.size > 0) remapped.append('file', file);
-      // tags intentionally dropped.
+    console.info('[OlongNotes] Upload Notes — form placeholder, not yet implemented.', values);
 
-      const ON2 = window.OlongNotes || {};
-      const esc2 = ON2.escapeHtml || ((s) => String(s ?? ''));
+    uploadModal.close();
+    uploadForm.reset();
+    noteFileDropText.textContent = DEFAULT_NOTE_FILE_TEXT;
+    noteFileDrop.classList.remove('has-file');
+  });
 
-      try {
-        const data = await ON2.api.upload('/notes', remapped, { auth: true });
-        uploadModal.close();
-        uploadForm.reset();
-        noteFileDropText.textContent = DEFAULT_NOTE_FILE_TEXT;
-        noteFileDrop.classList.remove('has-file');
-        if (data && data.note && data.note.id) {
-          window.location.href = `document-viewer.html?id=${encodeURIComponent(data.note.id)}`;
-        }
-      } catch (err) {
-        let el = uploadForm.querySelector('.auth-form__error');
-        if (!el) {
-          el = document.createElement('div');
-          el.className = 'auth-form__error';
-          el.setAttribute('role', 'alert');
-          el.style.cssText = 'color:#c53030;background:#fed7d7;padding:8px 12px;border-radius:4px;margin:0 0 12px;font-size:13px;';
-          uploadForm.querySelector('h2')?.insertAdjacentElement('afterend', el);
-        }
-        el.textContent = esc2((err && err.message) || 'Upload failed.');
-      }
-    });
-  }
-
-  /* ---------------- CTA "Upload Notes" button (role-dependent target) ----------------
-     EDIT 6: viewer path now opens auth-modal signup (no more contrib-modal). */
+  /* ---------------- CTA "Upload Notes" button (role-dependent target) ---------------- */
+  // Viewer isn't verified yet -> contributor application.
+  // User is already verified -> straight to the upload modal.
   document.getElementById('ctaContribBtn')?.addEventListener('click', () => {
     if (document.body.dataset.role === 'user') {
-      if (!roleAllowedForUpload()) {
-        alert('You need to be a contributor (limited, verified, or admin) to upload. Contact an admin to upgrade your account.');
-        return;
-      }
       uploadModal.open();
     } else {
-      openAuth('signup');
+      contribModal.open();
     }
   });
 
@@ -592,45 +486,58 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroUploadBtn = document.getElementById('heroUploadBtn');
   const topContributorsSection = document.getElementById('topContributorsSection');
 
-  // EDIT 2: applyRole now reads from real user cache, drops MOCK_USER,
-  // drops the "auto-open auth modal on viewer" behavior (we don't auto-prompt).
   function applyRole(role) {
     document.body.dataset.role = role;
 
     const isUser = role === 'user';
-    const user = currentDisplayUser();
 
+    // Navbar: guest buttons vs. profile chip
     if (navGuestActions) navGuestActions.hidden = isUser;
     if (navProfileChip) navProfileChip.hidden = !isUser;
-    if (isUser && user) {
-      if (navProfileName) navProfileName.textContent = user.name;
-      if (navProfileAvatar) navProfileAvatar.textContent = user.initials;
-    }
+    if (isUser && navProfileName) navProfileName.textContent = MOCK_USER.name;
+    if (isUser && navProfileAvatar) navProfileAvatar.textContent = MOCK_USER.initials;
 
+    // Hero: Become a Contributor vs. Upload Notes
     if (heroContribBtn) heroContribBtn.hidden = isUser;
     if (heroUploadBtn) heroUploadBtn.hidden = !isUser;
 
+    // Top Contributors section: viewer-hidden, user-visible
     if (topContributorsSection) topContributorsSection.hidden = !isUser;
 
-    if (isUser && authCard) {
-      authCard.closest('.auth-modal')?.classList.remove('is-open');
-      document.body.classList.remove('modal-open');
+    // Auth modal: only ever auto-shown for viewers. If we're switching
+    // *into* viewer mode (e.g. via the dev switcher), reopen it so the
+    // "first visit" experience can actually be previewed; switching
+    // into user mode always closes it.
+    if (authCard) {
+      if (isUser) {
+        authCard.closest('.auth-modal')?.classList.remove('is-open');
+        document.body.classList.remove('modal-open');
+      } else {
+        openAuth('signin');
+      }
     }
   }
 
-  // EDIT 11: navbar profile chip → logout.
-  const ONlogout = window.OlongNotes || {};
-  const apiLogout = ONlogout.api;
-  const clearToken = ONlogout.clearToken;
-  navProfileChip?.addEventListener('click', async () => {
-    if (!confirm('Log out?')) return;
-    try { await apiLogout.post('/auth/logout', {}, { auth: true }); }
-    catch (_) { /* still log out on client even if backend call fails */ }
-    clearToken();
-    writeStoredUser(null);
-    applyRole('viewer');
+  /* ---------------- DEV ROLE SWITCHER ----------------
+     Temporary — delete this block + the button in index.html once
+     Supabase auth decides the role for real. */
+  const devSwitcher = document.getElementById('devRoleSwitcher');
+  const devButtons = devSwitcher?.querySelectorAll('[data-role-btn]');
+
+  function setDevActiveButton(role) {
+    devButtons?.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.roleBtn === role));
+  }
+
+  devButtons?.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const role = btn.dataset.roleBtn;
+      window.localStorage?.setItem(ROLE_STORAGE_KEY, role);
+      applyRole(role);
+      setDevActiveButton(role);
+    });
   });
 
-  // EDIT 7: dev role switcher block — DELETED. Real session decides role.
-  applyRole(resolveRole());
+  const initialRole = resolveRole();
+  applyRole(initialRole);
+  setDevActiveButton(initialRole);
 });
