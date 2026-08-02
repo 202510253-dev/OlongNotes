@@ -1,26 +1,22 @@
 /**
  * OlongNotes — Landing Page UI Interactions
- * Same behavior as before, plus VIEWER / USER perspective handling.
+ * Phase 5 wired: real auth (login / signup / logout) + upload to
+ * POST /api/notes via the api.js helper. The dev role switcher is
+ * gone — role is now resolved from the JWT + cached user in
+ * localStorage (see resolveRole() below).
  *
  * ===========================================================
  * HOW THE ROLE IS DECIDED (see resolveRole() below)
  * ===========================================================
- * Checked in this order, first match wins:
- *   1. FORCE_ROLE below       — hardcode 'viewer' or 'user' to pin it
- *   2. ?role=viewer|user      — URL param, shareable, no code edits
- *   3. localStorage           — remembers your last dev-switcher pick
- *   4. default: 'viewer'
+ * Resolved on every page load. Returns 'user' only if BOTH a token
+ *   - 'olongnotes_token' (set by login via api.js setToken)
+ *   - 'olongnotes_user'  (cached user object, set right after login)
+ * exist in localStorage. Missing either → viewer. The token is NOT
+ * validated client-side — first protected API call will return 401
+ * and the auth flow handles it.
  *
- * Everything role-specific lives inside applyRole(role) — that's the
- * ONLY function that knows what a viewer vs. a user sees. When
- * Supabase auth is wired in, replace resolveRole()'s body with a
- * real session check (e.g. supabase.auth.getSession()) and call
- * applyRole() with the result — nothing else in this file changes.
- *
- * The floating "Preview: Viewer / User" button and everything under
- * "DEV ROLE SWITCHER" is temporary scaffolding for building the UI.
- * Delete that section (and the button in index.html) once real auth
- * is in place.
+ * Everything role-specific lives inside applyRole(role) — that's
+ * the ONLY function that knows what a viewer vs. a user sees.
  */
 
 /* -----------------------------------------------------
@@ -150,11 +146,14 @@ function renderFeaturedNotes(notes = FEATURED_NOTES) {
 function createModal({ panel, backdrop, closeBtn, bodyClass = 'modal-open', triggerAttr }) {
   if (!panel) return { open() {}, close() {}, isOpen: () => false };
 
+  const preventTouchScroll = (e) => e.preventDefault();
+
   const open = () => {
     panel.classList.add('is-open');
     panel.setAttribute('aria-hidden', 'false');
     if (triggerAttr) triggerAttr.setAttribute('aria-expanded', 'true');
     document.body.classList.add(bodyClass);
+    backdrop?.addEventListener('touchmove', preventTouchScroll, { passive: false });
   };
 
   const close = () => {
@@ -162,6 +161,7 @@ function createModal({ panel, backdrop, closeBtn, bodyClass = 'modal-open', trig
     panel.setAttribute('aria-hidden', 'true');
     if (triggerAttr) triggerAttr.setAttribute('aria-expanded', 'false');
     document.body.classList.remove(bodyClass);
+    backdrop?.removeEventListener('touchmove', preventTouchScroll);
   };
 
   closeBtn?.addEventListener('click', close);
@@ -449,8 +449,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // EDIT 4: contrib-modal handler block — DELETED. See index.html for the
-  // matching HTML removal. heroContribBtn now opens auth-modal in signup mode.
+  // EDIT 4 (continued): heroContribBtn now opens auth-modal in signup
+  // mode (the contrib-modal was deleted along with this handler block).
+  document.getElementById('heroContribBtn')?.addEventListener('click', () => openAuth('signup'));
 
   /* ---------------- Upload Notes modal (USER only) ---------------- */
   const uploadForm = document.getElementById('uploadForm');
@@ -553,29 +554,36 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   if (discoverScroll && discoverItems.length) {
-    let ticking = false;
+    const isNarrowViewport = () => window.matchMedia('(max-width: 720px)').matches;
 
-    const updateDiscover = () => {
-      ticking = false;
-      const rect = discoverScroll.getBoundingClientRect();
-      const scrollable = discoverScroll.offsetHeight - window.innerHeight;
-      const progress = Math.min(Math.max(scrollable > 0 ? -rect.top / scrollable : 0, 0), 0.999);
-      const index = Math.floor(progress * discoverItems.length);
+    if (isNarrowViewport()) {
+      // Mobile: no scroll-jacking. CSS keeps every panel in normal,
+      // readable stacked flow with no overlap.
+    } else {
+      let ticking = false;
 
-      discoverGroups.forEach((group) => markActive(group, index));
-      if (discoverProgressFill) discoverProgressFill.style.width = `${progress * 100}%`;
-    };
+      const updateDiscover = () => {
+        ticking = false;
+        const rect = discoverScroll.getBoundingClientRect();
+        const scrollable = discoverScroll.offsetHeight - window.innerHeight;
+        const progress = Math.min(Math.max(scrollable > 0 ? -rect.top / scrollable : 0, 0), 0.999);
+        const index = Math.floor(progress * discoverItems.length);
 
-    const onDiscoverScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        window.requestAnimationFrame(updateDiscover);
-      }
-    };
+        discoverGroups.forEach((group) => markActive(group, index));
+        if (discoverProgressFill) discoverProgressFill.style.width = `${progress * 100}%`;
+      };
 
-    window.addEventListener('scroll', onDiscoverScroll, { passive: true });
-    window.addEventListener('resize', onDiscoverScroll);
-    updateDiscover();
+      const onDiscoverScroll = () => {
+        if (!ticking) {
+          ticking = true;
+          window.requestAnimationFrame(updateDiscover);
+        }
+      };
+
+      window.addEventListener('scroll', onDiscoverScroll, { passive: true });
+      window.addEventListener('resize', onDiscoverScroll);
+      updateDiscover();
+    }
   }
 
   /* =======================================================

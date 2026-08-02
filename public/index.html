@@ -116,51 +116,6 @@
     </div>
   </div>
 
-  <!-- ===================== BECOME A CONTRIBUTOR MODAL =====================
-      VIEWER path — a viewer isn't verified yet, so their "Upload Notes" /
-      "Become a Contributor" actions open this application form instead
-      of the upload modal below. -->
-  <div class="contrib-modal" id="contribModal" aria-hidden="true">
-    <div class="contrib-modal__backdrop" id="contribBackdrop"></div>
-
-    <div class="contrib-card" id="contribCard" role="dialog" aria-modal="true" aria-labelledby="contribCardTitle">
-      <button class="auth-card__close" id="contribClose" type="button" aria-label="Close">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
-      </button>
-
-      <div class="contrib-card__head">
-        <span class="contrib-card__icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 19h16"/></svg>
-        </span>
-        <div>
-          <h2 id="contribCardTitle">Create your free account</h2>
-          <p>Share your notes with fellow Olongapo City students. Just three quick details and you're in.</p>
-        </div>
-      </div>
-
-      <form class="contrib-form" id="contribForm" novalidate>
-        <div class="contrib-form__grid">
-          <label class="auth-field">
-            <span class="auth-field__label">Username</span>
-            <input type="text" name="username" placeholder="juandc" autocomplete="username" required />
-          </label>
-
-          <label class="auth-field">
-            <span class="auth-field__label">Email</span>
-            <input type="email" name="email" placeholder="juan@example.com" autocomplete="email" required />
-          </label>
-
-          <label class="auth-field">
-            <span class="auth-field__label">Password</span>
-            <input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required />
-          </label>
-        </div>
-
-        <button type="submit" class="btn btn--goldenrod btn--block" id="contribConfirmBtn">Create account</button>
-      </form>
-    </div>
-  </div>
-
   <!-- ===================== UPLOAD NOTES MODAL =====================
       USER-ONLY. Already-verified contributors use this instead of the
       application form above. Same single-panel modal pattern as the
@@ -197,19 +152,27 @@
           </label>
 
           <label class="auth-field">
-            <span class="auth-field__label">Course / Subject</span>
-            <input type="text" name="course" placeholder="e.g. Mathematics" required />
+            <span class="auth-field__label">Subject</span>
+            <select name="subject_id" required>
+              <option value="" disabled selected>Select a subject</option>
+              <option value="1">General Mathematics</option>
+              <option value="2">English</option>
+              <option value="3">Science</option>
+              <option value="4">Filipino</option>
+              <option value="5">History</option>
+              <option value="6">Philosophy</option>
+              <option value="7">Research</option>
+              <option value="8">Physical Education</option>
+            </select>
           </label>
 
           <label class="auth-field">
             <span class="auth-field__label">School</span>
-            <select name="school" required>
-              <option value="" disabled selected>Select school</option>
-              <option>Olongapo City National High School</option>
-              <option>Rizal High School</option>
-              <option>Gordon College</option>
-              <option>Subic Bay National High School</option>
-              <option>Other</option>
+            <select name="school_id">
+              <option value="">No specific school</option>
+              <option value="1">Olongapo City National High School</option>
+              <option value="2">Rizal High School</option>
+              <option value="78">Gordon College</option>
             </select>
           </label>
 
@@ -225,11 +188,6 @@
               <option>Grade 12</option>
               <option>College</option>
             </select>
-          </label>
-
-          <label class="auth-field">
-            <span class="auth-field__label">Tags</span>
-            <input type="text" name="tags" placeholder="e.g. reviewer, midterms, week5" />
           </label>
 
           <label class="auth-field auth-field--file" for="noteFileInput" style="grid-column: 1 / -1;">
@@ -509,12 +467,10 @@
 
     <div class="about-strip__visual">
       <div class="about-strip__img about-strip__img--primary">
-        <img src="Aerial view.png" alt="Aerial view of a coastal city with mountains and ocean" />
+        <img src="img/Aerial%20view.png" alt="Aerial view of a coastal city with mountains and ocean" />
       </div>
       <div class="about-strip__img about-strip__img--secondary">
-        <img src="Students studying together.png" alt="Students studying together around a laptop" />
-      </div>
-    </div>
+        <img src="img/Students%20studying.png" alt="Students studying together around a laptop" />
 
     <div class="about-strip__content">
       <span class="about-strip__eyebrow">About OlongNotes</span>
@@ -666,13 +622,13 @@
 
               <div class="discover-visual__stack">
                 <div class="discover-visual-item" data-key="discover">
-                  <img src="https://images.unsplash.com/photo-1650661926447-9efb2610f64c?auto=format&fit=crop&w=900&q=80" alt="" />
+                  <img src="img/discover.png" alt="" />
                 </div>
                 <div class="discover-visual-item" data-key="learn">
-                  <img src="https://images.unsplash.com/photo-1769794371055-54436b54577e?auto=format&fit=crop&w=900&q=80" alt="" />
+                  <img src="img/learn.png" alt="" />
                 </div>
                 <div class="discover-visual-item" data-key="interact">
-                  <img src="https://images.unsplash.com/photo-1758270704534-fd9715bffc0e?auto=format&fit=crop&w=900&q=80" alt="" />
+                  <img src="img/interact.png" alt="" />
                 </div>
               </div>
             </div>
@@ -751,8 +707,9 @@
           </div>
           <!--
             This button's behavior is role-dependent (see script.js):
-            viewer -> opens the contributor application (#contribModal)
+            viewer -> opens the auth modal in signup mode
             user   -> opens the upload modal (#uploadModal) directly
+            (with a role gate: limited/verified/admin only)
             The id/label stay the same either way; only the click
             handler target changes based on the resolved role.
           -->
@@ -813,17 +770,6 @@
       <p>© 2025 OlongNotes. All rights reserved.</p>
     </div>
   </footer>
-
-  <!-- ===================== DEV-ONLY ROLE SWITCHER =====================
-       Lets you preview the Viewer / User perspectives live while building,
-       with no code edits and no page reload. DELETE this whole block
-       (and its wiring in script.js, see "DEV ROLE SWITCHER" section)
-       once Supabase auth is wired in — real sessions decide the role then. -->
-  <div class="dev-role-switcher" id="devRoleSwitcher">
-    <span class="dev-role-switcher__label">Preview:</span>
-    <button type="button" class="dev-role-switcher__btn" data-role-btn="viewer">Viewer</button>
-    <button type="button" class="dev-role-switcher__btn" data-role-btn="user">User</button>
-  </div>
 
   <script src="js/api.js"></script>
   <script src="js/script.js"></script>
