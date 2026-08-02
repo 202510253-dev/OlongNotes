@@ -122,8 +122,18 @@ router.post('/', auth, (req, res, next) => {
 })
 
 // GET /api/notes - public, no auth required
+//
+// Query params (all optional, combine freely):
+//   limit         page size (default 20, max 100)
+//   offset        page offset (default 0)
+//   school        school NAME (legacy filter; prefer school_id below)
+//   school_id     school ID (used by catalog pages; takes precedence)
+//   subject       subject NAME (legacy filter; prefer subject_id below)
+//   subject_id    subject ID (used by catalog pages; takes precedence)
+//   grade_level   exact-grade filter
+//   file_type     exact-MIME filter
 router.get('/', async (req, res) => {
-  const { school, grade_level, subject, file_type } = req.query
+  const { school, grade_level, subject, file_type, school_id, subject_id } = req.query
 
   // Pagination — default 20 per page, max 100
   const pageLimit = Math.min(parseInt(req.query.limit) || 20, 100)
@@ -142,6 +152,8 @@ router.get('/', async (req, res) => {
         grade_level,
         download_count,
         view_count,
+        likes_count,
+        bookmarks_count,
         created_at,
         status,
         users ( user_name ),
@@ -152,9 +164,17 @@ router.get('/', async (req, res) => {
       .order('created_at', { ascending: false })
       .range(pageOffset, pageOffset + pageLimit - 1)
 
-    if (school) query = query.eq('school_id', parseInt(school))
+    // school_id takes precedence over school (the latter matches by name
+    // and only exists for backward compatibility with older callers).
+    if (school_id) query = query.eq('school_id', parseInt(school_id))
+    else if (school) query = query.eq('school_id', parseInt(school))
+
     if (grade_level) query = query.eq('grade_level', grade_level)
-    if (subject) query = query.eq('subject_id', parseInt(subject))
+
+    // subject_id takes precedence over subject.
+    if (subject_id) query = query.eq('subject_id', parseInt(subject_id))
+    else if (subject) query = query.eq('subject_id', parseInt(subject))
+
     if (file_type) query = query.eq('file_type', file_type)
 
     const { data: notes, error, count } = await query
@@ -197,6 +217,8 @@ router.get('/:id', async (req, res) => {
         grade_level,
         download_count,
         view_count,
+        likes_count,
+        bookmarks_count,
         created_at,
         status,
         users ( user_name ),
@@ -260,16 +282,23 @@ router.post('/:id/like', auth, async (req, res) => {
       }
     }
 
-    // Return new count
-    const { count } = await supabase
-      .from('likes')
-      .select('*', { count: 'exact', head: true })
-      .eq('note_id', noteId)
+    // Read the current count off the denormalized column. The
+    // likes_count_trigger on the likes table has already kept this
+    // in sync with the insert/delete we just did.
+    const { data: noteRow } = await supabase
+      .from('notes')
+      .select('likes_count')
+      .eq('id', noteId)
+      .single()
+
+    const likesCount = (noteRow && typeof noteRow.likes_count === 'number')
+      ? noteRow.likes_count
+      : 0
 
     return res.status(existing ? 200 : 201).json({
       message: existing ? 'Like removed.' : 'Note liked.',
       liked: !existing,
-      likes_count: count
+      likes_count: likesCount
     })
 
   } catch (err) {
@@ -315,16 +344,23 @@ router.post('/:id/bookmark', auth, async (req, res) => {
       }
     }
 
-    // Return new count
-    const { count } = await supabase
-      .from('bookmarks')
-      .select('*', { count: 'exact', head: true })
-      .eq('note_id', noteId)
+    // Read the current count off the denormalized column. The
+    // bookmarks_count_trigger on the bookmarks table has already kept
+    // this in sync with the insert/delete we just did.
+    const { data: noteRow } = await supabase
+      .from('notes')
+      .select('bookmarks_count')
+      .eq('id', noteId)
+      .single()
+
+    const bookmarksCount = (noteRow && typeof noteRow.bookmarks_count === 'number')
+      ? noteRow.bookmarks_count
+      : 0
 
     return res.status(existing ? 200 : 201).json({
       message: existing ? 'Bookmark removed.' : 'Note bookmarked.',
       bookmarked: !existing,
-      bookmarks_count: count
+      bookmarks_count: bookmarksCount
     })
 
   } catch (err) {

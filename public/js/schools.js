@@ -1,57 +1,50 @@
 // ===================== SCHOOLS DIRECTORY =====================
+// Step 6 (Phase 3.5): wired to GET /api/schools. Each row is a real
+// Olongapo school from the seeded schools table (78 rows verified live).
+//
+// Behavior:
+//   - Loads the school list at page paint from /api/schools.
+//   - Builds the client-side filter state (category, letter, search).
+//   - On any API failure, falls back to an empty list and logs a warning
+//     so the page still renders cleanly.
+//   - Clicking a school navigates to school-profile.html?id=<school_id>
+//     using the integer primary key, NOT the URL-encoded name. The
+//     profile page resolves the name from the same list.
+//
+// Field shape (from backend):
+//   { id: <number>, school_name: <string> }
+//
+// Field shape (this file uses internally):
+//   { id, name, category }  where category is always 'all' for now —
+//   the seed data doesn't categorize schools, but the UI still exposes
+//   the filter UI for future use.
+
 (function () {
-  const schoolsData = [
-    { name: "AMA Computer Learning Center", category: "colleges" },
-    { name: "Asinan Elementary School", category: "public" },
-    { name: "Aura College", category: "colleges" },
-    { name: "Aura De Laurentus Business High School", category: "private" },
-    { name: "Balic-Balic Elementary School", category: "public" },
-    { name: "Barretto National High School", category: "public" },
-    { name: "Bonton Elementary School", category: "public" },
-    { name: "Brightfields Montessori School", category: "private" },
-    { name: "Christ the King Catholic School", category: "private" },
-    { name: "Christian Baptist Academy", category: "private" },
-    { name: "City of Olongapo National High School", category: "public" },
-    { name: "Columban College Inc. - Asinan", category: "colleges" },
-    { name: "East Bajac-Bajac Elementary School", category: "public" },
-    { name: "Gordon College", category: "state-universities" },
-    { name: "Gordon Heights National High School", category: "public" },
-    { name: "Holy Infant Jesus College", category: "colleges" },
-    { name: "Ilalim Elementary School", category: "public" },
-    { name: "Iram Elementary School", category: "public" },
-    { name: "Iram High School", category: "public" },
-    { name: "James L. Gordon Integrated School", category: "public" },
-    { name: "Juventus School for the Gifted", category: "private" },
-    { name: "Kalaklan Elementary School", category: "public" },
-    { name: "Kalalake Elementary School", category: "public" },
-    { name: "Kalalake National High School", category: "public" },
-    { name: "Little Angel Study Center", category: "private" },
-    { name: "Mabayuan Elementary School", category: "public" },
-    { name: "Mondriaan Montessori School", category: "private" },
-    { name: "Nellie E. Brown Elementary School", category: "public" },
-    { name: "New Cabalan Elementary School", category: "public" },
-    { name: "New Cabalan National School", category: "public" },
-    { name: "Olongapo Adventist Elementary School", category: "private" },
-    { name: "Olongapo Angelo Cultural School", category: "international" },
-    { name: "Ramon Magsaysay Technological University", category: "universities" },
-  ].sort((a, b) => a.name.localeCompare(b.name));
+  const esc = (window.OlongNotes && window.OlongNotes.escapeHtml)
+    || ((s) => String(s));
 
-  const schoolsList = document.getElementById("schoolsList");
-  const schoolsEmpty = document.getElementById("schoolsEmpty");
-  const searchInput = document.getElementById("schoolSearchInput");
-  const categoryList = document.getElementById("categoryList");
-  const letterGrid = document.getElementById("letterGrid");
-  const gridViewBtn = document.getElementById("gridViewBtn");
-  const listViewBtn = document.getElementById("listViewBtn");
-  const viewAllBtn = document.getElementById("viewAllBtn");
+  const api = (window.OlongNotes && window.OlongNotes.api) || null;
 
+  // ---------- DOM refs ----------
+  const schoolsList = document.getElementById('schoolsList');
+  const schoolsEmpty = document.getElementById('schoolsEmpty');
+  const searchInput = document.getElementById('schoolSearchInput');
+  const categoryList = document.getElementById('categoryList');
+  const letterGrid = document.getElementById('letterGrid');
+  const gridViewBtn = document.getElementById('gridViewBtn');
+  const listViewBtn = document.getElementById('listViewBtn');
+  const viewAllBtn = document.getElementById('viewAllBtn');
+
+  // ---------- State ----------
   const state = {
-    category: "all",
+    schools: [],      // raw rows from API
+    category: 'all',
     letter: null,
-    search: "",
-    view: "list",
+    search: '',
+    view: 'list',
   };
 
+  // ---------- Icon SVGs (static markup, safe to inline) ----------
   const iconMarkup = `
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M22 10 12 5 2 10l10 5 10-5Z"/>
@@ -63,13 +56,39 @@
       <path d="m9 6 6 6-6 6"/>
     </svg>`;
 
+  // ---------- Loading ----------
+  async function loadSchools() {
+    if (!api) {
+      console.warn('[schools] api.js did not load — showing empty state.');
+      render();
+      return;
+    }
+    try {
+      const data = await api.get('/schools');
+      const rows = Array.isArray(data) ? data : [];
+      // Normalize: keep server field name (id, school_name), add a `name`
+      // alias for the UI layer.
+      state.schools = rows.map((row) => ({
+        id: row.id,
+        name: row.school_name,
+        category: 'all',  // seed doesn't categorize; UI filter remains for future use
+      })).sort((a, b) => a.name.localeCompare(b.name));
+    } catch (e) {
+      console.warn('[schools] Failed to load /api/schools — empty list.', e);
+      state.schools = [];
+    }
+    initLetterAvailability();
+    render();
+  }
+
+  // ---------- Filter helpers ----------
   function availableLetters() {
-    return new Set(schoolsData.map((s) => s.name[0].toUpperCase()));
+    return new Set(state.schools.map((s) => s.name[0].toUpperCase()));
   }
 
   function initLetterAvailability() {
     const letters = availableLetters();
-    letterGrid.querySelectorAll(".letter-btn").forEach((btn) => {
+    letterGrid.querySelectorAll('.letter-btn').forEach((btn) => {
       if (!letters.has(btn.dataset.letter)) {
         btn.disabled = true;
       }
@@ -77,8 +96,8 @@
   }
 
   function getFilteredSchools() {
-    return schoolsData.filter((school) => {
-      const matchesCategory = state.category === "all" || school.category === state.category;
+    return state.schools.filter((school) => {
+      const matchesCategory = state.category === 'all' || school.category === state.category;
       const matchesLetter = !state.letter || school.name.toUpperCase().startsWith(state.letter);
       const matchesSearch =
         !state.search || school.name.toLowerCase().includes(state.search.toLowerCase());
@@ -86,106 +105,102 @@
     });
   }
 
+  // ---------- Render ----------
   function render() {
     const results = getFilteredSchools();
-
-    schoolsList.innerHTML = "";
-    schoolsList.classList.toggle("is-grid", state.view === "grid");
+    schoolsList.innerHTML = '';
+    schoolsList.classList.toggle('is-grid', state.view === 'grid');
 
     if (results.length === 0) {
       schoolsEmpty.hidden = false;
-    } else {
-      schoolsEmpty.hidden = true;
-      results.forEach((school) => {
-        const li = document.createElement("li");
-        li.className = "school-row";
-        li.tabIndex = 0;
-        li.setAttribute("role", "link");
-        li.innerHTML = `
-          <span class="school-row__icon" aria-hidden="true">${iconMarkup}</span>
-          <span class="school-row__name">${school.name}</span>
-          <span class="school-row__chevron" aria-hidden="true">${chevronMarkup}</span>
-        `;
-
-        const goToProfile = () => {
-          const params = new URLSearchParams({
-            name: school.name,
-            category: school.category,
-          });
-          window.location.href = `school-profile.html?${params.toString()}`;
-        };
-
-        li.addEventListener("click", goToProfile);
-        li.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            goToProfile();
-          }
-        });
-
-        schoolsList.appendChild(li);
-      });
+      return;
     }
+    schoolsEmpty.hidden = true;
+
+    results.forEach((school) => {
+      const li = document.createElement('li');
+      li.className = 'school-row';
+      li.tabIndex = 0;
+      li.setAttribute('role', 'link');
+      // Every dynamic field below is escaped (api.js escapeHtml).
+      li.innerHTML = `
+        <span class="school-row__icon" aria-hidden="true">${iconMarkup}</span>
+        <span class="school-row__name">${esc(school.name)}</span>
+        <span class="school-row__chevron" aria-hidden="true">${chevronMarkup}</span>
+      `;
+
+      const goToProfile = () => {
+        // Use the integer school_id, not the name. The profile page
+        // resolves the name itself from /api/schools.
+        window.location.href = `school-profile.html?id=${encodeURIComponent(school.id)}`;
+      };
+
+      li.addEventListener('click', goToProfile);
+      li.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          goToProfile();
+        }
+      });
+
+      schoolsList.appendChild(li);
+    });
   }
 
-  // Category filter
-  categoryList.addEventListener("click", (e) => {
-    const btn = e.target.closest(".category-list__item");
+  // ---------- Wire up controls ----------
+  categoryList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.category-list__item');
     if (!btn) return;
-    categoryList.querySelectorAll(".category-list__item").forEach((el) => el.classList.remove("is-active"));
-    btn.classList.add("is-active");
+    categoryList.querySelectorAll('.category-list__item').forEach((el) => el.classList.remove('is-active'));
+    btn.classList.add('is-active');
     state.category = btn.dataset.category;
     render();
   });
 
-  // Letter filter (click again to clear)
-  letterGrid.addEventListener("click", (e) => {
-    const btn = e.target.closest(".letter-btn");
+  letterGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.letter-btn');
     if (!btn || btn.disabled) return;
     const letter = btn.dataset.letter;
-    const alreadyActive = btn.classList.contains("is-active");
+    const alreadyActive = btn.classList.contains('is-active');
 
-    letterGrid.querySelectorAll(".letter-btn").forEach((el) => el.classList.remove("is-active"));
+    letterGrid.querySelectorAll('.letter-btn').forEach((el) => el.classList.remove('is-active'));
 
     if (alreadyActive) {
       state.letter = null;
     } else {
-      btn.classList.add("is-active");
+      btn.classList.add('is-active');
       state.letter = letter;
     }
     render();
   });
 
-  // Live search
-  searchInput.addEventListener("input", (e) => {
+  searchInput.addEventListener('input', (e) => {
     state.search = e.target.value.trim();
     render();
   });
 
-  // View toggle
   function setView(view) {
     state.view = view;
-    gridViewBtn.classList.toggle("is-active", view === "grid");
-    listViewBtn.classList.toggle("is-active", view === "list");
+    gridViewBtn.classList.toggle('is-active', view === 'grid');
+    listViewBtn.classList.toggle('is-active', view === 'list');
     render();
   }
 
-  gridViewBtn.addEventListener("click", () => setView("grid"));
-  listViewBtn.addEventListener("click", () => setView("list"));
+  gridViewBtn.addEventListener('click', () => setView('grid'));
+  listViewBtn.addEventListener('click', () => setView('list'));
 
-  // Reset all filters
-  viewAllBtn.addEventListener("click", () => {
-    state.category = "all";
+  viewAllBtn.addEventListener('click', () => {
+    state.category = 'all';
     state.letter = null;
-    state.search = "";
-    searchInput.value = "";
-    categoryList.querySelectorAll(".category-list__item").forEach((el, i) => {
-      el.classList.toggle("is-active", i === 0);
+    state.search = '';
+    searchInput.value = '';
+    categoryList.querySelectorAll('.category-list__item').forEach((el, i) => {
+      el.classList.toggle('is-active', i === 0);
     });
-    letterGrid.querySelectorAll(".letter-btn").forEach((el) => el.classList.remove("is-active"));
+    letterGrid.querySelectorAll('.letter-btn').forEach((el) => el.classList.remove('is-active'));
     render();
   });
 
-  initLetterAvailability();
-  render();
+  // ---------- Boot ----------
+  loadSchools();
 })();

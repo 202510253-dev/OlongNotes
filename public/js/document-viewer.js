@@ -71,9 +71,12 @@
       fileType,
       fileSize: row.file_size || 0,
       downloads: Number(row.download_count) || 0,
-      // like_count isn't returned by GET /api/notes/:id currently.
-      // We start at 0 and update from POST /like response.
-      likes: 0,
+      // like_count is denormalized on notes since the 2026-08-02
+      // migration (Section 10.2 of databaseUpdate.txt). The trigger
+      // on the likes table keeps it accurate, so we read it directly
+      // here instead of starting at 0.
+      likes: typeof row.like_count === 'number' ? row.like_count : 0,
+      bookmarks: typeof row.bookmarks_count === 'number' ? row.bookmarks_count : 0,
       createdAt: row.created_at || '',
       isPdf,
       isImage,
