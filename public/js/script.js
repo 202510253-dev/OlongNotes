@@ -592,10 +592,20 @@ document.addEventListener('DOMContentLoaded', () => {
      like. Everything above just wires up behavior; this wires
      up *visibility*.
      ======================================================= */
+  // Modern navbar (index.html): guest actions group + profile chip.
   const navGuestActions = document.getElementById('navGuestActions');
   const navProfileChip = document.getElementById('navProfileChip');
   const navProfileName = document.getElementById('navProfileName');
   const navProfileAvatar = document.getElementById('navProfileAvatar');
+
+  // Legacy navbar (other pages): standalone Log In / Sign Up buttons +
+  // a .profile-icon button that's always visible today. We hide/show
+  // these in lockstep with the modern navbar so login state reflects
+  // everywhere, not just on the landing page.
+  const legacyLoginBtn = document.getElementById('navLoginBtn');
+  const legacySignupBtn = document.getElementById('navSignupBtn');
+  const legacyProfileIcon = document.querySelector('.profile-icon');
+
   const heroContribBtn = document.getElementById('heroContribBtn');
   const heroUploadBtn = document.getElementById('heroUploadBtn');
   const topContributorsSection = document.getElementById('topContributorsSection');
@@ -608,12 +618,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const isUser = role === 'user';
     const user = currentDisplayUser();
 
+    // Modern navbar (index.html).
     if (navGuestActions) navGuestActions.hidden = isUser;
     if (navProfileChip) navProfileChip.hidden = !isUser;
     if (isUser && user) {
       if (navProfileName) navProfileName.textContent = user.name;
       if (navProfileAvatar) navProfileAvatar.textContent = user.initials;
     }
+
+    // Legacy navbar (other pages): hide Log In + Sign Up when signed in,
+    // show the profile icon. Reverse on logout.
+    if (legacyLoginBtn) legacyLoginBtn.hidden = isUser;
+    if (legacySignupBtn) legacySignupBtn.hidden = isUser;
+    if (legacyProfileIcon) legacyProfileIcon.hidden = !isUser;
 
     if (heroContribBtn) heroContribBtn.hidden = isUser;
     if (heroUploadBtn) heroUploadBtn.hidden = !isUser;

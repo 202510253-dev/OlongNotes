@@ -281,3 +281,249 @@
   @media (max-width: 420px) {
     .subjects-grid { grid-template-columns: 1fr; }
   }
+
+  /* ============================================================
+     Step 7 tiered flow — level bubbles, breadcrumb, drill-down
+  ============================================================ */
+
+  /* ---------- Breadcrumb ---------- */
+  .subjects-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .breadcrumb-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--navy-100, #f2f4f8);
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px 8px 10px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-heading);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .breadcrumb-back:hover {
+    background: var(--accent-blue, #3d6bf0);
+    color: #ffffff;
+  }
+
+  .breadcrumb-back:hover svg {
+    stroke: #ffffff;
+  }
+
+  .breadcrumb-back svg {
+    color: currentColor;
+    transition: stroke 0.15s ease;
+  }
+
+  .breadcrumb-path {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray-600, #5b6472);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ---------- Level bubbles ---------- */
+  .subjects-level-bubbles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .level-bubble {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1.5px solid var(--navy-100, #eef1f6);
+    border-radius: 18px;
+    padding: 24px 22px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .level-bubble:hover {
+    border-color: var(--accent-blue, #3d6bf0);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .level-bubble__icon {
+    flex-shrink: 0;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(61, 107, 240, 0.1);
+    color: var(--accent-blue, #3d6bf0);
+  }
+
+  .level-bubble--college .level-bubble__icon {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+  }
+
+  .level-bubble--shs .level-bubble__icon {
+    background: rgba(46, 158, 91, 0.1);
+    color: #2e9e5b;
+  }
+
+  .level-bubble__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .level-bubble__title {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0;
+  }
+
+  .level-bubble__sub {
+    font-size: 0.82rem;
+    color: var(--gray-600, #8891a0);
+    margin: 0;
+  }
+
+  /* ---------- Stage heading (changes per drill-down step) ---------- */
+  .subjects-stage-title {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0;
+  }
+
+  /* ---------- Card tile (used for college category/program/major) ---------- */
+  .subjects-grid--cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .card-tile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--navy-100, #eef1f6);
+    border-radius: 14px;
+    padding: 16px 16px 16px 14px;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .card-tile:hover {
+    border-color: var(--accent-blue, #3d6bf0);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .card-tile:hover .card-tile__chevron {
+    color: var(--accent-blue, #3d6bf0);
+    transform: translateX(2px);
+  }
+
+  .card-tile__icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(61, 107, 240, 0.1);
+    color: var(--accent-blue, #3d6bf0);
+  }
+
+  .card-tile__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-tile__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .card-tile__chevron {
+    flex-shrink: 0;
+    color: var(--gray-600, #c3c8d2);
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+
+  /* ---------- Loading + empty + error states ---------- */
+  .subjects-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    color: var(--gray-600, #8891a0);
+    font-size: 0.92rem;
+    padding: 40px 16px;
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px dashed var(--navy-100, #eef1f6);
+  }
+
+  .subjects-state--error {
+    color: #b13a3a;
+    border-color: rgba(177, 58, 58, 0.25);
+    background: rgba(177, 58, 58, 0.04);
+  }
+
+  .subjects-state__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--navy-100, #eef1f6);
+    border-top-color: var(--accent-blue, #3d6bf0);
+    animation: subjects-spin 0.8s linear infinite;
+  }
+
+  @keyframes subjects-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ---------- Responsive for the new tiered flow ---------- */
+  @media (max-width: 1180px) {
+    .subjects-grid--cards { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 860px) {
+    .subjects-level-bubbles { grid-template-columns: 1fr; }
+    .subjects-grid--cards { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .subjects-grid--cards { grid-template-columns: 1fr; }
+    .level-bubble { padding: 18px 16px; }
+  }
