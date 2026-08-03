@@ -135,6 +135,7 @@
     breadcrumbBackLabel.textContent = prevLabel;
   }
 
+
   function resetStack() {
     state.stack = [];
     renderBreadcrumb();
