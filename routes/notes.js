@@ -175,6 +175,7 @@ router.post('/', auth, (req, res, next) => {
       .from('olongnotes')
       .upload(filePath, req.file.buffer, {
         contentType: req.file.mimetype,
+        contentDisposition: 'inline',
         upsert: false
       })
 
