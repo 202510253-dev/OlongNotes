@@ -63,7 +63,7 @@ router.get('/schools', async (req, res) => {
 // No params = all subjects (backward compat for current frontend callers)
 // ─────────────────────────────────────────────
 router.get('/subjects', async (req, res) => {
-  const { education_level, program_id } = req.query
+  const { education_level, program_id, id } = req.query
 
   try {
     let query = supabase
@@ -81,6 +81,10 @@ router.get('/subjects', async (req, res) => {
 
     if (program_id) {
       query = query.eq('program_id', parseInt(program_id))
+    }
+
+    if (id) {
+      query = query.eq('id', parseInt(id))
     }
 
     const { data, error } = await query

@@ -6,6 +6,75 @@ const auth = require('../middleware/auth')
 const multer = require('multer')
 const { v4: uuidv4 } = require('uuid')
 
+// Status constants — single source of truth
+const STATUS = {
+  PENDING: 'pending',
+  PUBLISHED: 'published',
+  REJECTED: 'rejected'
+}
+
+// Extracts the storage path from a Supabase public URL
+// Returns null if the URL doesn't match the expected format
+function parseStoragePath(url) {
+  const marker = '/storage/v1/object/public/olongnotes/'
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  return url.slice(idx + marker.length) || null
+}
+
+// Shared toggle helper for likes and bookmarks
+async function toggleInteraction(req, res, { table, idField, denormColumn }) {
+  const noteId = parseInt(req.params.id)
+  const userId = req.user.id
+
+  try {
+    const { data: existing } = await supabase
+      .from(table)
+      .select('id')
+      .eq('note_id', noteId)
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (existing) {
+      const { error: deleteError } = await supabase
+        .from(table)
+        .delete()
+        .eq('note_id', noteId)
+        .eq('user_id', userId)
+
+      if (deleteError) {
+        console.error(`${table} delete error:`, deleteError)
+        return res.status(500).json({ message: `Could not remove ${table.slice(0, -1)}.` })
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from(table)
+        .insert({ note_id: noteId, user_id: userId, created_at: new Date().toISOString() })
+
+      if (insertError) {
+        if (insertError.code !== '23505') {
+          console.error(`${table} insert error:`, insertError)
+          return res.status(500).json({ message: `Could not ${table.slice(0, -1)} note.` })
+        }
+      }
+    }
+
+    const { count } = await supabase
+      .from(table)
+      .select('*', { count: 'exact', head: true })
+      .eq('note_id', noteId)
+
+    return res.status(existing ? 200 : 201).json({
+      message: existing ? `${idField} removed.` : `Note ${idField}.`,
+      [idField]: !existing,
+      [denormColumn]: count
+    })
+
+  } catch (err) {
+    console.error(`${table} toggle error:`, err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+}
 
 // Multer Confic - Memory storage, validate before the Supabase
 
@@ -92,7 +161,7 @@ router.post('/', auth, (req, res, next) => {
         file_type: req.file.mimetype,
         file_size: req.file.size,
         user_id: req.user.id,
-        status: req.user.role === 'admin' ? 'published' : 'pending',
+        status: req.user.role === 'admin' ? STATUS.PUBLISHED : STATUS.PENDING,
         download_count: 0,
         view_count: 0,
         created_at: new Date().toISOString()
@@ -160,7 +229,7 @@ router.get('/', async (req, res) => {
         schools ( school_name ),
         subjects ( subject_name )
       `, { count: 'exact' })
-      .eq('status', 'published')
+      .eq('status', STATUS.PUBLISHED)
       .order('created_at', { ascending: false })
       .range(pageOffset, pageOffset + pageLimit - 1)
 
@@ -226,7 +295,7 @@ router.get('/:id', async (req, res) => {
         subjects ( subject_name )
       `)
             .eq('id', parseInt(id))
-            .eq('status', 'published')
+            .eq('status', STATUS.PUBLISHED)
             .single()
 
         if (error || !note) {
@@ -246,127 +315,20 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/notes/:id/like - auth required, toggle
 router.post('/:id/like', auth, async (req, res) => {
-  const noteId = parseInt(req.params.id)
-  const userId = req.user.id
-
-  try {
-    const { data: existing } = await supabase
-      .from('likes')
-      .select('id')
-      .eq('note_id', noteId)
-      .eq('user_id', userId)
-      .maybeSingle()
-
-    if (existing) {
-      const { error: deleteError } = await supabase
-        .from('likes')
-        .delete()
-        .eq('note_id', noteId)
-        .eq('user_id', userId)
-
-      if (deleteError) {
-        console.error('Like delete error:', deleteError)
-        return res.status(500).json({ message: 'Could not remove like.' })
-      }
-    } else {
-      const { error: insertError } = await supabase
-        .from('likes')
-        .insert({ note_id: noteId, user_id: userId, created_at: new Date().toISOString() })
-
-      if (insertError) {
-        if (insertError.code !== '23505') {
-          console.error('Like insert error:', insertError)
-          return res.status(500).json({ message: 'Could not like note.' })
-        }
-        // 23505 = race condition, another request won — treat as success
-      }
-    }
-
-    // Read the current count off the denormalized column. The
-    // likes_count_trigger on the likes table has already kept this
-    // in sync with the insert/delete we just did.
-    const { data: noteRow } = await supabase
-      .from('notes')
-      .select('likes_count')
-      .eq('id', noteId)
-      .single()
-
-    const likesCount = (noteRow && typeof noteRow.likes_count === 'number')
-      ? noteRow.likes_count
-      : 0
-
-    return res.status(existing ? 200 : 201).json({
-      message: existing ? 'Like removed.' : 'Note liked.',
-      liked: !existing,
-      likes_count: likesCount
-    })
-
-  } catch (err) {
-    console.error('Like error:', err)
-    return res.status(500).json({ message: 'Server error.' })
-  }
+  return toggleInteraction(req, res, {
+    table: 'likes',
+    idField: 'liked',
+    denormColumn: 'likes_count'
+  })
 })
 
 // POST /api/notes/:id/bookmark - auth required, toggle
 router.post('/:id/bookmark', auth, async (req, res) => {
-  const noteId = parseInt(req.params.id)
-  const userId = req.user.id
-
-  try {
-    const { data: existing } = await supabase
-      .from('bookmarks')
-      .select('id')
-      .eq('note_id', noteId)
-      .eq('user_id', userId)
-      .maybeSingle()
-
-    if (existing) {
-      const { error: deleteError } = await supabase
-        .from('bookmarks')
-        .delete()
-        .eq('note_id', noteId)
-        .eq('user_id', userId)
-
-      if (deleteError) {
-        console.error('Bookmark delete error:', deleteError)
-        return res.status(500).json({ message: 'Could not remove bookmark.' })
-      }
-    } else {
-      const { error: insertError } = await supabase
-        .from('bookmarks')
-        .insert({ note_id: noteId, user_id: userId, created_at: new Date().toISOString() })
-
-      if (insertError) {
-        if (insertError.code !== '23505') {
-          console.error('Bookmark insert error:', insertError)
-          return res.status(500).json({ message: 'Could not bookmark note.' })
-        }
-      }
-    }
-
-    // Read the current count off the denormalized column. The
-    // bookmarks_count_trigger on the bookmarks table has already kept
-    // this in sync with the insert/delete we just did.
-    const { data: noteRow } = await supabase
-      .from('notes')
-      .select('bookmarks_count')
-      .eq('id', noteId)
-      .single()
-
-    const bookmarksCount = (noteRow && typeof noteRow.bookmarks_count === 'number')
-      ? noteRow.bookmarks_count
-      : 0
-
-    return res.status(existing ? 200 : 201).json({
-      message: existing ? 'Bookmark removed.' : 'Note bookmarked.',
-      bookmarked: !existing,
-      bookmarks_count: bookmarksCount
-    })
-
-  } catch (err) {
-    console.error('Bookmark error:', err)
-    return res.status(500).json({ message: 'Server error.' })
-  }
+  return toggleInteraction(req, res, {
+    table: 'bookmarks',
+    idField: 'bookmarked',
+    denormColumn: 'bookmarks_count'
+  })
 })
 
 // GET /api/notes/:id/download - public, increments download_count
@@ -378,7 +340,7 @@ router.get('/:id/download', async (req, res) => {
             .from('notes')
             .select('id, file_url, download_count, status')
             .eq('id', noteId)
-            .eq('status', 'published')
+            .eq('status', STATUS.PUBLISHED)
             .single()
 
         if (error || !note) {
@@ -427,15 +389,17 @@ router.delete('/:id', auth, async (req, res) => {
 
     // FIX 5 — delete file from Storage after DB row is gone
     if (note.file_url) {
-      const urlParts = note.file_url.split('/storage/v1/object/public/olongnotes/')
-      const filePath = urlParts[1]
+      const filePath = parseStoragePath(note.file_url)
       if (filePath) {
         const { error: storageError } = await supabaseAdmin.storage
           .from('olongnotes')
           .remove([filePath])
         if (storageError) {
-          console.error('Storage delete error (file may be orphaned):', storageError)
+          console.error('Storage delete error — file may be orphaned:', storageError)
+          console.error('Orphaned path:', filePath)
         }
+      } else {
+        console.warn('Could not parse storage path from URL — file not deleted:', note.file_url)
       }
     }
 
@@ -480,7 +444,7 @@ router.post('/:id/report', auth, async (req, res) => {
         target_type: 'note',
         target_id: noteId,
         reason,
-        status: 'pending',
+        status: STATUS.PENDING,
         created_at: new Date().toISOString()
       })
       .select()

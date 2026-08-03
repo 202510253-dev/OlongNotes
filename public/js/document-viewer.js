@@ -75,7 +75,7 @@
       // migration (Section 10.2 of databaseUpdate.txt). The trigger
       // on the likes table keeps it accurate, so we read it directly
       // here instead of starting at 0.
-      likes: typeof row.like_count === 'number' ? row.like_count : 0,
+      likes: typeof row.likes_count === 'number' ? row.likes_count : 0,
       bookmarks: typeof row.bookmarks_count === 'number' ? row.bookmarks_count : 0,
       createdAt: row.created_at || '',
       isPdf,

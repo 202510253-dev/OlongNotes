@@ -62,7 +62,7 @@
       caption: row.annotation || '',
       subjectName: (row.subjects && row.subjects.subject_name) || 'General',
       author: (row.users && row.users.user_name) || 'Anonymous',
-      likes: typeof row.like_count === 'number' ? row.like_count : 0,
+      likes: typeof row.likes_count === 'number' ? row.likes_count : 0,
       downloads: typeof row.download_count === 'number' ? row.download_count : 0,
       gradeLevel: row.grade_level || '',
       fileType: row.file_type || '',

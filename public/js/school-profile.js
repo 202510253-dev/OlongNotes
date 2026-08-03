@@ -68,7 +68,7 @@
       author: (row.users && row.users.user_name) || 'Anonymous',
       // denormalized counters from Section 10.2 migration (live since
       // 2026-08-02). Default to 0 if a row pre-dates the migration.
-      likes: typeof row.like_count === 'number' ? row.like_count : 0,
+      likes: typeof row.likes_count === 'number' ? row.likes_count : 0,
       downloads: typeof row.download_count === 'number' ? row.download_count : 0,
       gradeLevel: row.grade_level || '',
       fileType: row.file_type || '',
