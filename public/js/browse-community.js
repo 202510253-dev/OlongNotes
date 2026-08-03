@@ -629,23 +629,23 @@
     li.dataset.answers = "0";
 
     var metaLine =
-      '<span class="question-row__subject" style="--subject-tint:' + data.subjectTint + '">' + data.subject + "</span>" +
+      '<span class="question-row__subject" style="--subject-tint:' + escapeHtml(data.subjectTint) + '">' + escapeHtml(data.subject) + "</span>" +
       '<span class="question-row__dot">&middot;</span>' +
-      '<span class="question-row__time">' + data.time + "</span>";
+      '<span class="question-row__time">' + escapeHtml(data.time) + "</span>";
 
     var tagsHtml = data.tags.map(function (t) {
-      return '<span class="tag" style="--tag-tint:' + data.subjectTint + '">' + t + "</span>";
+      return '<span class="tag" style="--tag-tint:' + escapeHtml(data.subjectTint) + '">' + escapeHtml(t) + "</span>";
     }).join("");
 
     li.innerHTML =
-      '<span class="question-row__avatar" style="--avatar-tint:' + data.subjectTint + '" aria-hidden="true">' + data.avatar + "</span>" +
+      '<span class="question-row__avatar" style="--avatar-tint:' + escapeHtml(data.subjectTint) + '" aria-hidden="true">' + escapeHtml(data.avatar) + "</span>" +
       '<div class="question-row__body">' +
         '<div class="question-row__top">' +
           '<span class="question-row__meta-line">' + metaLine + "</span>" +
           '<span class="status-badge status-badge--unanswered">' + dotIcon + "Unanswered</span>" +
         "</div>" +
-        '<p class="question-row__text">' + data.title + "</p>" +
-        '<p class="question-row__desc">' + data.desc + "</p>" +
+        '<p class="question-row__text">' + escapeHtml(data.title) + "</p>" +
+        '<p class="question-row__desc">' + escapeHtml(data.desc) + "</p>" +
         '<div class="question-row__tags">' + tagsHtml + "</div>" +
         '<div class="question-row__footer">' +
           '<button class="like-btn" type="button" aria-pressed="false" data-count="0">' + heartIcon + '<span class="like-btn__count">0</span></button>' +
@@ -663,7 +663,7 @@
       : '<span class="status-badge status-badge--unanswered">' + dotIcon + "Unanswered</span>";
 
     var tagsHtml = data.tags.map(function (t) {
-      return '<span class="tag" style="--tag-tint:' + data.subjectTint + '">' + t + "</span>";
+      return '<span class="tag" style="--tag-tint:' + escapeHtml(data.subjectTint) + '">' + escapeHtml(t) + "</span>";
     }).join("");
 
     var commentsHtml = data.comments.map(renderComment).join("");

@@ -312,7 +312,7 @@
     if (!banner || !bannerText) return;
     bannerText.textContent = text;
     banner.className = `action-banner action-banner--${theme}`;
-    if (bannerIcon) bannerIcon.innerHTML = icon;
+    if (bannerIcon) bannerIcon.innerHTML = icon; // icon MUST be a hardcoded SVG constant from this file; never pass user input (C8-N1).
     banner.hidden = false;
   }
 
