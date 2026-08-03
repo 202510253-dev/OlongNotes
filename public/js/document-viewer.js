@@ -144,13 +144,14 @@
   function renderFileEmbed(doc) {
     if (doc.isPdf && doc.fileUrl) {
       return `
-        <div class="doc-page__pdf" style="width: 100%; height: 70vh;">
-          <iframe src="${esc(doc.fileUrl)}"
-                  title="${esc(doc.title)}"
-                  style="width: 100%; height: 100%; border: 0; background: #fff;"
-                  loading="lazy"></iframe>
+        <div class="pdf-placeholder">
+          <div class="pdf-placeholder-icon">📄</div>
+          <p class="pdf-placeholder-title">${esc(doc.title)}</p>
+          <p class="pdf-placeholder-desc">PDF documents open in a new tab for the best viewing experience.</p>
+          <a href="${esc(doc.fileUrl)}" target="_blank" rel="noopener noreferrer" class="pdf-open-btn">
+            Open PDF
+          </a>
         </div>
-        <div class="doc-page__pagenum">${esc(doc.title)}</div>
       `;
     }
     if (doc.isImage && doc.fileUrl) {

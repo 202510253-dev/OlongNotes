@@ -236,6 +236,52 @@
   margin: 0 0 26px;
 }
 
+.pdf-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  gap: 16px;
+  text-align: center;
+  padding: 40px;
+}
+
+.pdf-placeholder-icon {
+  font-size: 64px;
+}
+
+.pdf-placeholder-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.pdf-placeholder-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  max-width: 300px;
+}
+
+.pdf-open-btn {
+  display: inline-block;
+  padding: 12px 28px;
+  background: #1f6f4d;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+.pdf-open-btn:hover {
+  background: #185a3e;
+}
+
 .doc-page__art {
   display: flex;
   align-items: center;
@@ -687,5 +733,48 @@
 
   .doc-page__title {
     font-size: 1.6rem;
+  }
+}
+/* ── Print styles ─────────────────────────────────────────── */
+@media print {
+  /* Hide all chrome */
+  .viewer-topbar,
+  .viewer-toolbar,
+  .viewer-sidebar,
+  #printBtn,
+  #downloadBtn,
+  #likeBtn,
+  #saveBtn,
+  #reportBtn,
+  .action-banner,
+  .viewer-actions,
+  nav,
+  header,
+  footer {
+    display: none !important;
+  }
+
+  /* Remove layout constraints so content fills the page */
+  .viewer-layout {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+
+  .viewer-scrollarea {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .viewer-page {
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Make iframe fill the print area */
+  iframe {
+    width: 100% !important;
+    height: 100vh !important;
+    border: none !important;
   }
 }

@@ -483,45 +483,58 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // EDIT 5: real upload submit → POST /api/notes via api.upload().
-  if (uploadForm) {
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
+  const handleUploadSubmit = async (e) => {
+    e.preventDefault();
 
-      const fd = new FormData(uploadForm);
-      const remapped = new FormData();
-      remapped.append('title', fd.get('title') || '');
-      remapped.append('annotation', fd.get('caption') || '');
-      remapped.append('subject_id', fd.get('subject_id') || '');
-      remapped.append('school_id', fd.get('school_id') || '');
-      remapped.append('grade_level', fd.get('grade_level') || '');
-      const file = fd.get('note_file');
-      if (file && file.size > 0) remapped.append('file', file);
-      // tags intentionally dropped.
+    const fd = new FormData(uploadForm);
+    const remapped = new FormData();
+    remapped.append('title', fd.get('title') || '');
+    remapped.append('annotation', fd.get('caption') || '');
+    remapped.append('subject_id', fd.get('subject_id') || '');
+    remapped.append('school_id', fd.get('school_id') || '');
+    remapped.append('grade_level', fd.get('grade_level') || '');
+    const file = fd.get('note_file');
+    if (file && file.size > 0) remapped.append('file', file);
+    // tags intentionally dropped.
 
-      const ON2 = window.OlongNotes || {};
-      const esc2 = ON2.escapeHtml || ((s) => String(s ?? ''));
+    const ON2 = window.OlongNotes || {};
+    const esc2 = ON2.escapeHtml || ((s) => String(s ?? ''));
 
-      try {
-        const data = await ON2.api.upload('/notes', remapped, { auth: true });
-        uploadModal.close();
-        uploadForm.reset();
-        noteFileDropText.textContent = DEFAULT_NOTE_FILE_TEXT;
-        noteFileDrop.classList.remove('has-file');
-        if (data && data.note && data.note.id) {
-          window.location.href = `document-viewer.html?id=${encodeURIComponent(data.note.id)}`;
-        }
-      } catch (err) {
-        let el = uploadForm.querySelector('.auth-form__error');
-        if (!el) {
-          el = document.createElement('div');
-          el.className = 'auth-form__error';
-          el.setAttribute('role', 'alert');
-          el.style.cssText = 'color:#c53030;background:#fed7d7;padding:8px 12px;border-radius:4px;margin:0 0 12px;font-size:13px;';
-          uploadForm.querySelector('h2')?.insertAdjacentElement('afterend', el);
-        }
-        el.textContent = esc2((err && err.message) || 'Upload failed.');
+    try {
+      const data = await ON2.api.upload('/notes', remapped, { auth: true });
+      uploadModal.close();
+      uploadForm.reset();
+      noteFileDropText.textContent = DEFAULT_NOTE_FILE_TEXT;
+      noteFileDrop.classList.remove('has-file');
+      if (data && data.note && data.note.id) {
+        window.location.href = `document-viewer.html?id=${encodeURIComponent(data.note.id)}`;
       }
-    });
+    } catch (err) {
+      let el = uploadForm.querySelector('.auth-form__error');
+      if (!el) {
+        el = document.createElement('div');
+        el.className = 'auth-form__error';
+        el.setAttribute('role', 'alert');
+        el.style.cssText = 'color:#c53030;background:#fed7d7;padding:8px 12px;border-radius:4px;margin:0 0 12px;font-size:13px;';
+        uploadForm.querySelector('h2')?.insertAdjacentElement('afterend', el);
+      }
+
+      if (err && err.status === 401) {
+        if (ON2.clearToken) ON2.clearToken();
+        if (ON2.applyRole) ON2.applyRole('viewer');
+        uploadModal.close();
+        el.textContent = 'Your session expired. Please log in again to upload.';
+        document.getElementById('authModal')?.classList.add('is-open');
+        return;
+      }
+
+      el.textContent = esc2((err && err.message) || 'Upload failed.');
+    }
+  };
+
+  if (uploadForm) {
+    uploadForm.removeEventListener('submit', handleUploadSubmit);
+    uploadForm.addEventListener('submit', handleUploadSubmit);
   }
 
   /* ---------------- CTA "Upload Notes" button (role-dependent target) ----------------
