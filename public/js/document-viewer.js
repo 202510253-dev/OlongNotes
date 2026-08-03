@@ -71,13 +71,18 @@
       fileType,
       fileSize: row.file_size || 0,
       downloads: Number(row.download_count) || 0,
-      // like_count is denormalized on notes since the 2026-08-02
+      // likes_count is denormalized on notes since the 2026-08-02
       // migration (Section 10.2 of databaseUpdate.txt). The trigger
       // on the likes table keeps it accurate, so we read it directly
       // here instead of starting at 0.
       likes: typeof row.likes_count === 'number' ? row.likes_count : 0,
       bookmarks: typeof row.bookmarks_count === 'number' ? row.bookmarks_count : 0,
       createdAt: row.created_at || '',
+      // Backend returns these on GET /api/notes/:id when the request
+      // carries a valid JWT. Default false so the page works for
+      // anonymous viewers.
+      viewerHasLiked: Boolean(row.viewer_has_liked),
+      viewerHasBookmarked: Boolean(row.viewer_has_bookmarked),
       isPdf,
       isImage,
     };
@@ -122,6 +127,13 @@
     document.getElementById('statLikes').textContent = formatCount(doc.likes);
     document.getElementById('statDownloads').textContent = formatCount(doc.downloads);
     document.getElementById('statFileType').textContent = formatFileType(doc.fileType) || 'FILE';
+
+    // Pre-set the like / save buttons based on whether the current
+    // viewer has already liked/bookmarked. Without this, the buttons
+    // always show the inactive state on page load even when the user
+    // has previously liked the note — confusing.
+    document.getElementById('likeBtn')?.classList.toggle('is-active', doc.viewerHasLiked);
+    document.getElementById('saveBtn')?.classList.toggle('is-active', doc.viewerHasBookmarked);
   }
 
   // ---------- Document page rendering ----------
@@ -188,15 +200,22 @@
     const viewerPage = document.getElementById('viewerPage');
     if (!viewerPage) return;
     viewerPage.innerHTML = renderFileEmbed(doc);
-    document.getElementById('totalPages').textContent = '1';
-    document.getElementById('currentPage').textContent = '1';
-    document.getElementById('prevPageBtn').disabled = true;
-    document.getElementById('nextPageBtn').disabled = true;
   }
 
   // ---------- Toolbar handlers ----------
 
   function bindToolbar(doc) {
+    // Back button — prefer history.back() when the user actually
+    // navigated here from another page in this app. If they opened
+    // the viewer directly (no history entry), the href falls back
+    // to index.html so it still works.
+    document.getElementById('viewerBackBtn')?.addEventListener('click', (e) => {
+      if (window.history.length > 1) {
+        e.preventDefault();
+        window.history.back();
+      }
+    });
+
     let zoom = 100;
     const viewerPage = document.getElementById('viewerPage');
     const zoomLevel = document.getElementById('zoomLevel');
@@ -268,6 +287,15 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+
+      // Optimistic increment — the backend's increment_download_count
+      // RPC has already run before this response came back, so the DB
+      // is at N+1. Reflect that in the UI immediately (no reload).
+      // Keeping doc.downloads in sync means subsequent downloads
+      // increment off the latest value, not the stale page-load value.
+      doc.downloads = (Number(doc.downloads) || 0) + 1;
+      const statDownloads = document.getElementById('statDownloads');
+      if (statDownloads) statDownloads.textContent = formatCount(doc.downloads);
     } catch (e) {
       console.error('[OlongNotes] Download failed.', e);
       showBanner(e.message || 'Download failed.', 'report', '');
@@ -301,10 +329,21 @@
     if (!api) return;
     try {
       const data = await api.post(`/notes/${encodeURIComponent(doc.id)}/like`, null, { auth: true });
-      // Backend returns { message, liked, likes_count }
+      // Backend returns { message, liked, likes_count }. The server's
+      // count is authoritative — when the user removes their like,
+      // the count genuinely drops to 0 (or whatever the new value is).
+      // We must NOT fall back to doc.likes on 0, because that would
+      // make the UI lie when the user removes the last like. Use a
+      // strict null check instead of || so 0 is preserved.
       const liked = Boolean(data && data.liked);
-      const count = Number(data && data.likes_count) || doc.likes;
+      const count = (data && typeof data.likes_count === 'number')
+        ? data.likes_count
+        : doc.likes;
       doc.likes = count;
+      // Keep the pre-set flag in sync so a fresh page-load after a
+      // navigate-back (which re-runs populateSidebar) shows the right
+      // state. The server's `liked` field is the truth for THIS click.
+      doc.viewerHasLiked = liked;
 
       const likeBtn = document.getElementById('likeBtn');
       const statLikes = document.getElementById('statLikes');
@@ -332,6 +371,12 @@
     try {
       const data = await api.post(`/notes/${encodeURIComponent(doc.id)}/bookmark`, null, { auth: true });
       const bookmarked = Boolean(data && data.bookmarked);
+      // Keep in-memory bookmark count in sync — server's value is
+      // authoritative, same null-vs-zero check as toggleLike.
+      if (data && typeof data.bookmarks_count === 'number') {
+        doc.bookmarks = data.bookmarks_count;
+      }
+      doc.viewerHasBookmarked = bookmarked;
       const saveBtn = document.getElementById('saveBtn');
       saveBtn.classList.toggle('is-active', bookmarked);
       if (bookmarked) {

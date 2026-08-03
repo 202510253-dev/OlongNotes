@@ -140,14 +140,6 @@
   flex: 1;
 }
 
-.viewer-pageindicator {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #ffffff;
-  padding: 0 6px;
-  white-space: nowrap;
-}
-
 .viewer-zoomlevel {
   font-size: 0.82rem;
   font-weight: 600;
@@ -306,6 +298,10 @@
 
 .viewer-sidebar.is-collapsed {
   display: none;
+}
+
+.viewer-layout:has(.viewer-sidebar.is-collapsed) {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .viewer-card {

@@ -22,6 +22,31 @@ function parseStoragePath(url) {
   return url.slice(idx + marker.length) || null
 }
 
+// Counts the rows in a join table (likes / bookmarks) for a given note.
+// Returns 0 if the count is unavailable. Used by toggleInteraction to
+// emit the new count AFTER the INSERT/DELETE — see that function for
+// why we read it multiple times.
+async function readCount(table, noteId) {
+  const { count } = await supabase
+    .from(table)
+    .select('*', { count: 'exact', head: true })
+    .eq('note_id', noteId)
+  return typeof count === 'number' ? count : 0
+}
+
+// Reads the denormalized counter on `notes` (likes_count or
+// bookmarks_count). Used as a last-resort fallback when the direct
+// count read is suspicious (e.g. 0 after an INSERT).
+async function readDenorm(noteId, column) {
+  const { data: row } = await supabase
+    .from('notes')
+    .select(column)
+    .eq('id', noteId)
+    .single()
+  const v = row && row[column]
+  return typeof v === 'number' ? v : null
+}
+
 // Shared toggle helper for likes and bookmarks
 async function toggleInteraction(req, res, { table, idField, denormColumn }) {
   const noteId = parseInt(req.params.id)
@@ -59,10 +84,27 @@ async function toggleInteraction(req, res, { table, idField, denormColumn }) {
       }
     }
 
-    const { count } = await supabase
-      .from(table)
-      .select('*', { count: 'exact', head: true })
-      .eq('note_id', noteId)
+    // Read the count AFTER the mutation. There's a small race window
+    // between the INSERT/DELETE response and the COUNT query — both go
+    // through the PostgREST connection pool, and depending on connection
+    // reuse they may or may not see the just-written row. We re-read
+    // up to 3 times with a tiny backoff. If all reads agree with the
+    // pre-mutation state, we trust them; if any read differs, we trust
+    // the most-recent non-zero read. The denormalized column on `notes`
+    // is the ultimate source of truth — we fall back to it if the
+    // direct count is suspicious (e.g. 0 immediately after an INSERT).
+    const preCount = await readCount(table, noteId)
+    let count = await readCount(table, noteId)
+    for (let attempt = 1; attempt <= 3 && count === preCount; attempt++) {
+      await new Promise((r) => setTimeout(r, 25 * attempt))
+      count = await readCount(table, noteId)
+    }
+    // If direct count is 0 after an INSERT (trigger failed silently),
+    // fall back to the denormalized column. This is rare but observed.
+    if (count === 0 && !existing) {
+      const denorm = await readDenorm(noteId, denormColumn)
+      if (typeof denorm === 'number') count = denorm
+    }
 
     return res.status(existing ? 200 : 201).json({
       message: existing ? `${idField} removed.` : `Note ${idField}.`,
@@ -270,6 +312,13 @@ router.get('/', async (req, res) => {
 })
 
 // GET /api/notes/:id - public, increments view_count
+//
+// If a valid auth token is present, the response also carries
+// `viewer_has_liked` and `viewer_has_bookmarked` so the viewer UI can
+// pre-set the like/bookmark buttons on page load (otherwise they'd
+// always show the inactive state, which is misleading when the user
+// has already liked the note). The route stays public — the auth
+// token is parsed opportunistically, never required.
 router.get('/:id', async (req, res) => {
     const { id } = req.params
 
@@ -300,6 +349,37 @@ router.get('/:id', async (req, res) => {
 
         if (error || !note) {
             return res.status(404).json({ message: 'Note not found.' })
+        }
+
+        // Opportunistically resolve the viewer's user id from the JWT
+        // if present. Never rejects — unauthenticated viewers see the
+        // note without the per-user flags.
+        let viewerUserId = null
+        const authHeader = req.headers.authorization
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          const token = authHeader.split(' ')[1]
+          const { data: { user: authUser } } = await supabase.auth.getUser(token)
+          if (authUser) {
+            const { data: profile } = await supabase
+              .from('users')
+              .select('id')
+              .eq('auth_id', authUser.id)
+              .single()
+            if (profile) viewerUserId = profile.id
+          }
+        }
+
+        // Run the two "has the viewer done X" lookups in parallel.
+        if (viewerUserId) {
+          const [{ data: liked }, { data: bookmarked }] = await Promise.all([
+            supabase.from('likes').select('id').eq('note_id', note.id).eq('user_id', viewerUserId).maybeSingle(),
+            supabase.from('bookmarks').select('id').eq('note_id', note.id).eq('user_id', viewerUserId).maybeSingle(),
+          ])
+          note.viewer_has_liked = Boolean(liked)
+          note.viewer_has_bookmarked = Boolean(bookmarked)
+        } else {
+          note.viewer_has_liked = false
+          note.viewer_has_bookmarked = false
         }
 
         // Increment view_count — atomic, no race condition

@@ -14,7 +14,7 @@
 
   <!-- ===================== VIEWER TOP BAR ===================== -->
   <header class="viewer-topbar">
-    <a href="javascript:history.back()" class="viewer-topbar__back" aria-label="Back">
+    <a href="index.html" id="viewerBackBtn" class="viewer-topbar__back" aria-label="Back">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 4-7 8 7 8M4.5 12H20"/></svg>
     </a>
     <a href="index.html" class="viewer-topbar__brand">
@@ -32,18 +32,6 @@
       <div class="viewer-toolbar">
         <button class="viewer-tool" type="button" id="toggleSidebarBtn" aria-label="Toggle panel">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M9 4v16"/></svg>
-        </button>
-
-        <div class="viewer-toolbar__divider"></div>
-
-        <button class="viewer-tool" type="button" id="prevPageBtn" aria-label="Previous page">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
-        </button>
-        <span class="viewer-pageindicator">
-          <span id="currentPage">1</span> / <span id="totalPages">—</span>
-        </span>
-        <button class="viewer-tool" type="button" id="nextPageBtn" aria-label="Next page">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
         </button>
 
         <div class="viewer-toolbar__divider"></div>
@@ -72,9 +60,6 @@
         </button>
         <button class="viewer-tool" type="button" id="printBtn" aria-label="Print">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M6 14h12v7H6z"/></svg>
-        </button>
-        <button class="viewer-tool" type="button" id="moreBtn" aria-label="More options">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
         </button>
       </div>
 

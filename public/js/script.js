@@ -554,11 +554,15 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   if (discoverScroll && discoverItems.length) {
-    const isNarrowViewport = () => window.matchMedia('(max-width: 720px)').matches;
+    // Matches the @media (max-width: 1100px) breakpoint in style.css —
+    // when the discover section collapses to stacked flow, the
+    // scroll-pinned swap effect doesn't make sense, so skip the
+    // scroll listener entirely.
+    const isNarrowViewport = () => window.matchMedia('(max-width: 1100px)').matches;
 
     if (isNarrowViewport()) {
-      // Mobile: no scroll-jacking. CSS keeps every panel in normal,
-      // readable stacked flow with no overlap.
+      // Mobile / tablet / small-laptop: no scroll-jacking. CSS keeps
+      // every panel in normal, readable stacked flow with no overlap.
     } else {
       let ticking = false;
 

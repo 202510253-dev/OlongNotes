@@ -1437,16 +1437,31 @@ body.upload-modal-open .footer {
 }
 
 @media (max-width: 900px) {
-  .about-strip { padding: 72px 0; }
-  .about-strip__inner { grid-template-columns: 1fr; gap: 48px; }
-  .about-strip__visual { height: 380px; max-width: 480px; margin: 0 auto; }
+  .about-strip { padding: 64px 0; }
+  .about-strip__inner { grid-template-columns: 1fr; gap: 40px; }
+  .about-strip__visual {
+    height: 320px;
+    max-width: 460px;
+    margin: 0 auto;
+    position: relative;
+  }
   .about-strip__content { text-align: center; }
   .about-strip__text { margin-left: auto; margin-right: auto; }
+  .about-strip__heading { align-items: center; }
 }
 @media (max-width: 540px) {
-  .about-strip { padding: 56px 0; }
-  .about-strip__visual { height: 300px; }
-  .about-strip__heading { font-size: 1.6rem; }
+  .about-strip { padding: 48px 0 56px; }
+  .about-strip__inner { gap: 32px; }
+  .about-strip__visual {
+    height: 240px;
+    max-width: min(100%, 360px);
+    margin: 0 auto;
+    position: relative;
+  }
+  .about-strip__img--secondary { border-width: 4px; }
+  .about-strip__heading { font-size: 1.55rem; line-height: 1.22; margin-bottom: 18px; }
+  .about-strip__text { font-size: 0.92rem; line-height: 1.7; margin-bottom: 26px; }
+  .about-strip__content .btn { width: 100%; justify-content: center; }
 }
 
 /* =========================================================
@@ -1528,25 +1543,37 @@ body.upload-modal-open .footer {
 }
 
 @media (max-width: 640px) {
-  .marquee-strip { padding: 48px 0; }
+  /* On phones the marquee used to collapse into a wrapped static
+     grid (animation: none), which looked broken. Keep the animation
+     alive here — just slow it down for readability and let the
+     row's mask-image edge fade handle the entry/exit. */
+  .marquee-strip { padding: 36px 0; }
   .marquee-row {
-    padding: 10px 0;
-    overflow: visible;
+    padding: 12px 0;
+    overflow: hidden;
   }
-  .marquee-row--ltr .marquee-track,
+  .marquee-row--ltr .marquee-track {
+    animation: marquee-scroll 56s linear infinite reverse;
+    width: max-content;
+    flex-wrap: nowrap;
+    gap: 0;
+    justify-content: flex-start;
+  }
   .marquee-row--rtl .marquee-track {
-    animation: none !important;
-    transform: none !important;
-    width: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
+    animation: marquee-scroll 60s linear infinite;
+    width: max-content;
+    flex-wrap: nowrap;
+    gap: 0;
+    justify-content: flex-start;
   }
   .marquee-set {
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
   }
-  .marquee-item { padding: 0 18px; }
+  .marquee-item {
+    padding: 0 22px;
+    font-size: 1.05rem;
+  }
 }
 
 /* =========================================================
@@ -1559,7 +1586,13 @@ body.upload-modal-open .footer {
 
 .discover-scroll {
   position: relative;
-  height: 260vh;
+  /* 100vh: matches the sticky content height (calc(100vh - 96px)),
+     so there's effectively no empty scroll-through between this
+     section and the next. The 3 scroll-pinned items still swap as
+     the user scrolls past — just with very tight scroll distances
+     per item. Was 260vh → 180vh → 120vh → 100vh as we iteratively
+     trimmed the visible white gap. */
+  height: 100vh;
 }
 
 .discover-sticky {
@@ -1834,28 +1867,28 @@ body.upload-modal-open .footer {
   right: 12%;
 }
 
-@media (max-width: 960px) {
-  .discover-visual { width: 380px; height: 320px; }
-}
-
-@media (max-width: 720px) {
+@media (max-width: 1100px) {
+  /* Tablet & small-laptop: scroll-pinning feels awkward here because
+     the viewport is too short for 3 distinct pinned frames. Collapse
+     to a stacked flow instead. The 720px block below then tightens
+     spacing further for phones. */
   .discover-scroll { height: auto; }
   .discover-sticky {
     position: static;
     top: auto;
     height: auto;
-    padding: 56px 0;
+    padding: 64px 0;
     overflow: visible;
   }
-  .discover-frame { flex-direction: column; gap: 32px; text-align: center; }
-  .discover-copy { max-width: 100%; text-align: center; align-items: center; }
+  .discover-frame { flex-direction: column; gap: 40px; text-align: center; }
+  .discover-copy { max-width: 640px; text-align: center; align-items: center; }
 
   .discover-list {
     position: static;
     height: auto;
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 36px;
   }
   .discover-item {
     position: static;
@@ -1865,7 +1898,6 @@ body.upload-modal-open .footer {
     align-items: center;
     text-align: center;
   }
-  .discover-item__text { margin-left: auto; margin-right: auto; }
   .discover-progress { display: none; }
 
   .discover-badge-list {
@@ -1883,8 +1915,54 @@ body.upload-modal-open .footer {
     margin: 0 auto 10px;
   }
 
+  /* On stacked layout the layered discover-visual (with its 3D
+     transform and absolute-positioned swaps) becomes noise. Replace
+     it with a simple centered illustration: just show the first
+     discover image, statically, and let the badge list do the work
+     of indicating the 3 items. */
+  .discover-visual {
+    display: block;
+    position: relative;
+    width: min(100%, 460px);
+    height: auto;
+    aspect-ratio: 16 / 10;
+    margin: 0 auto;
+    perspective: none;
+  }
+  .discover-visual__ring { display: none; }
+  .discover-visual__stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform: none;
+    overflow: hidden;
+  }
+  .discover-visual-item {
+    position: absolute;
+    inset: 0;
+  }
+  .discover-visual-item:not([data-key="discover"]) { display: none; }
+}
+
+@media (max-width: 720px) {
+  /* Phones: keep the stacked flow but also hide the visual stack —
+     the page is too narrow for the layered illustrations to read. */
+  .discover-sticky { padding: 56px 0; }
+  .discover-frame { gap: 32px; }
+  .discover-list { gap: 28px; }
+  .discover-copy { text-align: center; align-items: center; }
+
+  .discover-item__title { font-size: 1.85rem; }
+  .discover-item__subtitle { font-size: 0.95rem; }
+  .discover-item__text {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.88rem;
+  }
+
   .discover-visual { display: none; }
 }
+
 
 /* =========================================================
    TOP CONTRIBUTORS
