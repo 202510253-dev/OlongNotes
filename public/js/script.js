@@ -334,8 +334,90 @@ document.addEventListener('DOMContentLoaded', () => {
     { passive: true }
   );
 
-  /* ---------------- Placeholder buttons ---------------- */
-  document.querySelectorAll('.search-card__btn, .hero__actions .btn--goldenrod').forEach((btn) => {
+  /* ---------------- Populate filter dropdowns on page load ---------------- */
+  async function populateFilters() {
+    const ON = window.OlongNotes || {};
+
+    // Schools
+    const schoolSelect = document.getElementById('schoolFilter');
+    if (schoolSelect && ON.api) {
+      try {
+        const schools = await ON.api.get('/schools');
+        if (schools && Array.isArray(schools)) {
+          const options = '<option value="">All Schools</option>' +
+            schools.map(s => `<option value="${s.id}">${s.school_name}</option>`).join('');
+          schoolSelect.innerHTML = options;
+        }
+      } catch (e) {
+        console.error('[OlongNotes] Failed to load schools', e);
+      }
+    }
+
+    // Subjects
+    const subjectSelect = document.getElementById('subjectFilter');
+    if (subjectSelect && ON.api) {
+      try {
+        const subjects = await ON.api.get('/subjects?education_level=senior_high');
+        const data = subjects?.subjects || subjects || [];
+        if (Array.isArray(data) && data.length > 0) {
+          const options = '<option value="">All Subjects</option>' +
+            data.map(s => `<option value="${s.id}">${s.subject_name}</option>`).join('');
+          subjectSelect.innerHTML = options;
+        }
+      } catch (e) {
+        console.error('[OlongNotes] Failed to load subjects', e);
+      }
+    }
+
+    // Grade levels (static)
+    const gradeSelect = document.getElementById('gradeFilter');
+    if (gradeSelect) {
+      const grades = ['Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
+      const options = '<option value="">All Grade Levels</option>' +
+        grades.map(g => `<option value="${g}">${g}</option>`).join('');
+      gradeSelect.innerHTML = options;
+    }
+  }
+
+  // Populate dropdowns when API is ready
+  if (window.OlongNotes && window.OlongNotes.api) {
+    populateFilters();
+  } else {
+    // Wait for API to be available
+    let attempts = 0;
+    const waitForAPI = setInterval(() => {
+      if (window.OlongNotes?.api) {
+        clearInterval(waitForAPI);
+        populateFilters();
+      }
+      attempts++;
+      if (attempts > 50) clearInterval(waitForAPI);
+    }, 100);
+  }
+
+  /* ---------------- Search button handler — navigate with filters ---------------- */
+  const searchBtn = document.getElementById('searchBtn');
+  const schoolSelect = document.getElementById('schoolFilter');
+  const gradeSelect = document.getElementById('gradeFilter');
+  const subjectSelect = document.getElementById('subjectFilter');
+
+  searchBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+
+    const schoolId = schoolSelect?.value;
+    const grade = gradeSelect?.value;
+    const subjectId = subjectSelect?.value;
+
+    if (schoolId) params.set('school_id', schoolId);
+    if (grade) params.set('grade_level', grade);
+    if (subjectId) params.set('subject_id', subjectId);
+
+    window.location.href = `subject-notes.html?${params.toString()}`;
+  });
+
+  /* ---------------- Placeholder buttons (hero only) -------------------- */
+  document.querySelectorAll('.hero__actions .btn--goldenrod').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       console.info('[OlongNotes] Placeholder action — not yet implemented.');

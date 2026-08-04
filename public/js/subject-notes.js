@@ -31,7 +31,19 @@
   const state = {
     notes: [],
     subjectName: 'Subject',
+    urlFilters: {}
   };
+
+  // ---------- Read URL params for filtering ----------
+  function readURLParams() {
+    const params = new URLSearchParams(window.location.search);
+    const schoolId = params.get('school_id');
+    const gradeLevel = params.get('grade_level');
+
+    state.urlFilters = {};
+    if (schoolId) state.urlFilters.school_id = schoolId;
+    if (gradeLevel) state.urlFilters.grade_level = gradeLevel;
+  }
 
   // ---------- Helpers ----------
   function initials(name) {
@@ -100,7 +112,15 @@
       return;
     }
     try {
-      const data = await api.get(`/notes?subject_id=${subjectId}&limit=100`);
+      // Build query with subject_id + any URL filters
+      const query = new URLSearchParams();
+      query.set('subject_id', subjectId);
+      query.set('limit', '100');
+
+      if (state.urlFilters.school_id) query.set('school_id', state.urlFilters.school_id);
+      if (state.urlFilters.grade_level) query.set('grade_level', state.urlFilters.grade_level);
+
+      const data = await api.get(`/notes?${query.toString()}`);
       const rows = (data && Array.isArray(data.notes)) ? data.notes : [];
       state.notes = rows.map(adaptNoteFromApi);
     } catch (e) {
@@ -175,6 +195,7 @@
   }
 
   // ---------- Boot ----------
+  readURLParams();
   resolveSubjectName();
   loadNotes();
 })();

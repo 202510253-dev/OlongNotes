@@ -357,40 +357,23 @@
         <div class="search-card__row search-card__filters">
           <label class="select">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 4l9 6-9 6-9-6Z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/></svg>
-            <select aria-label="Filter by school">
-              <option>All Schools</option>
-              <option>Olongapo City National High School</option>
-              <option>Rizal High School</option>
-              <option>Gordon College</option>
-              <option>Subic Bay National High School</option>
+            <select id="schoolFilter" aria-label="Filter by school">
+              <option value="">All Schools</option>
             </select>
           </label>
           <label class="select">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
-            <select aria-label="Filter by grade level">
-              <option>All Grade Levels</option>
-              <option>Grade 7</option>
-              <option>Grade 8</option>
-              <option>Grade 9</option>
-              <option>Grade 10</option>
-              <option>Grade 11</option>
-              <option>Grade 12</option>
-              <option>College</option>
+            <select id="gradeFilter" aria-label="Filter by grade level">
+              <option value="">All Grade Levels</option>
             </select>
           </label>
           <label class="select">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
-            <select aria-label="Filter by subject">
-              <option>All Subjects</option>
-              <option>Mathematics</option>
-              <option>Science</option>
-              <option>English</option>
-              <option>ICT</option>
-              <option>Araling Panlipunan</option>
-              <option>Programming</option>
+            <select id="subjectFilter" aria-label="Filter by subject">
+              <option value="">All Subjects</option>
             </select>
           </label>
-          <button class="btn btn--primary search-card__btn" type="button">
+          <button id="searchBtn" class="btn btn--primary search-card__btn" type="button">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             Search
           </button>
