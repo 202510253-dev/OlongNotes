@@ -189,6 +189,58 @@
     justify-content: center;
   }
 
+  .letter-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .letter-btn {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #374151;
+    transition: all 0.15s;
+  }
+
+  .letter-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+  }
+
+  .letter-btn.active {
+    background: #1f6f4d;
+    border-color: #1f6f4d;
+    color: white;
+  }
+
+  .view-all-container {
+    text-align: center;
+    margin-top: 24px;
+  }
+
+  .view-all-btn {
+    padding: 10px 24px;
+    background: white;
+    border: 2px solid #1f6f4d;
+    border-radius: 8px;
+    color: #1f6f4d;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .view-all-btn:hover {
+    background: #1f6f4d;
+    color: white;
+  }
+
   .subject-tile {
     display: flex;
     align-items: center;

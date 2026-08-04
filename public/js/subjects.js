@@ -51,6 +51,8 @@
   const stageCategories = document.getElementById('stageCategories');
   const stagePrograms = document.getElementById('stagePrograms');
   const stageMajors = document.getElementById('stageMajors');
+  const letterFilter = document.getElementById('letterFilter');
+  const viewAllButton = document.getElementById('viewAllSubjects');
 
   const loadingEl = document.getElementById('subjectsLoading');
   const emptyEl = document.getElementById('subjectsEmpty');
@@ -62,6 +64,10 @@
   // The breadcrumb is the labels joined by › .
   // The current stage is derived from the LAST entry's kind.
   const state = { stack: [] };
+  let currentLetter = null;
+  let currentOffset = 0;
+  const PAGE_LIMIT = 20;
+  let currentLevel = null;
 
   const LEVEL_LABELS = {
     k10: 'K-10',
@@ -142,10 +148,27 @@
   }
 
   // ---------- Fetchers ----------
-  async function fetchSubjectsForLevel(level) {
+  async function loadSubjectsForLevel(level) {
     if (!api) throw new Error('API helper not loaded.');
-    const data = await api.get(`/subjects?education_level=${encodeURIComponent(level)}`);
-    return Array.isArray(data) ? data : [];
+
+    currentLevel = level;
+    const params = new URLSearchParams({
+      education_level: level,
+      limit: PAGE_LIMIT,
+      offset: currentOffset,
+    });
+
+    if (currentLetter) params.set('letter', currentLetter);
+
+    const data = await api.get(`/subjects?${params.toString()}`);
+    const subjects = data?.subjects || data || [];
+    const total = data?.pagination?.total ?? (Array.isArray(subjects) ? subjects.length : 0);
+
+    renderSubjectsStage(subjects);
+    renderLetterFilter(level, total);
+    renderViewAll(total, level);
+
+    return { subjects, total };
   }
 
   async function fetchProgramCategories() {
@@ -197,8 +220,7 @@
     return a;
   }
 
-  function renderSubjectsStage(subjects) {
-    showOnly(stageSubjects);
+  function renderSubjectGrid(subjects) {
     subjectsGrid.innerHTML = '';
     if (!Array.isArray(subjects) || subjects.length === 0) {
       setStateVisible('No subjects in this level yet.');
@@ -206,6 +228,73 @@
     }
     setStateVisible(null);
     subjects.forEach((subject) => subjectsGrid.appendChild(renderSubjectTile(subject)));
+  }
+
+  function renderLetterFilter(educationLevel) {
+    if (!letterFilter) return;
+
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    letterFilter.innerHTML = `
+      <button class="letter-btn ${!currentLetter ? 'active' : ''}" data-letter="">All</button>
+      ${letters.map((letter) => `
+        <button class="letter-btn ${currentLetter === letter ? 'active' : ''}" data-letter="${letter}">${letter}</button>
+      `).join('')}
+    `;
+
+    letterFilter.querySelectorAll('.letter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentLetter = btn.dataset.letter || null;
+        currentOffset = 0;
+        loadSubjectsForLevel(educationLevel);
+      });
+    });
+  }
+
+  function renderViewAll(total, educationLevel) {
+    if (!viewAllButton) return;
+
+    // Hide "View all" button if:
+    // 1. A letter filter is active (already viewing filtered results)
+    // 2. Total is less than PAGE_LIMIT and no letter is selected (all fit on one page)
+    if (currentLetter || (total <= PAGE_LIMIT && !currentLetter)) {
+      viewAllButton.style.display = 'none';
+      return;
+    }
+
+    viewAllButton.style.display = '';
+    viewAllButton.textContent = `View all ${educationLevel === 'senior_high' ? 'Senior High' : 'K-10'} Subjects (${total})`;
+
+    viewAllButton.onclick = () => {
+      currentOffset = 0;
+      fetchAllSubjects(educationLevel, total);
+    };
+  }
+
+  async function fetchAllSubjects(educationLevel, total) {
+    try {
+      const params = new URLSearchParams({
+        education_level: educationLevel,
+        limit: Math.min(total, 100),
+        offset: 0,
+      });
+      if (currentLetter) params.set('letter', currentLetter);
+
+      const data = await api.get(`/subjects?${params.toString()}`);
+      const subjects = data?.subjects || data || [];
+      renderSubjectGrid(subjects);
+
+      if (viewAllButton) viewAllButton.style.display = 'none';
+    } catch (e) {
+      console.error('[subjects] Failed to load all subjects.', e);
+    }
+  }
+
+  function renderSubjectsStage(subjects) {
+    showOnly(stageSubjects);
+    if (letterFilter) {
+      letterFilter.style.display = (currentLevel && currentLevel !== 'college') ? '' : 'none';
+    }
+    renderSubjectGrid(subjects);
   }
 
   function renderCategoriesStage(categories) {
@@ -316,22 +405,31 @@
     setStageTitle(null);
     setLoading(true);
     hideAllStages();
+
+    currentLetter = null;
+    currentOffset = 0;
+
     try {
       if (level === 'college') {
+        currentLevel = 'college';
+        if (letterFilter) letterFilter.innerHTML = '';
+        if (viewAllButton) {
+          viewAllButton.style.display = 'none';
+          viewAllButton.textContent = '';
+        }
         setStageTitle('Choose a program category');
         const categories = await fetchProgramCategories();
         renderCategoriesStage(categories);
         return;
       }
 
-      const subjects = await fetchSubjectsForLevel(level);
+      const { subjects } = await loadSubjectsForLevel(level);
 
       // Friendlier empty-state for K-10 since DB has no content yet.
       if ((!subjects || subjects.length === 0) && level === 'k10') {
         setStateVisible('K-10 content is on its way. We don\'t have any K-10 subjects yet — check back soon.');
         return;
       }
-      renderSubjectsStage(subjects);
     } catch (e) {
       console.error(`[subjects] Failed to load ${level} subjects.`, e);
       setError(`We couldn\'t load ${LEVEL_LABELS[level] || 'this level'} subjects. ${e.message || ''}`.trim());
@@ -412,8 +510,7 @@
       setStageTitle(null);
       setLoading(true);
       try {
-        const subjects = await fetchSubjectsForLevel(top.level);
-        renderSubjectsStage(subjects);
+        await loadSubjectsForLevel(top.level);
       } catch (e) {
         console.error('[subjects] Back: failed to load level subjects.', e);
         setError(`We couldn\'t reload ${LEVEL_LABELS[top.level] || 'this level'}. ${e.message || ''}`.trim());

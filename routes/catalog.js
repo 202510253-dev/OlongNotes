@@ -60,15 +60,17 @@ router.get('/schools', async (req, res) => {
 // GET /api/subjects — public
 // Supports ?education_level=k10|senior_high|college
 // Supports ?program_id=X (college subjects under a program/major)
+// Supports ?id=X (single subject lookup)
+// Supports ?letter=X and ?limit=X&offset=X for filtering and pagination
 // No params = all subjects (backward compat for current frontend callers)
 // ─────────────────────────────────────────────
 router.get('/subjects', async (req, res) => {
-  const { education_level, program_id, id } = req.query
+  const { education_level, program_id, id, letter, limit, offset } = req.query
 
   try {
     let query = supabase
       .from('subjects')
-      .select('id, subject_name, cover_image_url, preview_content, category_id, education_level, program_id')
+      .select('id, subject_name, cover_image_url, preview_content, category_id, education_level, program_id', { count: 'exact' })
       .order('subject_name', { ascending: true })
 
     if (education_level) {
@@ -87,11 +89,31 @@ router.get('/subjects', async (req, res) => {
       query = query.eq('id', parseInt(id))
     }
 
-    const { data, error } = await query
+    if (letter && letter.length === 1) {
+      query = query.ilike('subject_name', `${letter}%`)
+    }
+
+    const pageLimit = Math.min(parseInt(limit) || 20, 100)
+    const pageOffset = parseInt(offset) || 0
+    query = query.range(pageOffset, pageOffset + pageLimit - 1)
+
+    const { data, error, count } = await query
 
     if (error) {
       console.error('Fetch subjects error:', error)
       return res.status(500).json({ message: 'Could not fetch subjects.' })
+    }
+
+    if (limit || offset) {
+      return res.status(200).json({
+        subjects: data,
+        pagination: {
+          total: count,
+          limit: pageLimit,
+          offset: pageOffset,
+          has_more: (pageOffset + pageLimit) < count
+        }
+      })
     }
 
     return res.status(200).json(data)
