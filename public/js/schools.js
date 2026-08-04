@@ -35,6 +35,8 @@
   const listViewBtn = document.getElementById('listViewBtn');
   const viewAllBtn = document.getElementById('viewAllBtn');
 
+  const PAGE_SIZE = 12;
+
   // ---------- State ----------
   const state = {
     schools: [],      // raw rows from API
@@ -42,6 +44,7 @@
     letter: null,
     search: '',
     view: 'list',
+    showAll: false,
   };
 
   // ---------- Icon SVGs (static markup, safe to inline) ----------
@@ -108,6 +111,18 @@
   // ---------- Render ----------
   function render() {
     const results = getFilteredSchools();
+    const displayed = state.showAll ? results : results.slice(0, PAGE_SIZE);
+
+    if (results.length <= PAGE_SIZE) {
+      state.showAll = false;
+      viewAllBtn.hidden = true;
+    } else {
+      viewAllBtn.hidden = false;
+      viewAllBtn.textContent = state.showAll
+        ? 'Show fewer schools'
+        : `View all Schools (${results.length})`;
+    }
+
     schoolsList.innerHTML = '';
     schoolsList.classList.toggle('is-grid', state.view === 'grid');
 
@@ -117,7 +132,7 @@
     }
     schoolsEmpty.hidden = true;
 
-    results.forEach((school) => {
+    displayed.forEach((school) => {
       const li = document.createElement('li');
       li.className = 'school-row';
       li.tabIndex = 0;
@@ -150,10 +165,11 @@
   // ---------- Wire up controls ----------
   categoryList.addEventListener('click', (e) => {
     const btn = e.target.closest('.category-list__item');
-    if (!btn) return;
+    if (!btn || btn.disabled) return;
     categoryList.querySelectorAll('.category-list__item').forEach((el) => el.classList.remove('is-active'));
     btn.classList.add('is-active');
     state.category = btn.dataset.category;
+    state.showAll = false;
     render();
   });
 
@@ -171,11 +187,13 @@
       btn.classList.add('is-active');
       state.letter = letter;
     }
+    state.showAll = false;
     render();
   });
 
   searchInput.addEventListener('input', (e) => {
     state.search = e.target.value.trim();
+    state.showAll = false;
     render();
   });
 
@@ -190,14 +208,7 @@
   listViewBtn.addEventListener('click', () => setView('list'));
 
   viewAllBtn.addEventListener('click', () => {
-    state.category = 'all';
-    state.letter = null;
-    state.search = '';
-    searchInput.value = '';
-    categoryList.querySelectorAll('.category-list__item').forEach((el, i) => {
-      el.classList.toggle('is-active', i === 0);
-    });
-    letterGrid.querySelectorAll('.letter-btn').forEach((el) => el.classList.remove('is-active'));
+    state.showAll = !state.showAll;
     render();
   });
 

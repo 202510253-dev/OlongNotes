@@ -458,6 +458,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const noteFileInput = document.getElementById('noteFileInput');
   const noteFileDrop = document.getElementById('noteFileDrop');
   const noteFileDropText = document.getElementById('noteFileDropText');
+  const uploadSubjectSelect = document.getElementById('uploadSubjectSelect');
+  const uploadSchoolInput = document.getElementById('uploadSchoolInput');
+  const uploadSchoolId = document.getElementById('uploadSchoolId');
+  const uploadGradeLevel = document.getElementById('uploadGradeLevel');
+  const uploadCollegeFields = document.getElementById('uploadCollegeFields');
+  const uploadCollegeCategorySelect = document.getElementById('uploadCollegeCategorySelect');
+  const uploadCollegeProgramSelect = document.getElementById('uploadCollegeProgramSelect');
+  const uploadCollegeMajorSelect = document.getElementById('uploadCollegeMajorSelect');
   const DEFAULT_NOTE_FILE_TEXT = 'Upload PDF, Word, PowerPoint, or an image';
 
   const uploadModal = createModal({
@@ -468,11 +476,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // EDIT 6: heroUploadBtn now role-gates before opening.
-  document.getElementById('heroUploadBtn')?.addEventListener('click', () => {
+  document.getElementById('heroUploadBtn')?.addEventListener('click', async () => {
     if (!roleAllowedForUpload()) {
       alert('You need to be a contributor (limited, verified, or admin) to upload. Contact an admin to upgrade your account.');
       return;
     }
+    await refreshUploadSubjects();
     uploadModal.open();
   });
 
@@ -481,6 +490,187 @@ document.addEventListener('DOMContentLoaded', () => {
     noteFileDropText.textContent = file ? file.name : DEFAULT_NOTE_FILE_TEXT;
     noteFileDrop.classList.toggle('has-file', Boolean(file));
   });
+
+  const syncSchoolIdFromInput = () => {
+    if (!uploadSchoolInput || !uploadSchoolId) return;
+    const entered = uploadSchoolInput.value.trim();
+    const dataList = document.getElementById('uploadSchoolDatalist');
+    if (!dataList) {
+      uploadSchoolId.value = '';
+      return;
+    }
+    const match = Array.from(dataList.options).find((option) => option.value === entered);
+    uploadSchoolId.value = match ? String(match.dataset.schoolId || '') : '';
+  };
+
+  uploadSchoolInput?.addEventListener('change', syncSchoolIdFromInput);
+  uploadSchoolInput?.addEventListener('blur', syncSchoolIdFromInput);
+  uploadSchoolInput?.addEventListener('input', () => {
+    if (uploadSchoolId) uploadSchoolId.value = '';
+  });
+
+  const createUploadOption = (value, label, disabled = false, selected = false) => {
+    const option = document.createElement('option');
+    option.value = value == null ? '' : String(value);
+    option.textContent = label;
+    if (disabled) option.disabled = true;
+    if (selected) option.selected = true;
+    return option;
+  };
+
+  const resetSelect = (select, placeholder, disabled = true) => {
+    if (!select) return;
+    select.innerHTML = '';
+    select.appendChild(createUploadOption('', placeholder, true, true));
+    select.disabled = disabled;
+  };
+
+  const populateSelect = (select, items, valueKey, labelKey, placeholder) => {
+    if (!select) return;
+    resetSelect(select, placeholder, !Array.isArray(items) || items.length === 0);
+    if (!Array.isArray(items) || items.length === 0) return;
+    select.disabled = false;
+    items.forEach((item) => {
+      const value = item[valueKey];
+      const label = item[labelKey] || item[valueKey] || 'Unnamed';
+      select.appendChild(createUploadOption(value, label));
+    });
+  };
+
+  const mapGradeLevelToEducationLevel = (gradeLevel) => {
+    if (gradeLevel === 'College') return 'college';
+    if (gradeLevel === 'Grade 11' || gradeLevel === 'Grade 12') return 'senior_high';
+    return 'k10';
+  };
+
+  const loadSubjectsForLevel = async (educationLevel) => {
+    try {
+      const data = await window.OlongNotes.api.get(`/subjects?education_level=${encodeURIComponent(educationLevel)}`);
+      populateSelect(uploadSubjectSelect, Array.isArray(data) ? data : [], 'id', 'subject_name', 'Select a subject');
+    } catch (err) {
+      resetSelect(uploadSubjectSelect, 'Unable to load subjects');
+      console.error('[upload] Failed to load subjects for', educationLevel, err);
+    }
+  };
+
+  const loadSubjectsForProgram = async (programId) => {
+    if (!programId) {
+      resetSelect(uploadSubjectSelect, 'Select a course after choosing a program');
+      return;
+    }
+    try {
+      const data = await window.OlongNotes.api.get(`/subjects?program_id=${encodeURIComponent(programId)}`);
+      populateSelect(uploadSubjectSelect, Array.isArray(data) ? data : [], 'id', 'subject_name', 'Select a course');
+    } catch (err) {
+      resetSelect(uploadSubjectSelect, 'Unable to load courses');
+      console.error('[upload] Failed to load subjects for program', programId, err);
+    }
+  };
+
+  const loadCollegeCategories = async () => {
+    try {
+      const data = await window.OlongNotes.api.get('/program-categories');
+      populateSelect(uploadCollegeCategorySelect, Array.isArray(data) ? data : [], 'id', 'category_name', 'Select a department');
+    } catch (err) {
+      resetSelect(uploadCollegeCategorySelect, 'Unable to load departments');
+      console.error('[upload] Failed to load college departments', err);
+    }
+    resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
+    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+    resetSelect(uploadSubjectSelect, 'Select a course after choosing a department', true);
+  };
+
+  const loadProgramsForCategory = async (categoryId) => {
+    if (!categoryId) {
+      resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
+      resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+      resetSelect(uploadSubjectSelect, 'Select a course after choosing a program', true);
+      return;
+    }
+    try {
+      const data = await window.OlongNotes.api.get(`/programs?category_id=${encodeURIComponent(categoryId)}`);
+      populateSelect(uploadCollegeProgramSelect, Array.isArray(data) ? data : [], 'id', 'program_name', 'Select a program');
+    } catch (err) {
+      resetSelect(uploadCollegeProgramSelect, 'Unable to load programs', true);
+      console.error('[upload] Failed to load programs for category', categoryId, err);
+    }
+    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+    resetSelect(uploadSubjectSelect, 'Select a course after choosing a program', true);
+  };
+
+  const loadMajorsForProgram = async (programId) => {
+    if (!programId) {
+      resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+      resetSelect(uploadSubjectSelect, 'Select a course after choosing a major', true);
+      return;
+    }
+
+    try {
+      const data = await window.OlongNotes.api.get(`/programs?parent_program_id=${encodeURIComponent(programId)}`);
+      const majors = Array.isArray(data) ? data : [];
+      if (majors.length > 0) {
+        populateSelect(uploadCollegeMajorSelect, majors, 'id', 'program_name', 'Select a major (optional)');
+        uploadCollegeMajorSelect.disabled = false;
+        resetSelect(uploadSubjectSelect, 'Select a course after choosing a major', true);
+      } else {
+        resetSelect(uploadCollegeMajorSelect, 'No majors available', true);
+        await loadSubjectsForProgram(programId);
+      }
+    } catch (err) {
+      resetSelect(uploadCollegeMajorSelect, 'Unable to load majors', true);
+      resetSelect(uploadSubjectSelect, 'Select a course after choosing a major', true);
+      console.error('[upload] Failed to load majors for program', programId, err);
+    }
+  };
+
+  uploadGradeLevel?.addEventListener('change', async () => {
+    const selectedLevel = uploadGradeLevel.value;
+    if (selectedLevel === 'College') {
+      uploadCollegeFields.style.display = 'grid';
+      resetSelect(uploadCollegeCategorySelect, 'Loading departments...', true);
+      await loadCollegeCategories();
+      resetSelect(uploadSubjectSelect, 'Select a course after choosing a program', true);
+    } else {
+      uploadCollegeFields.style.display = 'none';
+      resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
+      resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
+      resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+      const educationLevel = mapGradeLevelToEducationLevel(selectedLevel);
+      await loadSubjectsForLevel(educationLevel);
+    }
+  });
+
+  uploadCollegeCategorySelect?.addEventListener('change', async () => {
+    const categoryId = uploadCollegeCategorySelect.value;
+    await loadProgramsForCategory(categoryId);
+  });
+
+  uploadCollegeProgramSelect?.addEventListener('change', async () => {
+    const programId = uploadCollegeProgramSelect.value;
+    await loadMajorsForProgram(programId);
+  });
+
+  uploadCollegeMajorSelect?.addEventListener('change', async () => {
+    const majorId = uploadCollegeMajorSelect.value;
+    await loadSubjectsForProgram(majorId);
+  });
+
+  const refreshUploadSubjects = async () => {
+    const selectedLevel = uploadGradeLevel?.value;
+    if (!selectedLevel) return;
+    if (selectedLevel === 'College') {
+      uploadCollegeFields.style.display = 'grid';
+      await loadCollegeCategories();
+      resetSelect(uploadSubjectSelect, 'Select a course after choosing a program', true);
+    } else {
+      uploadCollegeFields.style.display = 'none';
+      resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
+      resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
+      resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+      const educationLevel = mapGradeLevelToEducationLevel(selectedLevel);
+      await loadSubjectsForLevel(educationLevel);
+    }
+  };
 
   // EDIT 5: real upload submit → POST /api/notes via api.upload().
   const handleUploadSubmit = async (e) => {

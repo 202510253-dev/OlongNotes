@@ -9,6 +9,10 @@
   gap: 20px;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 /* ---------------------------------------------------------
    Hero
 --------------------------------------------------------- */
@@ -185,6 +189,17 @@
   font-weight: 600;
 }
 
+.category-list__item:disabled {
+  color: var(--gray-400, #c3c8d2);
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.category-list__item:disabled:hover {
+  background: none;
+  color: var(--gray-400, #c3c8d2);
+}
+
 .letter-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -233,6 +248,9 @@
   border-radius: 16px;
   padding: 20px 22px 22px;
   box-shadow: var(--shadow-sm);
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* List view: two-column, top-to-bottom flow */
@@ -240,26 +258,30 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  column-count: 2;
-  column-gap: 28px;
-  max-height: 560px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--gray-100) transparent;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 28px;
+  width: 100%;
+  grid-auto-rows: auto;
 }
 
-.schools-list::-webkit-scrollbar {
-  width: 6px;
+.schools-list li {
+  width: 100%;
 }
 
-.schools-list::-webkit-scrollbar-thumb {
-  background: var(--gray-100);
-  border-radius: 999px;
+@media (max-width: 900px) {
+  .schools-list,
+  .schools-list.is-grid,
+  .schools-list:not(.is-grid) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
 }
 
 .school-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   break-inside: avoid;
   padding: 11px 4px;
@@ -267,6 +289,8 @@
   cursor: pointer;
   transition: background 0.15s ease, transform 0.12s ease;
   text-decoration: none;
+  min-width: 0;
+  width: 100%;
 }
 
 .school-row:hover {
@@ -292,9 +316,9 @@
   font-size: 0.88rem;
   font-weight: 500;
   color: var(--text-heading);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .school-row__chevron {
@@ -310,7 +334,6 @@
 
 /* Grid view: card layout */
 .schools-list.is-grid {
-  column-count: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
@@ -365,12 +388,22 @@
     position: static;
   }
 
-  .schools-list {
-    column-count: 1;
+  .schools-list,
+  .schools-list.is-grid,
+  .schools-list:not(.is-grid) {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
   }
+}
 
-  .schools-list.is-grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 768px) {
+  .schools-list,
+  .schools-list.is-grid,
+  .schools-list:not(.is-grid) {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
   }
 }
 
@@ -388,7 +421,23 @@
     justify-content: space-between;
   }
 
+  .schools-list {
+    max-height: none;
+    overflow-y: visible;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
   .schools-list.is-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .school-row {
+    width: 100%;
+  }
+}
+
+@media (max-width: 460px) {
+  .letter-grid {
+    grid-template-columns: repeat(5, 1fr);
   }
 }

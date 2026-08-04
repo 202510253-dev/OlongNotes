@@ -152,33 +152,50 @@
           </label>
 
           <label class="auth-field">
-            <span class="auth-field__label">Subject</span>
-            <select name="subject_id" required>
-              <option value="" disabled selected>Select a subject</option>
-              <option value="1">General Mathematics</option>
-              <option value="2">English</option>
-              <option value="3">Science</option>
-              <option value="4">Filipino</option>
-              <option value="5">History</option>
-              <option value="6">Philosophy</option>
-              <option value="7">Research</option>
-              <option value="8">Physical Education</option>
+            <span class="auth-field__label">Subject / Course</span>
+            <select id="uploadSubjectSelect" name="subject_id" required>
+              <option value="" disabled selected>Select a course after choosing a department or program</option>
             </select>
+            <span class="auth-field__hint">Example: Calculus I, Engineering Mathematics, Philippine Literature</span>
           </label>
+
+          <div id="uploadCollegeFields" style="grid-column: 1 / -1; display: none;">
+            <label class="auth-field">
+              <span class="auth-field__label">Department</span>
+              <select id="uploadCollegeCategorySelect">
+                <option value="" disabled selected>Select a department</option>
+              </select>
+            </label>
+            <label class="auth-field">
+              <span class="auth-field__label">Program</span>
+              <select id="uploadCollegeProgramSelect" disabled>
+                <option value="" disabled selected>Select a program</option>
+              </select>
+            </label>
+            <label class="auth-field">
+              <span class="auth-field__label">Major</span>
+              <select id="uploadCollegeMajorSelect" disabled>
+                <option value="" disabled selected>Select a major (optional)</option>
+              </select>
+            </label>
+          </div>
 
           <label class="auth-field">
             <span class="auth-field__label">School</span>
-            <select name="school_id">
-              <option value="">No specific school</option>
-              <option value="1">Olongapo City National High School</option>
-              <option value="2">Rizal High School</option>
-              <option value="78">Gordon College</option>
-            </select>
+            <input id="uploadSchoolInput" name="school_name" list="uploadSchoolDatalist" placeholder="Type school name to filter" autocomplete="off" />
+            <datalist id="uploadSchoolDatalist">
+              <option value="No specific school" data-school-id=""></option>
+              <option value="Olongapo City National High School" data-school-id="1"></option>
+              <option value="Rizal High School" data-school-id="2"></option>
+              <option value="Gordon College" data-school-id="78"></option>
+            </datalist>
+            <input type="hidden" id="uploadSchoolId" name="school_id" value="" />
+            <span class="auth-field__hint">Type the first letters of a school name to filter. Leave blank if not tied to a school.</span>
           </label>
 
           <label class="auth-field">
             <span class="auth-field__label">Grade level</span>
-            <select name="grade_level" required>
+            <select id="uploadGradeLevel" name="grade_level" required>
               <option value="" disabled selected>Select grade level</option>
               <option>Grade 7</option>
               <option>Grade 8</option>

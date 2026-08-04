@@ -70,12 +70,15 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 body {
   margin: 0;
   font-family: var(--font-body);
   color: var(--gray-800);
   overflow-x: hidden;
+  min-height: 100vh;
   background-color: var(--surface);
   background-image: repeating-linear-gradient(
     90deg,
@@ -494,7 +497,9 @@ body.modal-open .footer {
   margin-bottom: 6px;
 }
 
-.contrib-form select {
+.contrib-form select,
+.contrib-form input[type="text"],
+.contrib-form input[list] {
   width: 100%;
   background: var(--gray-50);
   border: 1.5px solid var(--gray-200);
@@ -504,15 +509,47 @@ body.modal-open .footer {
   font-size: 0.92rem;
   color: var(--gray-800);
   outline: none;
-  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+
+.contrib-form select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235B6472' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
 }
-.contrib-form select:focus { border-color: var(--accent-blue); background-color: var(--surface); }
-.contrib-form select:invalid { color: var(--gray-400); }
+
+.contrib-form select option {
+  color: var(--gray-900);
+  background: white;
+}
+
+.contrib-form select:focus,
+.contrib-form input[type="text"]:focus,
+.contrib-form input[list]:focus {
+  border-color: var(--accent-blue);
+  background-color: var(--surface);
+  box-shadow: 0 0 0 4px rgba(51, 102, 255, 0.08);
+}
+
+.contrib-form select:disabled,
+.contrib-form select[disabled] {
+  background: #f6f7fb;
+  color: var(--gray-500);
+}
+
+.contrib-form select:invalid {
+  color: var(--gray-400);
+}
+
+.auth-field__hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  line-height: 1.4;
+}
 
 .contrib-form textarea {
   width: 100%;

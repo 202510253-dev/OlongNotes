@@ -317,6 +317,13 @@
     setLoading(true);
     hideAllStages();
     try {
+      if (level === 'college') {
+        setStageTitle('Choose a program category');
+        const categories = await fetchProgramCategories();
+        renderCategoriesStage(categories);
+        return;
+      }
+
       const subjects = await fetchSubjectsForLevel(level);
 
       // Friendlier empty-state for K-10 since DB has no content yet.
