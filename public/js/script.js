@@ -970,4 +970,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // EDIT 7: dev role switcher block — DELETED. Real session decides role.
   applyRole(resolveRole());
+
+  /* ---------------- ?auth= deep-link from other pages ----------------
+   Other pages (recent-activities.html, etc.) don't carry the auth
+   modal — when an unauthenticated viewer clicks Log In / Sign Up
+   there, they're routed here with `?auth=signin` or `?auth=signup`
+   and we open the modal in the requested mode. If the viewer is
+   already signed in, no-op. The query string is cleaned from the
+   address bar so a refresh doesn't re-open the modal. */
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('auth');
+    if ((mode === 'signin' || mode === 'signup') && resolveRole() === 'viewer') {
+      openAuth(mode === 'signup' ? 'signup' : 'signin');
+      params.delete('auth');
+      const cleaned = params.toString();
+      const next = window.location.pathname + (cleaned ? `?${cleaned}` : '') + window.location.hash;
+      window.history.replaceState({}, '', next);
+    }
+  } catch (_) { /* query-string inspection is best-effort */ }
 });

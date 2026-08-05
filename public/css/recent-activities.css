@@ -53,6 +53,10 @@
   line-height: 1.15;
   margin: 0 0 14px;
   letter-spacing: -0.01em;
+  /* Base style.css sets h1 color to --text-heading (navy), but the
+     hero sits on a navy gradient — force white so the title doesn't
+     disappear into the background. */
+  color: var(--white);
 }
 
 .recent-hero__lede {

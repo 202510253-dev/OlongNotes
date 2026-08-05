@@ -328,16 +328,24 @@
     const closeBtn = document.getElementById('sideDrawerClose');
     if (!burger || !drawer || !backdrop || !closeBtn) return;
 
+    // CSS (style.css:867) uses the `.is-open` class as the visible-open
+    // trigger for the drawer. We also flip aria-hidden for screen
+    // readers — script.js's sideDrawer factory does the same. This
+    // matches every other page's drawer open/close behaviour.
+    const isOpen = () => drawer.classList.contains('is-open');
+
     const open = () => {
+      drawer.classList.add('is-open');
       drawer.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
     };
     const close = () => {
+      drawer.classList.remove('is-open');
       drawer.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
     };
 
-    burger.addEventListener('click', open);
+    burger.addEventListener('click', () => (isOpen() ? close() : open()));
     closeBtn.addEventListener('click', close);
     backdrop.addEventListener('click', close);
     drawer.addEventListener('click', (e) => {
@@ -346,25 +354,95 @@
       if (e.target.closest('.side-drawer__link')) close();
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && drawer.getAttribute('aria-hidden') === 'false') close();
+      if (e.key === 'Escape' && isOpen()) close();
     });
   }
 
   // ---------- Navbar auth buttons (parity with other pages) ----------
+  // On pages with the full script.js stack, `applyRole()` decides
+  // navbar visibility. This page doesn't load script.js, so we replicate
+  // the relevant pieces:
+  //   - Hide Log In / Sign Up buttons when a token is present
+  //   - Show the profile-icon button when a token is present
+  //   - On click, route to index.html where the auth modal lives
+  //
+  // Re-runs whenever the `olongnotes:auth-changed` event fires so a
+  // login from another tab keeps the navbar in sync.
   function bindNavbarAuth() {
-    const loginBtn  = document.getElementById('navLoginBtn');
-    const signupBtn = document.getElementById('navSignupBtn');
-    const fire = (kind) => () => {
-      window.dispatchEvent(new CustomEvent('olongnotes:request-auth', { detail: { kind } }));
-    };
-    loginBtn ?.addEventListener('click', fire('login'));
-    signupBtn?.addEventListener('click', fire('signup'));
+    const ON = window.OlongNotes || {}
+    const getToken = ON.getToken || (() => null)
+    const loginBtn  = document.getElementById('navLoginBtn')
+    const signupBtn = document.getElementById('navSignupBtn')
+    const profileIcon = document.querySelector('.profile-icon')
+
+    const apply = () => {
+      const isAuthed = !!getToken()
+      if (loginBtn)    loginBtn.hidden    = isAuthed
+      if (signupBtn)   signupBtn.hidden   = isAuthed
+      if (profileIcon) profileIcon.hidden = !isAuthed
+    }
+    apply()
+    window.addEventListener('olongnotes:auth-changed', apply)
+    window.addEventListener('storage', apply)  // cross-tab sync
+
+    // The auth modal lives on index.html only — we don't replicate
+    // the 90-line modal markup on every page. Clicking either button
+    // takes the viewer to the landing page where the modal opens via
+    // the existing `?auth=signin|signup` query-string hook.
+    const goAuth = (mode) => (e) => {
+      e.preventDefault()
+      window.location.href = `index.html?auth=${mode}`
+    }
+    loginBtn ?.addEventListener('click', goAuth('signin'))
+    signupBtn?.addEventListener('click', goAuth('signup'))
+  }
+
+  // ---------- Theme toggle (parity with other pages) ----------
+  // Reads a saved preference from localStorage; falls back to OS-level
+  // prefers-color-scheme. Sets `data-theme="dark"` on <html> — every
+  // dark-mode override in style.css is scoped to `[data-theme="dark"]`,
+  // so this one attribute flips the whole site. Kept in this file
+  // (instead of pulled from script.js) so this page doesn't need to
+  // load the entire landing-page script just to flip themes.
+  function bindThemeToggle() {
+    const THEME_KEY = 'olongnotes-theme'
+    const root = document.documentElement
+    const themeToggle = document.getElementById('themeToggle')
+
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const getStored = () => {
+      try { return localStorage.getItem(THEME_KEY) } catch (_) { return null }
+    }
+    const store = (theme) => {
+      try { localStorage.setItem(THEME_KEY, theme) } catch (_) {}
+    }
+    const apply = (theme) => {
+      if (theme === 'dark') root.setAttribute('data-theme', 'dark')
+      else root.removeAttribute('data-theme')
+      if (themeToggle) themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false')
+    }
+
+    apply(getStored() || (systemPrefersDark.matches ? 'dark' : 'light'))
+
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+        apply(next)
+        store(next)
+      })
+    }
+    // Follow the OS preference live until the user picks one explicitly.
+    systemPrefersDark.addEventListener('change', (e) => {
+      if (!getStored()) apply(e.matches ? 'dark' : 'light')
+    })
   }
 
   // ---------- Bootstrap ----------
   function init() {
     bindSideDrawer();
     bindNavbarAuth();
+    bindThemeToggle();
     bindBubbles();
     bindBreadcrumb();
     renderBreadcrumb();
