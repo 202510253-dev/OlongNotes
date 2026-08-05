@@ -1,0 +1,502 @@
+/* ===================== RECENT ACTIVITIES PAGE =====================
+   Foundation styles for recent-activities.html.
+   Phase 1 (foundation): layout, hero, feed list, sidebar. No animations,
+   no backend data hooks. All colors come from existing --navy / --white /
+   --shadow-* variables in style.css so the page matches the rest of the app.
+
+   BEM-ish naming scoped under .recent- prefix to avoid colliding with
+   .feed / .hero / .side patterns in other pages (community.html uses
+   some of these names).
+*/
+
+/* ---------- HERO ---------- */
+.recent-hero {
+  background:
+    radial-gradient(ellipse at 85% 20%, rgba(255,255,255,0.06), transparent 55%),
+    linear-gradient(135deg, var(--navy) 0%, var(--navy-700) 100%);
+  color: var(--white);
+  padding: 64px 0 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.recent-hero__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 32px;
+}
+
+.recent-hero__copy {
+  max-width: 640px;
+}
+
+.recent-hero__eyebrow {
+  display: inline-block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.16);
+  padding: 6px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.recent-hero__title {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+
+.recent-hero__lede {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.82);
+  margin: 0 0 24px;
+  max-width: 56ch;
+}
+
+/* ---------- HERO FILTERS (bubble-stack, modeled on subjects.css) ---------- */
+/*
+   Phase 2: replaced the flat pill tab bar with a 5-bubble stack —
+   K10-style level bubbles. The active stage now comes from a stack
+   (state.stack = [{kind:'type', type:'note_liked'}]) rendered as a
+   "Liked ›" breadcrumb above the feed. The active bubble is the one
+   whose type matches the top of the stack; default = the "all"
+   bubble (empty stack, shows everything).
+
+   Color tokens per bubble map to the same icon tints used by the
+   activity cards in the feed below — kept consistent with the
+   iconography already in .recent-card__icon--*.
+*/
+
+.recent-bubbles {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.recent-bubble {
+  appearance: none;
+  border: 1.5px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.92);
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.recent-bubble:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.42);
+  transform: translateY(-1px);
+}
+
+.recent-bubble.is-active {
+  background: var(--white);
+  color: var(--navy);
+  border-color: var(--white);
+}
+
+.recent-bubble__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.92);
+}
+
+/* Per-bubble tints — match the card icons below so the visual
+   language is consistent. When the bubble is active the background
+   flips white so the icon needs to drop back to the original tint. */
+.recent-bubble--all        .recent-bubble__icon { background: rgba(11,31,77,0.10); color: var(--navy); }
+.recent-bubble--viewed     .recent-bubble__icon { background: rgba(46,108,240,0.18); color: #5d8df9; }
+.recent-bubble--liked      .recent-bubble__icon { background: rgba(210,58,85,0.18); color: #f2667d; }
+.recent-bubble--bookmarked .recent-bubble__icon { background: rgba(199,144,30,0.18); color: #f1c25a; }
+.recent-bubble--uploaded   .recent-bubble__icon { background: rgba(31,154,90,0.18); color: #2ec276; }
+
+.recent-bubble.is-active .recent-bubble__icon {
+  /* On the active white pill, keep the icon visually saturated.
+     Defaults to navy for the "all" bubble; per-type stays colored. */
+  color: inherit;
+}
+
+.recent-bubble__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.recent-bubble__title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-bubble__sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.3;
+  opacity: 0.85;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-bubble--all        .recent-bubble__icon { color: var(--navy); }
+.recent-bubble.is-active .recent-bubble--viewed     .recent-bubble__icon { color: var(--blue-600, #2e6cf0); }
+.recent-bubble.is-active .recent-bubble--liked      .recent-bubble__icon { color: var(--red-600, #d23a55); }
+.recent-bubble.is-active .recent-bubble--bookmarked .recent-bubble__icon { color: var(--amber-600, #c7901e); }
+.recent-bubble.is-active .recent-bubble--uploaded   .recent-bubble__icon { color: var(--green-600, #1f9a5a); }
+
+/* ---------- HERO ART (right-side decoration) ---------- */
+.recent-hero__art {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.recent-hero__art svg {
+  display: block;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.18));
+}
+
+/* ---------- CONTENT LAYOUT ---------- */
+.recent-content {
+  padding: 48px 0 80px;
+  background: #f7f8fc;
+}
+
+.recent-content__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ---------- FEED (left column) ---------- */
+.recent-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 240px;
+}
+
+/* skeleton (default state until JS hydrates) */
+.recent-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recent-skeleton__item {
+  height: 96px;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    #eceff5 0%,
+    #f4f6fa 50%,
+    #eceff5 100%
+  );
+  background-size: 200% 100%;
+  animation: recent-shimmer 1.4s ease-in-out infinite;
+}
+
+.recent-skeleton__item:nth-child(2) { animation-delay: 0.15s; }
+.recent-skeleton__item:nth-child(3) { animation-delay: 0.30s; }
+
+@keyframes recent-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---------- ACTIVITY CARD ---------- */
+.recent-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  background: var(--white);
+  border: 1px solid #e6e9f2;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(11, 31, 77, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.recent-card:hover {
+  border-color: #c9d2e6;
+  box-shadow: 0 4px 14px rgba(11, 31, 77, 0.08);
+  transform: translateY(-1px);
+}
+
+.recent-card:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* icon tile (left) */
+.recent-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.recent-card__icon--viewed     { background: #e7f0ff; color: #2e6cf0; }
+.recent-card__icon--bookmarked { background: #fef4d9; color: #c7901e; }
+.recent-card__icon--liked      { background: #fde5ea; color: #d23a55; }
+.recent-card__icon--uploaded   { background: #e3f6ec; color: #1f9a5a; }
+.recent-card__icon--reported   { background: #f0e8fb; color: #7a3fc8; }
+
+/* body (middle) */
+.recent-card__body {
+  min-width: 0;
+}
+
+.recent-card__title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-heading, var(--navy));
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-card__meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: #6b7283;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.recent-card__meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #c4cbd9;
+  display: inline-block;
+}
+
+.recent-card__verb {
+  font-weight: 600;
+  color: #475063;
+}
+
+/* timestamp (right) */
+.recent-card__time {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: #8a92a5;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* ---------- FEED STATES (empty / error / login-required) ---------- */
+.recent-state {
+  background: var(--white);
+  border: 1px dashed #d4dae8;
+  border-radius: 14px;
+  padding: 48px 24px;
+  text-align: center;
+  color: #4d5566;
+}
+
+.recent-state__icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #eef1f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+}
+
+.recent-state__title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 6px;
+}
+
+.recent-state__text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #6b7283;
+  margin: 0 auto;
+  max-width: 42ch;
+}
+
+.recent-state__actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---------- BREADCRUMB (above feed, hidden by default) ----------
+   Phase 2: a single-step stack — the breadcrumb appears when the
+   user has drilled into one of the type bubbles (Liked, Viewed,
+   etc.) and shows the active filter plus a back button. The
+   "back" returns to "All Activity". */
+.recent-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: var(--white);
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 2px rgba(11, 31, 77, 0.04);
+  border: 1px solid #e6e9f2;
+}
+
+.recent-breadcrumb .breadcrumb-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eef1f8;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px 8px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.recent-breadcrumb .breadcrumb-back:hover {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.recent-breadcrumb .breadcrumb-back:hover svg {
+  stroke: var(--white);
+}
+
+.recent-breadcrumb .breadcrumb-back svg {
+  transition: stroke 0.15s ease;
+}
+
+.recent-breadcrumb .breadcrumb-path {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #475063;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- FOOTER ---------- */
+.site-footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.7);
+  padding: 24px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+}
+
+.site-footer__inner {
+  display: flex;
+  justify-content: center;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 960px) {
+  .recent-bubbles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .recent-bubbles {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .recent-hero {
+    padding: 48px 0 40px;
+  }
+
+  .recent-hero__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .recent-hero__art {
+    display: none; /* hero artwork adds little on mobile */
+  }
+
+  .recent-hero__filters {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .recent-filter {
+    flex-shrink: 0;
+  }
+
+  .recent-card {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .recent-card__time {
+    grid-column: 2;
+    text-align: left;
+    margin-top: 2px;
+  }
+}

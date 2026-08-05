@@ -15,6 +15,19 @@
   const api = ON.api;
   const esc = ON.escapeHtml || ((s) => String(s ?? ''));
 
+  // ---------- Activity recorder ----------
+  // Fire-and-forget POST to /api/activities. The backend writes the same
+  // row directly from routes/notes.js for upload/delete (and now GET
+  // views/likes/bookmarks too), so the client POST is a fallback / safety
+  // net. Failures are silent — the activity log is best-effort metadata
+  // and must never break the user's action.
+  function recordActivity(noteId, type) {
+    if (!api || !ON.getToken || !ON.getToken()) return;
+    api
+      .post('/activities', { note_id: noteId, activity_type: type }, { auth: true })
+      .catch((e) => console.debug('[activities] record skipped:', e && e.message));
+  }
+
   // ---------- Helpers ----------
 
   function initialsOf(name) {
@@ -353,6 +366,7 @@
 
       if (liked) {
         showBanner('Thank you! Your like helps others discover quality notes.', 'like', heartIconFilled);
+        recordActivity(doc.id, 'note_liked');
       } else {
         hideBanner();
       }
@@ -382,6 +396,7 @@
       saveBtn.classList.toggle('is-active', bookmarked);
       if (bookmarked) {
         showBanner('Saved! You can find this note in your bookmarks.', 'saved', saveIconFilled);
+        recordActivity(doc.id, 'note_bookmarked');
       } else {
         hideBanner();
       }
@@ -468,6 +483,7 @@
           { reason },
           { auth: true }
         );
+        recordActivity(doc.id, 'note_reported');
         reportBtn.classList.add('is-active');
         close();
         showBanner(`Thanks for flagging "${reason}." Our team will review this document shortly.`, 'report', flagIcon);
@@ -490,6 +506,11 @@
   populateSidebar(doc);
   renderPage(doc);
   bindToolbar(doc);
+
+  // Record the view in the activity log (backend also writes this from
+  // GET /api/notes/:id; the client POST is a safety net for the case
+  // where the backend opportunistic-JWT path missed the viewer).
+  recordActivity(doc.id, 'note_viewed');
 
   document.getElementById('likeBtn')?.addEventListener('click', () => toggleLike(doc));
   document.getElementById('saveBtn')?.addEventListener('click', () => toggleSave(doc));

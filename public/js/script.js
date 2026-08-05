@@ -182,6 +182,19 @@ function createModal({ panel, backdrop, closeBtn, bodyClass = 'modal-open', trig
 // role + username + initials without re-fetching. Cleared on logout.
 const USER_STORAGE_KEY = 'olongnotes_user';
 
+// Fire-and-forget POST to /api/activities. Used after the upload succeeds
+// so the user's Recent Activities feed shows the new note immediately.
+// Same shape as document-viewer's recordActivity — the backend also writes
+// the same row from POST /api/notes (see routes/notes.js wire-up), so this
+// is a safety net. Failures are silent.
+function recordActivity(noteId, type) {
+  const ON = window.OlongNotes || {};
+  if (!ON.api || !ON.getToken || !ON.getToken()) return;
+  ON.api
+    .post('/activities', { note_id: noteId, activity_type: type }, { auth: true })
+    .catch((e) => console.debug('[activities] record skipped:', e && e.message));
+}
+
 function readStoredUser() {
   try {
     const raw = localStorage.getItem(USER_STORAGE_KEY);
@@ -779,6 +792,11 @@ document.addEventListener('DOMContentLoaded', () => {
       noteFileDropText.textContent = DEFAULT_NOTE_FILE_TEXT;
       noteFileDrop.classList.remove('has-file');
       if (data && data.note && data.note.id) {
+        // Record the upload in the activity log before navigating away.
+        // The backend also writes this row from POST /api/notes — this
+        // is a safety net for the case where the backend write was
+        // masked (e.g., a misconfigured RLS). Fire-and-forget.
+        recordActivity(data.note.id, 'note_uploaded');
         window.location.href = `document-viewer.html?id=${encodeURIComponent(data.note.id)}`;
       }
     } catch (err) {
@@ -930,6 +948,11 @@ document.addEventListener('DOMContentLoaded', () => {
       authCard.closest('.auth-modal')?.classList.remove('is-open');
       document.body.classList.remove('modal-open');
     }
+
+    // Notify any auth-aware helpers (auth-drawer.js: hides the Recent
+    // Activities link for anonymous viewers). Fire it on every role
+    // change so login → the link appears without a page reload.
+    window.dispatchEvent(new CustomEvent('olongnotes:auth-changed', { detail: { role } }));
   }
 
   // EDIT 11: navbar profile chip → logout.

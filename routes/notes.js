@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator')
 const auth = require('../middleware/auth')
 const multer = require('multer')
 const { v4: uuidv4 } = require('uuid')
+const { writeActivity } = require('./activities')
 
 // Status constants — single source of truth
 const STATUS = {
@@ -82,6 +83,14 @@ async function toggleInteraction(req, res, { table, idField, denormColumn }) {
           return res.status(500).json({ message: `Could not ${table.slice(0, -1)} note.` })
         }
       }
+
+      // Record the like / bookmark in the activity log — only on the
+      // "ON" transition (insert), not on the "OFF" transition (delete).
+      // Activity_type follows the table name. `writeActivity` uses the
+      // service-role client internally (RLS bypass) — the helper never
+      // throws, so a log failure won't roll back the toggle.
+      const activityType = table === 'likes' ? 'note_liked' : 'note_bookmarked'
+      writeActivity(userId, activityType, noteId, null)
     }
 
     // Read the count AFTER the mutation. There's a small race window
@@ -218,6 +227,10 @@ router.post('/', auth, (req, res, next) => {
         .remove([filePath])
       return res.status(500).json({ message: 'Could not save note. Please try again.' })
     }
+
+    // Record the upload in the activity log. Fire-and-forget — the
+    // helper never throws, so a log failure won't roll back the upload.
+    writeActivity(req.user.id, 'note_uploaded', note.id, `Note ${note.id} uploaded by user ${req.user.id}`)
 
     return res.status(201).json({
       message: 'Note uploaded successfully. It will appear after admin review.',
@@ -382,6 +395,13 @@ router.get('/:id', async (req, res) => {
           note.viewer_has_bookmarked = false
         }
 
+        // Record the view in the activity log — only for authenticated
+        // viewers. Anonymous viewers don't pollute the log. Fire-and-forget;
+        // never blocks the response.
+        if (viewerUserId) {
+          writeActivity(viewerUserId, 'note_viewed', note.id, null)
+        }
+
         // Increment view_count — atomic, no race condition
         await supabase.rpc('increment_view_count', { note_id: parseInt(id) })
 
@@ -483,21 +503,17 @@ router.delete('/:id', auth, async (req, res) => {
       }
     }
 
-    // FIX 13 — activity log with error capture
-    const { error: logError } = await supabase
-      .from('activity_log')
-      .insert({
-        user_id: req.user.id,
-        target_type: 'note',
-        target_id: noteId,
-        activity_type: 'note_deleted',
-        description: `Note ${noteId} deleted by ${req.user.role === 'admin' ? 'admin' : 'owner'}`,
-        created_at: new Date().toISOString()
-      })
-
-    if (logError) {
-      console.error('Activity log write failed:', logError)
-    }
+    // FIX 13 — activity log with error capture. Routed through
+    // `writeActivity` (uses supabaseAdmin/service role) so the row
+    // actually persists — the prior inline `supabase.from('activity_log')`
+    // insert was RLS-blocked because activity_log_insert requires
+    // auth.uid() which is not propagated to backend PostgREST.
+    writeActivity(
+      req.user.id,
+      'note_deleted',
+      noteId,
+      `Note ${noteId} deleted by ${req.user.role === 'admin' ? 'admin' : 'owner'}`
+    )
 
     return res.status(200).json({ message: 'Note deleted successfully.' })
 
@@ -534,6 +550,11 @@ router.post('/:id/report', auth, async (req, res) => {
       console.error('Report insert error:', error)
       return res.status(500).json({ message: 'Could not submit report.' })
     }
+
+    // Record the report in the activity log. Fire-and-forget — the
+    // user has already been told the report was submitted, so a log
+    // failure shouldn't surface a second error.
+    writeActivity(req.user.id, 'note_reported', noteId, reason)
 
     return res.status(201).json({
       message: 'Report submitted. Our team will review it.',
