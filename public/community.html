@@ -172,14 +172,7 @@
                   <span class="filter-select__label">All Subjects</span>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <ul class="dropdown-filter__menu" role="listbox" hidden>
-                  <li class="dropdown-filter__option is-active" role="option" data-value="all">All Subjects</li>
-                  <li class="dropdown-filter__option" role="option" data-value="mathematics">Mathematics</li>
-                  <li class="dropdown-filter__option" role="option" data-value="physics">Physics</li>
-                  <li class="dropdown-filter__option" role="option" data-value="chemistry">Chemistry</li>
-                  <li class="dropdown-filter__option" role="option" data-value="biology">Biology</li>
-                  <li class="dropdown-filter__option" role="option" data-value="english">English</li>
-                </ul>
+                <ul class="dropdown-filter__menu" role="listbox" hidden></ul>
               </div>
 
               <div class="dropdown-filter" data-filter="sort">
@@ -196,173 +189,7 @@
               </div>
             </div>
 
-            <ul class="question-list" id="questionList">
-
-              <!-- Q1 -->
-              <li class="question-row" data-question-id="q1" data-status="answered" data-mine="false" data-grade="11" data-subject="physics" data-timestamp="15" data-answers="4">
-                <span class="question-row__avatar" style="--avatar-tint:#3d6bf0" aria-hidden="true">J</span>
-                <div class="question-row__body">
-                  <div class="question-row__top">
-                    <span class="question-row__meta-line">
-                      <span class="question-row__subject" style="--subject-tint:#3d6bf0">Physics</span>
-                      <span class="question-row__dot">&middot;</span>
-                      <span class="question-row__grade">Grade 11</span>
-                      <span class="question-row__dot">&middot;</span>
-                      <span class="question-row__time">15 mins ago</span>
-                    </span>
-                    <span class="status-badge status-badge--answered">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg>
-                      Answered
-                    </span>
-                  </div>
-
-                  <p class="question-row__text">A ball is thrown vertically upward with a velocity of 20 m/s. How long will it take to reach the highest point?</p>
-                  <p class="question-row__desc">What formula should I use to solve this? I know the final velocity is 0 at the highest point, but I'm not sure how to find the time.</p>
-
-                  <div class="question-row__tags">
-                    <span class="tag" style="--tag-tint:#3d6bf0">#Physics</span>
-                    <span class="tag" style="--tag-tint:#3d6bf0">#Motion</span>
-                    <span class="tag" style="--tag-tint:#3d6bf0">#Kinematics</span>
-                  </div>
-
-                  <div class="question-row__footer">
-                    <button class="like-btn" type="button" aria-pressed="false" data-count="25">
-                      <svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
-                      <span class="like-btn__count">25</span>
-                    </button>
-                    <span class="stat-count">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>
-                      <span class="answer-count">4 Answers</span>
-                    </span>
-                    <button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>
-                  </div>
-                </div>
-              </li>
-
-              <!-- Q2 -->
-              <li class="question-row" data-question-id="q2" data-status="unanswered" data-mine="false" data-grade="9" data-subject="mathematics" data-timestamp="60" data-answers="2">
-                <span class="question-row__avatar" style="--avatar-tint:#e7833b" aria-hidden="true">M</span>
-                <div class="question-row__body">
-                  <div class="question-row__top">
-                    <span class="question-row__meta-line">
-                      <span class="question-row__subject" style="--subject-tint:#e7833b">Mathematics</span>
-                      <span class="question-row__dot">&middot;</span>
-                      <span class="question-row__grade">Grade 9</span>
-                      <span class="question-row__dot">&middot;</span>
-                      <span class="question-row__time">1 hour ago</span>
-                    </span>
-                    <span class="status-badge status-badge--unanswered">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-                      Unanswered
-                    </span>
-                  </div>
-
-                  <p class="question-row__text">Can you help me solve x: 7x + 4/5 = 15 ?</p>
-                  <p class="question-row__desc">I tried isolating x but I keep getting a different answer. Where did I go wrong?</p>
-
-                  <div class="question-row__tags">
-                    <span class="tag" style="--tag-tint:#e7833b">#Algebra</span>
-                    <span class="tag" style="--tag-tint:#e7833b">#Equations</span>
-                    <span class="tag" style="--tag-tint:#e7833b">#Linear</span>
-                  </div>
-
-                  <div class="question-row__footer">
-                    <button class="like-btn" type="button" aria-pressed="false" data-count="14">
-                      <svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
-                      <span class="like-btn__count">14</span>
-                    </button>
-                    <span class="stat-count">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>
-                      <span class="answer-count">2 Answers</span>
-                    </span>
-                    <button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>
-                  </div>
-                </div>
-              </li>
-
-              <!-- Q3 -->
-              <li class="question-row" data-question-id="q3" data-status="answered" data-mine="false" data-grade="10" data-subject="chemistry" data-timestamp="120" data-answers="2">
-                <span class="question-row__avatar" style="--avatar-tint:#8b5cf6" aria-hidden="true">A</span>
-                <div class="question-row__body">
-                  <div class="question-row__top">
-                    <span class="question-row__meta-line">
-                      <span class="question-row__subject" style="--subject-tint:#8b5cf6">Chemistry</span>
-                      <span class="question-row__dot">&middot;</span>
-                      <span class="question-row__grade">Grade 10</span>
-                      <span class="question-row__dot">&middot;</span>
-                      <span class="question-row__time">2 hours ago</span>
-                    </span>
-                    <span class="status-badge status-badge--answered">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg>
-                      Answered
-                    </span>
-                  </div>
-
-                  <p class="question-row__text">What is the balanced chemical equation for photosynthesis?</p>
-                  <p class="question-row__desc">I keep forgetting the coefficients. Can someone help?</p>
-
-                  <div class="question-row__tags">
-                    <span class="tag" style="--tag-tint:#8b5cf6">#Chemistry</span>
-                    <span class="tag" style="--tag-tint:#8b5cf6">#Photosynthesis</span>
-                    <span class="tag" style="--tag-tint:#8b5cf6">#Biology</span>
-                  </div>
-
-                  <div class="question-row__footer">
-                    <button class="like-btn" type="button" aria-pressed="false" data-count="19">
-                      <svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
-                      <span class="like-btn__count">19</span>
-                    </button>
-                    <span class="stat-count">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>
-                      <span class="answer-count">2 Answers</span>
-                    </span>
-                    <button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>
-                  </div>
-                </div>
-              </li>
-
-              <!-- Q4 -->
-              <li class="question-row" data-question-id="q4" data-status="unanswered" data-mine="false" data-grade="12" data-subject="biology" data-timestamp="180" data-answers="2">
-                <span class="question-row__avatar" style="--avatar-tint:#2e9e5b" aria-hidden="true">R</span>
-                <div class="question-row__body">
-                  <div class="question-row__top">
-                    <span class="question-row__meta-line">
-                      <span class="question-row__subject" style="--subject-tint:#2e9e5b">Biology</span>
-                      <span class="question-row__dot">&middot;</span>
-                      <span class="question-row__grade">Grade 12</span>
-                      <span class="question-row__dot">&middot;</span>
-                      <span class="question-row__time">3 hours ago</span>
-                    </span>
-                    <span class="status-badge status-badge--unanswered">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-                      Unanswered
-                    </span>
-                  </div>
-
-                  <p class="question-row__text">What are the functions of mitochondria in a cell?</p>
-                  <p class="question-row__desc">I need a simple explanation for my biology assignment.</p>
-
-                  <div class="question-row__tags">
-                    <span class="tag" style="--tag-tint:#2e9e5b">#Biology</span>
-                    <span class="tag" style="--tag-tint:#2e9e5b">#Cells</span>
-                    <span class="tag" style="--tag-tint:#2e9e5b">#Mitochondria</span>
-                  </div>
-
-                  <div class="question-row__footer">
-                    <button class="like-btn" type="button" aria-pressed="false" data-count="12">
-                      <svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>
-                      <span class="like-btn__count">12</span>
-                    </button>
-                    <span class="stat-count">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>
-                      <span class="answer-count">2 Answers</span>
-                    </span>
-                    <button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>
-                  </div>
-                </div>
-              </li>
-
-            </ul>
+            <ul class="question-list" id="questionList"></ul>
             <p class="questions-empty" id="questionsEmpty" hidden>No questions to show here yet.</p>
           </div>
         </div>
@@ -546,19 +373,9 @@
             <div class="ask-select">
               <select id="askSubjectSelect">
                 <option value="" disabled selected>Select a subject</option>
-                <option value="mathematics">Mathematics</option>
-                <option value="physics">Physics</option>
-                <option value="chemistry">Chemistry</option>
-                <option value="biology">Biology</option>
-                <option value="english">English</option>
               </select>
               <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </div>
-          </div>
-
-          <div class="ask-field">
-            <label class="ask-field__label" for="askTitleInput">Title <span class="ask-field__required">*</span></label>
-            <input class="ask-input" type="text" id="askTitleInput" maxlength="150" placeholder="Write a clear and specific title for your question" />
           </div>
 
           <div class="ask-field">
@@ -589,7 +406,7 @@
             </div>
           </div>
 
-          <p class="ask-modal__error" id="askModalError" hidden>Please fill in the subject, title, and description before posting.</p>
+          <p class="ask-modal__error" id="askModalError" hidden>Please fill in the subject and description before posting.</p>
         </div>
 
         <div class="ask-modal__footer">
