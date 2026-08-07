@@ -67,10 +67,13 @@ router.get('/schools', async (req, res) => {
 router.get('/subjects', async (req, res) => {
   const { education_level, program_id, id, letter, limit, offset } = req.query
 
-  try {
+try {
     let query = supabase
       .from('subjects')
-      .select('id, subject_name, cover_image_url, preview_content, category_id, education_level, program_id', { count: 'exact' })
+      .select(`
+        id, subject_name, cover_image_url, preview_content, category_id, education_level, program_id,
+        shs_strands ( strand_name, shs_tracks ( track_name ) )
+      `, { count: 'exact' })
       .order('subject_name', { ascending: true })
 
     if (education_level) {

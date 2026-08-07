@@ -143,36 +143,19 @@
           <!-- Questions feed -->
           <div class="questions-panel">
 
-            <!-- Status tabs -->
-            <div class="questions-tabs" role="tablist" aria-label="Filter questions by status">
-              <button class="questions-tab is-active" type="button" role="tab" aria-selected="true">All</button>
-              <button class="questions-tab" type="button" role="tab" aria-selected="false">Unanswered</button>
-              <button class="questions-tab" type="button" role="tab" aria-selected="false">Answered</button>
-              <button class="questions-tab" type="button" role="tab" aria-selected="false">My Questions</button>
-            </div>
-
-            <!-- Filter row -->
+            <!-- Top filter row: Level + Sort -->
             <div class="questions-panel__filters">
-              <div class="dropdown-filter" data-filter="grade">
+              <div class="dropdown-filter" data-filter="level">
                 <button class="filter-select" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="filter-select__label">All Grades</span>
+                  <span class="filter-select__label">All Levels</span>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
                 <ul class="dropdown-filter__menu" role="listbox" hidden>
-                  <li class="dropdown-filter__option is-active" role="option" data-value="all">All Grades</li>
-                  <li class="dropdown-filter__option" role="option" data-value="9">Grade 9</li>
-                  <li class="dropdown-filter__option" role="option" data-value="10">Grade 10</li>
-                  <li class="dropdown-filter__option" role="option" data-value="11">Grade 11</li>
-                  <li class="dropdown-filter__option" role="option" data-value="12">Grade 12</li>
+                  <li class="dropdown-filter__option is-active" role="option" data-value="all">All Levels</li>
+                  <li class="dropdown-filter__option" role="option" data-value="k10">K-10</li>
+                  <li class="dropdown-filter__option" role="option" data-value="senior_high">Senior High</li>
+                  <li class="dropdown-filter__option" role="option" data-value="college">College</li>
                 </ul>
-              </div>
-
-              <div class="dropdown-filter" data-filter="subject">
-                <button class="filter-select" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="filter-select__label">All Subjects</span>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                </button>
-                <ul class="dropdown-filter__menu" role="listbox" hidden></ul>
               </div>
 
               <div class="dropdown-filter" data-filter="sort">
@@ -188,6 +171,9 @@
                 </ul>
               </div>
             </div>
+
+            <!-- Subjects bubble chip row removed per Phase 4.0 mockup —
+                 the page-level All Levels dropdown is the only filter. -->
 
             <ul class="question-list" id="questionList"></ul>
             <p class="questions-empty" id="questionsEmpty" hidden>No questions to show here yet.</p>
@@ -358,62 +344,67 @@
         </button>
 
         <div class="ask-modal__head">
-          <span class="ask-modal__icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/><circle cx="8" cy="11.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="12" cy="11.5" r="0.9" fill="currentColor" stroke="none"/><circle cx="16" cy="11.5" r="0.9" fill="currentColor" stroke="none"/></svg>
-          </span>
-          <div>
-            <h2 class="ask-modal__title" id="askModalTitle">Ask Your Question</h2>
-            <p class="ask-modal__subtitle">Share your question with the community and get help from learners and contributors.</p>
+          <span class="ask-modal__avatar" id="askModalAvatar" aria-hidden="true">U</span>
+          <div class="ask-modal__head-text">
+            <span class="ask-modal__asker" id="askModalAsker">You</span>
+            <h2 class="ask-modal__title" id="askModalTitle">Create Post</h2>
           </div>
         </div>
 
         <div class="ask-modal__body">
-          <div class="ask-field">
-            <label class="ask-field__label" for="askSubjectSelect">Subject <span class="ask-field__required">*</span></label>
-            <div class="ask-select">
-              <select id="askSubjectSelect">
-                <option value="" disabled selected>Select a subject</option>
-              </select>
-              <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </div>
-          </div>
-
-          <div class="ask-field">
-            <label class="ask-field__label" for="askDescTextarea">Describe your question <span class="ask-field__required">*</span></label>
-            <div class="ask-editor">
-              <div class="ask-editor__toolbar">
-                <button class="toolbar-btn" type="button" data-format="bold" title="Bold" aria-label="Bold"><strong>B</strong></button>
-                <button class="toolbar-btn toolbar-btn--italic" type="button" data-format="italic" title="Italic" aria-label="Italic">I</button>
-                <span class="ask-editor__divider" aria-hidden="true"></span>
-                <button class="toolbar-btn" type="button" data-format="ordered-list" title="Numbered list" aria-label="Numbered list">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h1v3M4 6v0M4.5 13.5a1 1 0 1 1 1.6-1.2L4.4 14h1.7"/></svg>
-                </button>
-                <button class="toolbar-btn" type="button" data-format="list" title="Bulleted list" aria-label="Bulleted list">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>
-                </button>
+          <div class="ask-filters">
+            <div class="ask-field">
+              <label class="ask-field__label" for="askSubjectSelect">Subjects</label>
+              <div class="ask-select">
+                <select id="askSubjectSelect">
+                  <option value="" disabled selected>Select a subject</option>
+                </select>
+                <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </div>
-              <textarea id="askDescTextarea" maxlength="2000" placeholder="Provide more details about your question. Include what you've tried, what you're expecting, and any relevant information."></textarea>
-              <div class="ask-editor__counter"><span id="askDescCount">0</span> / 2000</div>
+            </div>
+
+            <div class="ask-field">
+              <label class="ask-field__label" for="askLevelSelect">Grade Level</label>
+              <div class="ask-select">
+                <select id="askLevelSelect">
+                  <option value="" disabled selected>Select a grade level</option>
+                  <option value="Grade 9">Grade 9</option>
+                  <option value="Grade 10">Grade 10</option>
+                  <option value="Grade 11">Grade 11</option>
+                  <option value="Grade 12">Grade 12</option>
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year College">4th Year College</option>
+                </select>
+                <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
             </div>
           </div>
 
-          <div class="ask-field">
-            <label class="ask-field__label">Add tags <span class="ask-field__optional">(optional)</span></label>
-            <p class="ask-field__hint">Add up to 3 tags to help others find your question.</p>
-            <div class="ask-tags">
-              <input class="ask-input" type="text" id="askTagsInput" placeholder="e.g. Physics, Motion, Kinematics" />
-              <span class="ask-tags__count" id="askTagsCount">0 / 3</span>
-            </div>
+          <div class="ask-textarea-wrap">
+            <textarea id="askDescTextarea" maxlength="2000" placeholder="Ask a Question!"></textarea>
+            <span class="ask-textarea-wrap__smile" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="0.8" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="0.8" fill="currentColor" stroke="none"/></svg>
+            </span>
           </div>
 
-          <p class="ask-modal__error" id="askModalError" hidden>Please fill in the subject and description before posting.</p>
-        </div>
+          <p class="ask-modal__error" id="askModalError" hidden>Please fill in the subject, grade level, and question before posting.</p>
 
-        <div class="ask-modal__footer">
-          <button class="btn btn--primary ask-modal__submit" type="button" id="askPostBtn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg>
-            Post Question
-          </button>
+          <div class="ask-attach" aria-label="Add to your post">
+            <span class="ask-attach__label">Add to your post!</span>
+            <div class="ask-attach__buttons">
+              <button class="ask-attach__btn" type="button" id="askAttachPhoto" aria-label="Add a photo" title="Add a photo">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="1.8"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg>
+              </button>
+              <button class="ask-attach__btn" type="button" id="askAttachTag" aria-label="Tag a subject" title="Tag a subject">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0973c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0L3 13.3V4h9.3l6.7 6.7a2 2 0 0 1 0 2.8Z"/><circle cx="8" cy="9" r="1.2" fill="currentColor" stroke="none"/></svg>
+              </button>
+              <button class="ask-attach__btn ask-attach__btn--post" type="button" id="askPostBtn" title="Post your question">
+                Post
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

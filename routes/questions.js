@@ -10,6 +10,10 @@
 //   POST   /api/questions/:id/like              (auth)          Toggle like via question_likes.
 //   POST   /api/questions/:id/answer            (auth + role)   Add an answer.
 //   POST   /api/questions/:id/accept            (auth, asker)   Accept an answer via accept_answer RPC.
+//   POST   /api/questions/:id/report            (auth)          Persist a report on a question.
+//   DELETE /api/questions/:id                   (owner or admin) Delete a question.
+//
+// Answer delete (DELETE /api/answers/:id) lives in routes/answers.js.
 //
 // The answer-likes route lives in routes/answers.js (mounted at
 // /api/answers). Keeping it on its own router keeps the route table
@@ -34,7 +38,7 @@
 
 const express = require('express')
 const router = express.Router()
-const { supabase } = require('../supabase')
+const { supabase, supabaseAdmin } = require('../supabase')
 const auth = require('../middleware/auth')
 const { writeActivity } = require('./activities')
 
@@ -98,6 +102,47 @@ async function readDenorm(table, idColumn, idValue, denormColumn) {
   return typeof v === 'number' ? v : 0
 }
 
+// ---------- Points ----------
+// Points system (Phase 4.0):
+//   +2  asker     when a question is created
+//   +10 answerer  when their answer is accepted
+//   +1  answerer  per like on their answer
+//   +1  asker     per like on their question  (mirror of the answer rule)
+//
+// Writes via supabaseAdmin (service role) because the anon PostgREST
+// connection on the backend can't satisfy the RLS USING clause for an
+// arbitrary user_id. Read-then-write is safe under Q&A traffic scale
+// (low concurrency, human-scale). Worst case is dropping a few points
+// — not corrupting the row. NEVER throws: a points failure is logged
+// and the user-facing action still succeeds.
+async function awardPoints(userId, delta) {
+  if (!userId || !delta) return { skipped: true }
+  try {
+    const { data: row, error: readError } = await supabaseAdmin
+      .from('users')
+      .select('points')
+      .eq('id', userId)
+      .maybeSingle()
+    if (readError) {
+      console.error('[questions] points read error:', readError)
+      return { error: readError }
+    }
+    const current = (row && row.points) || 0
+    const { error: updateError } = await supabaseAdmin
+      .from('users')
+      .update({ points: current + delta })
+      .eq('id', userId)
+    if (updateError) {
+      console.error('[questions] points update error:', updateError)
+      return { error: updateError }
+    }
+    return { ok: true, value: current + delta }
+  } catch (err) {
+    console.error('[questions] awardPoints exception:', err)
+    return { error: err }
+  }
+}
+
 // Shared toggle helper for question_likes and answer_likes. Identical
 // shape to the one in routes/notes.js, but reads from question_likes /
 // answer_likes and the denormalized column is on questions / answers
@@ -111,6 +156,7 @@ async function toggleQuestionInteraction(req, res, {
   parentTable,  // 'questions' | 'answers' — the row that owns the denorm column
   parentIdField,// PK column on parent (id)
   denormColumn, // likes_count on parent
+  ownerIdField, // 'user_id' on parent — the recipient of the +1 like points
   activityType  // 'question_liked' | 'answer_liked'
 }) {
   const parentId = parseInt(req.params.id)
@@ -127,6 +173,17 @@ async function toggleQuestionInteraction(req, res, {
       .eq(idField, parentId)
       .eq('user_id', userId)
       .maybeSingle()
+
+    // Resolve the parent owner's user_id once, before any writes. We
+    // need it to award the +1 like points to the right person on the
+    // ON transition. Reading once and reusing beats issuing a second
+    // round-trip per toggle.
+    const { data: parentRow } = await supabase
+      .from(parentTable)
+      .select(ownerIdField)
+      .eq(parentIdField, parentId)
+      .maybeSingle()
+    const ownerId = parentRow ? parentRow[ownerIdField] : null
 
     if (existing) {
       const { error: deleteError } = await supabase
@@ -156,6 +213,12 @@ async function toggleQuestionInteraction(req, res, {
       // Record the like in the activity log — ON transition only.
       // writeActivity is fire-and-forget; never throws.
       writeActivity(userId, activityType, parentId, null)
+
+      // Points — +1 to the parent owner, unless the liker IS the
+      // owner (don't let users farm points from self-likes).
+      if (ownerId && ownerId !== userId) {
+        awardPoints(ownerId, 1)
+      }
     }
 
     // Read the denormalized counter after the trigger has had a chance
@@ -205,20 +268,32 @@ async function resolveViewerUserId(req) {
 
 // ---------- POST /api/questions ----------
 //
-// Body: { title, body, subject_id (int), school_id (int?), grade_level (string?), tags (string[]?) }
+// Body: { body, subject_id (int), education_level (k10|senior_high|college)?, tags (string[]?) }
 // Auth: required + role gate (limited / verified / admin).
+//
+// Phase 4.0 mockup — the ask modal exposes a single 3-bucket dropdown
+// (K-10 / SHS / College) instead of a free-text grade_level. We map the
+// bucket to a representative grade_level string when writing the row so
+// existing GET filters that join on grade_level still work. If no bucket
+// is provided, grade_level is left NULL.
 //
 // Behavior:
 //   1. Validate required fields.
 //   2. INSERT into questions (user_id = req.user.id).
 //   3. If tags provided (array of strings), INSERT into question_tags.
 //   4. writeActivity('question_asked') — fire-and-forget.
+const BUCKET_TO_GRADE = {
+  k10: 'Grade 7',          // representative value within the bucket
+  senior_high: 'Grade 11',
+  college: 'College',
+}
+
 router.post('/', auth, async (req, res) => {
   if (!ALLOWED_UPLOAD_ROLES.includes(req.user.role)) {
     return res.status(403).json({ message: 'Only contributors can ask questions.' })
   }
 
-  const { body, subject_id, school_id, grade_level, tags } = req.body || {}
+  const { body, subject_id, education_level, grade_level, tags } = req.body || {}
 
   if (!body || typeof body !== 'string' || body.trim().length === 0) {
     return res.status(400).json({ message: 'Question body is required.' })
@@ -226,6 +301,16 @@ router.post('/', auth, async (req, res) => {
   const subjectId = parseInt(subject_id)
   if (!subjectId || Number.isNaN(subjectId)) {
     return res.status(400).json({ message: 'subject_id is required.' })
+  }
+
+  // Resolve the grade_level write value: prefer the new education_level
+  // bucket when present (it owns the Phase 4.0 ask modal), fall back to
+  // an explicit grade_level string for legacy callers, else NULL.
+  let gradeLevelWrite = null
+  if (education_level && BUCKET_TO_GRADE[String(education_level)]) {
+    gradeLevelWrite = BUCKET_TO_GRADE[String(education_level)]
+  } else if (grade_level) {
+    gradeLevelWrite = String(grade_level)
   }
 
   const title = deriveTitle(body)
@@ -241,8 +326,8 @@ router.post('/', auth, async (req, res) => {
       .insert({
         user_id: req.user.id,
         subject_id: subjectId,
-        school_id: school_id ? parseInt(school_id) : null,
-        grade_level: grade_level ? String(grade_level) : null,
+        school_id: req.body.school_id ? parseInt(req.body.school_id) : null,
+        grade_level: gradeLevelWrite,
         title,
         body: body.trim(),
         status: STATUS.UNANSWERED,
@@ -276,6 +361,9 @@ router.post('/', auth, async (req, res) => {
 
     // Activity log — question_asked. Fire-and-forget.
     writeActivity(req.user.id, 'question_asked', question.id, `Question: ${question.title}`)
+
+    // Points — asker earns +2 for asking. Fire-and-forget.
+    awardPoints(req.user.id, 2)
 
     return res.status(201).json({ message: 'Question created.', question })
   } catch (err) {
@@ -579,6 +667,7 @@ router.post('/:id/like', auth, (req, res) =>
     parentTable: 'questions',
     parentIdField: 'id',
     denormColumn: 'likes_count',
+    ownerIdField: 'user_id',
     activityType: 'question_liked',
   })
 )
@@ -652,6 +741,117 @@ router.post('/:id/answer', auth, async (req, res) => {
   }
 })
 
+// ---------- DELETE /api/questions/:id ----------
+//
+// Owner or admin only. Cascades clean up answers, question_likes,
+// answer_likes, question_tags (FK cascades verified 2026-08-06).
+router.delete('/:id', auth, async (req, res) => {
+  const questionId = parseInt(req.params.id)
+  if (!questionId || Number.isNaN(questionId)) {
+    return res.status(400).json({ message: 'Invalid question id.' })
+  }
+
+  try {
+    const { data: question, error: fetchError } = await supabase
+      .from('questions')
+      .select('id, user_id, title')
+      .eq('id', questionId)
+      .maybeSingle()
+
+    if (fetchError) {
+      console.error('[questions] delete fetch error:', fetchError)
+      return res.status(500).json({ message: 'Server error.' })
+    }
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found.' })
+    }
+    if (question.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only delete your own questions.' })
+    }
+
+    const { error: deleteError } = await supabase
+      .from('questions')
+      .delete()
+      .eq('id', questionId)
+
+    if (deleteError) {
+      console.error('[questions] delete error:', deleteError)
+      return res.status(500).json({ message: 'Could not delete question.' })
+    }
+
+    return res.status(200).json({ message: 'Question deleted.' })
+  } catch (err) {
+    console.error('[questions] DELETE error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
+// ---------- DELETE /api/answers/:id ----------
+//
+// Owner of the answer, owner of the parent question, or admin lives in
+// routes/answers.js — DELETE /api/answers/:id. Same FK cascades handle
+// cleanup of answer_likes.
+
+// ---------- POST /api/questions/:id/report ----------
+//
+// Auth required. Persists to the `reports` table (verified schema
+// 2026-08-06) and emits a question_reported activity row.
+router.post('/:id/report', auth, async (req, res) => {
+  const questionId = parseInt(req.params.id)
+  const reason = (req.body || {}).reason
+
+  if (!questionId || Number.isNaN(questionId)) {
+    return res.status(400).json({ message: 'Invalid question id.' })
+  }
+  if (!reason || typeof reason !== 'string' || reason.trim().length === 0) {
+    return res.status(400).json({ message: 'A reason is required to report a question.' })
+  }
+  if (reason.length > 500) {
+    return res.status(400).json({ message: 'Reason too long. Max 500 characters.' })
+  }
+
+  try {
+    const { data: exists } = await supabase
+      .from('questions')
+      .select('id')
+      .eq('id', questionId)
+      .maybeSingle()
+
+    if (!exists) {
+      return res.status(404).json({ message: 'Question not found.' })
+    }
+
+    const { data: report, error } = await supabase
+      .from('reports')
+      .insert({
+        reporter_id: req.user.id,
+        target_type: 'question',
+        target_id: questionId,
+        reason: reason.trim(),
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('[questions] report insert error:', error)
+      return res.status(500).json({ message: 'Could not submit report.' })
+    }
+
+    // Best-effort activity log entry — does not affect the response.
+    writeActivity(req.user.id, 'question_reported', questionId, reason.trim())
+
+    return res.status(201).json({
+      message: 'Report submitted. Our team will review it.',
+      report_id: report.id,
+    })
+  } catch (err) {
+    console.error('[questions] report POST error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
 // ---------- POST /api/questions/:id/accept ----------
 //
 // Body: { answer_id }
@@ -696,10 +896,11 @@ router.post('/:id/accept', auth, async (req, res) => {
 
     // Confirm the answer exists AND belongs to this question (defense in
     // depth — the FK should already enforce this but better to fail with
-    // a clean 400 than to trust the RPC to handle it).
+    // a clean 400 than to trust the RPC to handle it). user_id is
+    // fetched here so we can award +10 points to the answerer below.
     const { data: answer, error: aError } = await supabase
       .from('answers')
-      .select('id, question_id')
+      .select('id, question_id, user_id')
       .eq('id', parseInt(answerId))
       .maybeSingle()
 
@@ -724,6 +925,13 @@ router.post('/:id/accept', auth, async (req, res) => {
     if (rpcError) {
       console.error('[questions] accept_answer RPC error:', rpcError)
       return res.status(500).json({ message: 'Could not accept answer.' })
+    }
+
+    // Points — answerer earns +10 when their answer is accepted.
+    // Skip if the answerer is the asker (defensive; should never happen
+    // since we verified question.user_id === req.user.id above).
+    if (answer.user_id && answer.user_id !== req.user.id) {
+      awardPoints(answer.user_id, 10)
     }
 
     return res.status(200).json({ message: 'Answer accepted.' })

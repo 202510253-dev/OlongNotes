@@ -146,8 +146,16 @@
 .questions-panel__filters {
   display: flex;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
+
+/* ---------------------------------------------------------
+   Subject bubble chip row (Phase 4.0 mockup)
+--------------------------------------------------------- */
+/* Subject filter is dropped per the Phase 4.0 mockup — the page-level
+   All Levels dropdown is the only filter, plus the free-text search
+   input in the navbar. No bubble chip row. */
 
 .filter-select {
   display: inline-flex;
@@ -183,6 +191,12 @@
   gap: 14px;
   padding: 20px 0;
   border-top: 1px solid var(--navy-100, #eef1f6);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.question-row:hover {
+  background: var(--navy-100, rgba(238, 241, 246, 0.4));
 }
 
 .question-row:first-child {
@@ -210,6 +224,7 @@
   min-width: 0;
 }
 
+/* Header: avatar + asker name + time + subject + curriculum pill */
 .question-row__top {
   display: flex;
   align-items: flex-start;
@@ -226,6 +241,21 @@
   font-size: 0.8rem;
 }
 
+/* Asker header — FB-style: avatar (already styled above) + name + time */
+.question-row__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.question-row__asker {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
 .question-row__subject {
   font-weight: 700;
   color: var(--subject-tint, var(--accent-blue, #3d6bf0));
@@ -239,6 +269,22 @@
 .question-row__dot {
   color: var(--gray-600, #c3c8d2);
 }
+
+.question-row__curriculum {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: var(--curriculum-tint, var(--accent-blue, #3d6bf0));
+  white-space: nowrap;
+}
+
+.question-row__curriculum--k10 { background: #2e9e5b; }
+.question-row__curriculum--senior_high { background: #e0973c; }
+.question-row__curriculum--college { background: #8b5cf6; }
 
 .question-row__text {
   font-size: 0.95rem;
@@ -1152,52 +1198,70 @@
 
 .ask-modal__head {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding-bottom: 20px;
-  margin-bottom: 22px;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 16px;
+  margin-bottom: 18px;
   border-bottom: 1px solid var(--navy-100, #eef1f6);
 }
 
-.ask-modal__icon {
+.ask-modal__avatar {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(61, 107, 240, 0.1);
-  color: var(--accent-blue, #3d6bf0);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--avatar-tint, var(--accent-blue, #3d6bf0));
+}
+
+.ask-modal__head-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ask-modal__asker {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  line-height: 1.2;
 }
 
 .ask-modal__title {
   font-family: 'Poppins', 'Inter', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--text-heading);
-  margin: 0 0 6px;
-}
-
-.ask-modal__subtitle {
-  font-size: 0.88rem;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: var(--gray-600, #8891a0);
-  line-height: 1.5;
+  line-height: 1.2;
   margin: 0;
 }
 
 .ask-modal__body {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+}
+
+/* Inline filter row: Subjects + Grade Level side-by-side */
+.ask-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .ask-field__label {
   display: block;
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--text-heading);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .ask-field__required {
@@ -1246,9 +1310,9 @@
   -moz-appearance: none;
   border: 1.5px solid var(--navy-100, #eef1f6);
   border-radius: 12px;
-  padding: 12px 40px 12px 16px;
+  padding: 10px 40px 10px 14px;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-heading);
   background: none;
   outline: none;
@@ -1262,73 +1326,131 @@
 
 .ask-select__chevron {
   position: absolute;
-  right: 16px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--gray-600, #8891a0);
   pointer-events: none;
 }
 
-.ask-editor {
+/* Big textarea block — wraps the textarea + a smile icon at bottom-right */
+.ask-textarea-wrap {
+  position: relative;
   border: 1.5px solid var(--navy-100, #eef1f6);
   border-radius: 12px;
-  overflow: hidden;
+  padding: 14px 16px;
+  background: var(--surface);
+  transition: border-color 0.15s ease;
 }
 
-.ask-editor__toolbar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--navy-100, #eef1f6);
-  background: var(--gray-50);
+.ask-textarea-wrap:focus-within {
+  border-color: var(--accent-blue, #3d6bf0);
 }
 
-.ask-editor__divider {
-  width: 1px;
-  height: 16px;
-  background: var(--navy-100, #eef1f6);
-}
-
-.ask-editor textarea {
+.ask-textarea-wrap textarea {
   width: 100%;
-  min-height: 130px;
+  min-height: 140px;
   border: none;
-  padding: 14px 16px 6px;
+  padding: 0;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-heading);
   resize: vertical;
   outline: none;
   display: block;
+  background: transparent;
 }
 
-.ask-editor textarea::placeholder {
+.ask-textarea-wrap textarea::placeholder {
   color: var(--gray-600, #9aa2b1);
 }
 
-.ask-editor__counter {
-  text-align: right;
-  font-size: 0.78rem;
-  color: var(--gray-600, #8891a0);
-  padding: 0 16px 12px;
-}
-
-.ask-tags {
-  position: relative;
-}
-
-.ask-tags .ask-input {
-  padding-right: 64px;
-}
-
-.ask-tags__count {
+.ask-textarea-wrap__smile {
   position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.78rem;
+  right: 14px;
+  bottom: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
   color: var(--gray-600, #8891a0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ask-textarea-wrap__smile:hover {
+  background: var(--navy-100, #f2f4f8);
+  color: var(--text-heading);
+}
+
+/* "Add to your post!" attachment row — submit wired to one of these */
+.ask-attach {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--navy-100, #eef1f6);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.ask-attach__label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.ask-attach__icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ask-attach__btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gray-600, #8891a0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ask-attach__btn:hover {
+  background: var(--navy-100, #f2f4f8);
+  color: var(--text-heading);
+}
+
+.ask-attach__btn--post {
+  width: auto;
+  height: 36px;
+  padding: 0 14px;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--accent-blue, #3d6bf0);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ask-attach__btn--post:hover {
+  background: #2a55d0;
+  color: #ffffff;
+}
+
+.ask-attach__btn--post:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .ask-modal__error {
@@ -1338,21 +1460,7 @@
   background: rgba(224, 85, 111, 0.08);
   border-radius: 10px;
   padding: 10px 14px;
-  margin: -4px 0 0;
-}
-
-.ask-modal__footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--navy-100, #eef1f6);
-}
-
-.ask-modal__submit {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  margin: 0;
 }
 
 @media (max-width: 640px) {
@@ -1367,6 +1475,10 @@
     border-radius: 20px 20px 0 0;
     max-height: 92vh;
     overflow-y: auto;
+  }
+
+  .ask-filters {
+    grid-template-columns: 1fr;
   }
 }
 

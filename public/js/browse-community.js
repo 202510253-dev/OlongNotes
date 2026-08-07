@@ -1,18 +1,36 @@
 /* ---------------------------------------------------------
-   BROWSE / COMMUNITY HUB — live Q&A wiring
-   Phase 4 (Q&A). All question/answer data is sourced live from
-   the backend (no frontend mock): /api/questions, /api/questions/:id,
-   /api/questions/:id/like, /api/questions/:id/answer,
-   /api/questions/:id/accept, /api/answers/:id/like.
+   BROWSE / COMMUNITY HUB — Phase 4.0 Q&A wiring
+   Live data from the backend (no mock):
+     GET    /api/questions                  list + filters
+     GET    /api/questions/:id              single + answers
+     POST   /api/questions                  ask (subject_id + grade_level + body)
+     POST   /api/questions/:id/like         toggle like
+     POST   /api/questions/:id/answer       add an answer
+     POST   /api/questions/:id/accept       asker accepts an answer
+     POST   /api/answers/:id/like           toggle answer like
+     GET    /api/subjects                   ask modal subject dropdown
+
+   Layout matches the Phase 4.0 mockup (FB-style social cards):
+     - Single "All Levels" dropdown (K-10 / Senior High / College).
+       Subject filter is at the page level only via this bucket.
+     - Question cards: avatar + asker name + relative time + subject +
+       curriculum pill (K-10/SHS/College) + body/title + like + comment
+       counts + Answered/Unanswered status badge. Card body click opens
+       the question modal.
+     - Ask modal (FB "Create Post"): avatar + name + "Create Post" title,
+       2-column inline dropdowns (Subjects + Grade Level = specific
+       grade string), big "Ask a Question!" textarea with smile icon,
+       "Add to your post!" attachment row with photo + tag icon
+       buttons + Post pill. Backend derives the education_level bucket
+       from the specific grade_level at write time.
 --------------------------------------------------------- */
 (function () {
   'use strict';
 
   // ---------- Configuration ----------
   const PAGE_LIMIT = 20;
-  const GRADE_VALUES = ['9', '10', '11', '12']; // matches dropdown markup in HTML
 
-  // Inline auth-state helpers — reuses the same JWT shape used elsewhere.
+  // ---------- Auth helpers ----------
   function getToken() {
     return window.OlongNotes && window.OlongNotes.getToken
       ? window.OlongNotes.getToken()
@@ -23,19 +41,39 @@
   }
 
   // ---------- State ----------
-  // filterState mirrors what the DOM dropdowns hold. page is the current
-  // 1-based page; hasMore drives the "Load more" button visibility. openId
-  // tracks which question (if any) is expanded in the detail modal.
+  // filterState mirrors what the DOM holds. page is 1-based, hasMore
+  // drives the "Load more" button. openId is the currently-open
+  // question in the detail modal. Subject filter is GONE — the page
+  // has a single "All Levels" dropdown and the per-subject filter lives
+  // inside the ask modal's Subjects dropdown only.
   const filterState = {
-    status: 'all',    // all | unanswered | answered | my_questions
-    grade: 'all',
-    subject: 'all',
-    sort: 'latest',   // latest | oldest | most-liked | most-answers
+    level: 'all',   // all | k10 | senior_high | college
+    sort: 'latest', // latest | oldest | most-liked | most-answers
     page: 1,
     hasMore: false,
     total: 0,
   };
   let openId = null;
+
+  // ---------- Curriculum bucket helper ----------
+  // Mirrors routes/questions.js GRADE_LEVEL_ALIASES. We derive the bucket
+  // client-side so the card can render the K-10/SHS/College pill without
+  // an extra round trip. Anything we can't classify falls back to 'k10'
+  // (the most common legacy value) so the card still gets a pill.
+  const GRADE_BUCKET = [
+    { bucket: 'k10',         matches: ['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'] },
+    { bucket: 'senior_high', matches: ['Grade 11', 'Grade 12', '1st Year Senior High', '2nd Year Senior High'] },
+    { bucket: 'college',     matches: ['1st Year', '2nd Year', '3rd Year', '4th Year', '4th Year College', '5th Year'] },
+  ];
+  const BUCKET_LABEL = { k10: 'K-10', senior_high: 'SHS', college: 'College' };
+  function bucketForGrade(gradeLevel) {
+    if (!gradeLevel) return 'k10';
+    const g = String(gradeLevel);
+    for (const b of GRADE_BUCKET) {
+      if (b.matches.includes(g)) return b.bucket;
+    }
+    return 'k10';
+  }
 
   // ---------- Subject tints (mirror subjects.js palette, deterministic) ----------
   // The backend doesn't expose a tint column on subjects (per Phase 6
@@ -71,21 +109,13 @@
   }
 
   // ---------- API helpers ----------
-  // buildListQuery — translates filterState into an /api/questions
-  // querystring. tab beats status, status wins when there's no tab.
+  // Translates filterState into an /api/questions querystring.
   function buildListQuery() {
     const q = new URLSearchParams();
     q.set('limit', String(PAGE_LIMIT));
     q.set('offset', String((filterState.page - 1) * PAGE_LIMIT));
 
-    if (filterState.grade !== 'all') q.set('grade_level', filterState.grade);
-    if (filterState.subject !== 'all') q.set('subject_id', filterState.subject); // subject is the id here
-
-    if (filterState.status === 'my_questions') {
-      q.set('tab', 'my_questions');
-    } else if (filterState.status === 'unanswered' || filterState.status === 'answered') {
-      q.set('status', filterState.status);
-    }
+    if (filterState.level !== 'all') q.set('education_level', filterState.level);
 
     return q.toString();
   }
@@ -94,23 +124,18 @@
     const qs = buildListQuery();
     return window.OlongNotes.api.get('/questions?' + qs);
   }
-
   async function fetchQuestionDetail(id) {
     return window.OlongNotes.api.get('/questions/' + id);
   }
-
   async function postLike(id) {
     return window.OlongNotes.api.post('/questions/' + id + '/like', null, { auth: true });
   }
-
   async function postAnswer(id, content) {
     return window.OlongNotes.api.post('/questions/' + id + '/answer', { content }, { auth: true });
   }
-
   async function postAnswerLike(id) {
     return window.OlongNotes.api.post('/answers/' + id + '/like', null, { auth: true });
   }
-
   async function postAccept(questionId, answerId) {
     return window.OlongNotes.api.post(
       '/questions/' + questionId + '/accept',
@@ -118,34 +143,22 @@
       { auth: true }
     );
   }
-
   async function postQuestion(payload) {
     return window.OlongNotes.api.post('/questions', payload, { auth: true });
   }
 
-  // Convert a subject option's data-value to a backend subject_id. The
-  // HTML dropdown stores subject keys (strings like "mathematics") in the
-  // prototype. The new dropdown we populate below will store numeric IDs.
-  // For backward compatibility with any HTML page that hasn't been
-  // re-rendered, treat non-numeric values as a no-op filter.
-  function isNumericId(v) {
-    return /^\d+$/.test(String(v));
-  }
-
-  // ---------- DOM rendering ----------
-
-  // Render a single question row matching the HTML template already in
-  // community.html (so CSS classes apply unmodified).
+  // ---------- Card rendering ----------
+  // FB-style social card: avatar + asker name + relative time + subject
+  // + curriculum pill + Answered/Unanswered status + body/title +
+  // like/comment counts + Answer button. Whole card body click opens
+  // the detail modal (delegated handler skips the like-btn + Answer).
   function renderQuestionRow(q) {
     const li = document.createElement('li');
     li.className = 'question-row';
     li.dataset.questionId = q.id;
-    li.dataset.status = q.status;
-    li.dataset.mine = q.viewer_is_asker ? 'true' : 'false';
+    li.dataset.status = q.status || 'open';
     li.dataset.grade = q.grade_level || '';
     li.dataset.subject = q.subject_id || '';
-    // Sort key — timestamp in minutes. Use created_at ISO millisecond
-    // divided by 60000 for a numeric sort that respects order.
     li.dataset.timestamp = q.created_at ? String(Math.floor(new Date(q.created_at).getTime() / 60000)) : '0';
     li.dataset.answers = String(q.answers_count != null ? q.answers_count : 0);
     li.dataset.likesCount = String(q.likes_count != null ? q.likes_count : 0);
@@ -153,56 +166,45 @@
 
     const tint = tintFor(q.subjects && q.subjects.subject_name);
     const asker = (q.users && q.users.user_name) || 'Anonymous';
-    const subjectName = (q.subjects && q.subjects.subject_name) || 'General';
-    const statusHtml = q.status === 'answered'
-      ? '<span class="status-badge status-badge--answered">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg>' +
-          'Answered</span>'
-      : '<span class="status-badge status-badge--unanswered">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>' +
-          'Unanswered</span>';
-
-    const gradeHtml = q.grade_level
-      ? '<span class="question-row__dot">&middot;</span>' +
-        '<span class="question-row__grade">' + esc(q.grade_level) + '</span>'
-      : '';
-
-    const tagsHtml = (q.tags || []).map((t) =>
-      '<span class="tag" style="--tag-tint:' + tint + '">' + esc(t) + '</span>'
-    ).join('');
+    const subjectName = (q.subjects && q.subjects.subject_name) || '';
+    const bucket = bucketForGrade(q.grade_level);
+    const bucketLabel = BUCKET_LABEL[bucket] || 'All Levels';
+    const isAnswered = String(q.status || '').toLowerCase() === 'answered';
+    const timeLabel = relativeTime(q.created_at);
 
     const heartIcon =
       '<svg class="like-btn__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 1.8 4.5 5.2 3.6c2.1-.5 4.1.4 5.3 2.1a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>';
 
-    const answerCount = q.answers_count || 0;
-    const answerCountLabel = answerCount + (answerCount === 1 ? ' Answer' : ' Answers');
+    const commentIcon =
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>';
 
+    const answerCount = q.answers_count != null ? q.answers_count : 0;
+    const likeCount = q.likes_count != null ? q.likes_count : 0;
     const likePressed = q.viewer_has_liked ? 'true' : 'false';
     const likedClass = q.viewer_has_liked ? ' is-liked' : '';
+    const statusBadge = isAnswered
+      ? '<span class="question-row__status question-row__status--answered">Answered</span>'
+      : '<span class="question-row__status question-row__status--open">Unanswered</span>';
 
     li.innerHTML =
       '<span class="question-row__avatar" style="--avatar-tint:' + tint + '" aria-hidden="true">' + esc(initials(asker)) + '</span>' +
       '<div class="question-row__body">' +
-        '<div class="question-row__top">' +
-          '<span class="question-row__meta-line">' +
-            '<span class="question-row__subject" style="--subject-tint:' + tint + '">' + esc(subjectName) + '</span>' +
-            gradeHtml +
-            '<span class="question-row__dot">&middot;</span>' +
-            '<span class="question-row__time">' + esc(relativeTime(q.created_at)) + '</span>' +
-          '</span>' +
-          statusHtml +
+        '<div class="question-row__header">' +
+          '<span class="question-row__asker">' + esc(asker) + '</span>' +
+          (timeLabel ? '<span class="question-row__time">· ' + esc(timeLabel) + '</span>' : '') +
+          '<span class="question-row__curriculum question-row__curriculum--' + bucket + '">' + esc(bucketLabel) + '</span>' +
+          statusBadge +
         '</div>' +
-        '<p class="question-row__text">' + esc(q.title || '') + '</p>' +
-        '<p class="question-row__desc">' + esc(q.body || '') + '</p>' +
-        '<div class="question-row__tags">' + tagsHtml + '</div>' +
+        (subjectName ? '<div class="question-row__subject" style="--tag-tint:' + tint + '">#' + esc(subjectName) + '</div>' : '') +
+        '<p class="question-row__text question-row__text--clickable">' + esc(q.body || q.title || '') + '</p>' +
         '<div class="question-row__footer">' +
-          '<button class="like-btn' + likedClass + '" type="button" aria-pressed="' + likePressed + '" data-count="' + esc(q.likes_count || 0) + '">' +
+          '<button class="like-btn' + likedClass + '" type="button" aria-pressed="' + likePressed + '" data-count="' + esc(likeCount) + '">' +
             heartIcon +
-            '<span class="like-btn__count">' + esc(q.likes_count || 0) + '</span>' +
+            '<span class="like-btn__count">' + esc(likeCount) + '</span>' +
           '</button>' +
           '<span class="stat-count">' +
-            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.6-.8L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/></svg>' +
-            '<span class="answer-count">' + esc(answerCountLabel) + '</span>' +
+            commentIcon +
+            '<span class="answer-count">' + esc(answerCount) + '</span>' +
           '</span>' +
           '<button class="btn btn--outline btn--sm question-row__action" type="button">Answer</button>' +
         '</div>' +
@@ -212,52 +214,10 @@
   }
 
   function renderQuestionsInto(list, questions) {
-    // Clear any existing rows before re-rendering. The empty message and
-    // the load-more button get re-added outside this function.
     list.innerHTML = '';
     for (const q of questions) {
       list.appendChild(renderQuestionRow(q));
     }
-  }
-
-  // ---------- Subject dropdown population ----------
-  // Pulls /api/subjects and fills the subject dropdown dynamically so the
-  // page can stay in sync with the catalog without a redeploy. Keeps an
-  // "All Subjects" entry as the first option.
-  async function populateSubjectDropdown() {
-    const dropdown = document.querySelector('.dropdown-filter[data-filter="subject"]');
-    if (!dropdown) return;
-    const menu = dropdown.querySelector('.dropdown-filter__menu');
-    const label = dropdown.querySelector('.filter-select__label');
-    if (!menu || !label) return;
-
-    let subjects = [];
-    try {
-      const data = await window.OlongNotes.api.get('/subjects');
-      subjects = Array.isArray(data) ? data : (data && data.subjects ? data.subjects : []);
-    } catch (err) {
-      console.warn('[community] could not load subjects:', err);
-      return; // leave the dropdown empty
-    }
-    if (!subjects.length) return;
-
-    // Rebuild the menu. Sort alphabetically for predictability.
-    subjects.sort((a, b) =>
-      String(a.subject_name || '').localeCompare(String(b.subject_name || ''))
-    );
-
-    const parts = [
-      '<li class="dropdown-filter__option is-active" role="option" data-value="all">All Subjects</li>',
-    ];
-    for (const s of subjects) {
-      parts.push(
-        '<li class="dropdown-filter__option" role="option" data-value="' +
-        esc(s.id) + '">' + esc(s.subject_name) + '</li>'
-      );
-    }
-    menu.innerHTML = parts.join('');
-    label.textContent = 'All Subjects';
-    filterState.subject = 'all';
   }
 
   // ---------- List load ----------
@@ -282,22 +242,14 @@
       filterState.hasMore = Boolean(pagination.has_more);
       filterState.total = pagination.total || 0;
 
-      // Apply sort. Sort the in-DOM rows so the existing CSS layout stays
-      // untouched and we don't need to rebuild DOM order on every filter
-      // change.
       applySortToRows(list);
 
-      // Empty-state visibility. If a load returns zero rows AND the user
-      // is not paginated, surface the empty message.
       if (empty) empty.hidden = list.children.length !== 0;
-
       ensureLoadMoreButton();
     } catch (err) {
       console.error('[community] failed to load questions:', err);
       if (empty) {
-        empty.textContent = err.status === 401
-          ? 'Log in to see your questions.'
-          : 'Could not load questions. Please try again.';
+        empty.textContent = 'Could not load questions. Please try again.';
         empty.hidden = false;
       }
     }
@@ -324,10 +276,8 @@
   function ensureLoadMoreButton() {
     const list = document.getElementById('questionList');
     if (!list) return;
-    // Remove any existing load-more row
     const existing = document.getElementById('communityLoadMore');
     if (existing) existing.remove();
-
     if (!filterState.hasMore) return;
 
     const li = document.createElement('li');
@@ -344,39 +294,9 @@
     });
   }
 
-  // ---------- Tabs ----------
-  // Mirrors the prototype's class-based active state so the existing CSS
-  // for .questions-tab.is-active still applies.
-  function initQuestionTabs() {
-    const tabs = document.querySelectorAll('.questions-tab');
-    if (!tabs.length) return;
-    const labelToStatus = {
-      'all': 'all',
-      'unanswered': 'unanswered',
-      'answered': 'answered',
-      'my questions': 'my_questions',
-    };
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        tabs.forEach((t) => {
-          t.classList.remove('is-active');
-          t.setAttribute('aria-selected', 'false');
-        });
-        tab.classList.add('is-active');
-        tab.setAttribute('aria-selected', 'true');
-        const key = tab.textContent.trim().toLowerCase();
-        filterState.status = labelToStatus[key] || 'all';
-        loadQuestions();
-      });
-    });
-  }
-
   // ---------- Filter dropdowns ----------
-  // Reuses the existing markup (.dropdown-filter / .filter-select /
-  // .dropdown-filter__menu / .dropdown-filter__option / data-value).
-  // We don't re-implement open/close behavior — that's already wired in
-  // the CSS via .dropdown-filter__menu[hidden]. We just hook the option
-  // click to update state and reload.
+  // Generic handler for the "All Levels" and "Sort" dropdowns. The
+  // subject filter is a bubble row (no dropdown).
   function initDropdownFilters() {
     const dropdowns = document.querySelectorAll('.dropdown-filter');
     dropdowns.forEach((dropdown) => {
@@ -402,8 +322,7 @@
           options.forEach((o) => o.classList.remove('is-active'));
           opt.classList.add('is-active');
           label.textContent = opt.textContent;
-          const v = opt.dataset.value;
-          filterState[key] = v;
+          filterState[key] = opt.dataset.value;
           closeAllDropdowns();
           loadQuestions();
         });
@@ -423,8 +342,6 @@
   }
 
   // ---------- Like buttons (delegated) ----------
-  // One delegated listener on the list. Replaces the prototype's separate
-  // init/render attach — works because the list is the stable ancestor.
   function initLikeButtons() {
     const list = document.getElementById('questionList');
     if (!list) return;
@@ -433,7 +350,7 @@
       const btn = e.target.closest('.like-btn');
       if (!btn) return;
       e.preventDefault();
-      e.stopPropagation(); // don't bubble to row -> open modal
+      e.stopPropagation();
 
       if (!isAuthed()) {
         showInlineBanner('Log in to like questions.');
@@ -459,14 +376,12 @@
 
       try {
         const res = await postLike(id);
-        // Reconcile with the server's value (which saw the trigger fire).
         if (res && typeof res.likes_count === 'number') {
           btn.dataset.count = String(res.likes_count);
           if (countEl) countEl.textContent = String(res.likes_count);
           row.dataset.likesCount = String(res.likes_count);
         }
       } catch (err) {
-        // Revert on failure.
         btn.setAttribute('aria-pressed', String(wasLiked));
         btn.classList.toggle('is-liked', wasLiked);
         if (countEl) countEl.textContent = String(base);
@@ -480,6 +395,24 @@
     });
   }
 
+  // ---------- Card click → question modal ----------
+  // Whole card body opens the modal, EXCEPT the like button and the
+  // Answer button (which have their own handlers).
+  function initCardClick() {
+    const list = document.getElementById('questionList');
+    if (!list) return;
+    list.addEventListener('click', (e) => {
+      // Skip clicks on like + Answer buttons; they have their own behavior.
+      if (e.target.closest('.like-btn')) return;
+      if (e.target.closest('.question-row__action')) return;
+      const row = e.target.closest('.question-row');
+      if (!row) return;
+      const id = parseInt(row.dataset.questionId, 10);
+      if (!id) return;
+      openQuestionModal(id);
+    });
+  }
+
   // ---------- Question detail modal ----------
   function initQuestionModal() {
     const modal = document.getElementById('questionModal');
@@ -489,18 +422,6 @@
     const answerCancelBtn = document.getElementById('answerCancelBtn');
     const answerTextarea = document.getElementById('answerTextarea');
     if (!modal || !content) return;
-
-    // Open modal on Answer button click — delegated, so dynamically
-    // rendered rows are covered.
-    document.addEventListener('click', async (e) => {
-      const btn = e.target.closest('.question-row__action');
-      if (!btn) return;
-      const row = btn.closest('.question-row');
-      if (!row) return;
-      const id = parseInt(row.dataset.questionId, 10);
-      if (!id) return;
-      await openQuestionModal(id);
-    });
 
     if (backBtn) backBtn.addEventListener('click', closeQuestionModal);
 
@@ -518,8 +439,7 @@
       answerPostBtn.addEventListener('click', () => handleAnswerPost());
     }
 
-    // Modal-internal delegations: answer-like + accept buttons. Re-bound
-    // each time the modal opens because the inner content is rebuilt.
+    // Delegated handlers inside the modal — answer-like + accept.
     content.addEventListener('click', async (e) => {
       const likeBtn = e.target.closest('.answer-like-btn');
       if (likeBtn) {
@@ -551,7 +471,6 @@
           return;
         }
         content.innerHTML = renderQuestionDetail(q);
-        bindAcceptButtons();
       } catch (err) {
         console.error('[community] detail load failed:', err);
         content.innerHTML = '<p class="modal-question__loading">Could not load question. Please try again.</p>';
@@ -589,15 +508,11 @@
       try {
         await postAnswer(questionId, content2);
         answerTextarea.value = '';
-        // Refresh the detail content so the new answer appears + the
-        // answers_count on the row in the background list stays in sync.
         const refreshed = await fetchQuestionDetail(questionId);
         if (refreshed && refreshed.question) {
           content.innerHTML = renderQuestionDetail(refreshed.question);
-          bindAcceptButtons();
+          syncRowCounts(questionId, refreshed.question);
         }
-        // Update the row in the list behind the modal.
-        syncRowCounts(questionId, refreshed && refreshed.question ? refreshed.question : null);
         showInlineBanner('Answer posted.', 'success');
       } catch (err) {
         console.error('[community] answer post failed:', err);
@@ -663,13 +578,9 @@
       btn.textContent = 'Accepting…';
       try {
         await postAccept(questionId, answerId);
-        // Re-fetch detail so the accepted badge + status flip are
-        // reflected. The RPC atomicity guarantees is_accepted flipped
-        // everywhere it needed to.
         const refreshed = await fetchQuestionDetail(questionId);
         if (refreshed && refreshed.question) {
           content.innerHTML = renderQuestionDetail(refreshed.question);
-          bindAcceptButtons();
           syncRowCounts(questionId, refreshed.question);
         }
         showInlineBanner('Answer accepted.', 'success');
@@ -686,11 +597,6 @@
         }
       }
     }
-
-    function bindAcceptButtons() {
-      // Accept buttons are already wired via the delegated click handler
-      // above. Nothing to do here — kept as a hook in case future needs.
-    }
   }
 
   function syncRowCounts(questionId, detailQuestion) {
@@ -700,11 +606,6 @@
     row.dataset.answers = String(detailQuestion.answers_count || 0);
     row.dataset.status = detailQuestion.status || row.dataset.status;
     row.dataset.likesCount = String(detailQuestion.likes_count || 0);
-    if (detailQuestion.viewer_is_asker) row.dataset.mine = 'true';
-    if (typeof detailQuestion.viewer_has_liked === 'boolean') {
-      row.dataset.viewerLiked = detailQuestion.viewer_has_liked ? 'true' : 'false';
-    }
-    // Update the answer-count label + status badge in the row.
     const countEl = row.querySelector('.answer-count');
     if (countEl) {
       const n = detailQuestion.answers_count || 0;
@@ -720,20 +621,13 @@
         likeBtn.classList.toggle('is-liked', detailQuestion.viewer_has_liked);
       }
     }
-    const badge = row.querySelector('.status-badge');
-    if (badge && detailQuestion.status === 'answered') {
-      badge.className = 'status-badge status-badge--answered';
-      badge.innerHTML =
-        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg>' +
-        'Answered';
-    }
   }
 
   // ---------- Detail modal rendering ----------
   function renderQuestionDetail(q) {
     const tint = tintFor(q.subjects && q.subjects.subject_name);
     const asker = (q.users && q.users.user_name) || 'Anonymous';
-    const subjectName = (q.subjects && q.subjects.subject_name) || 'General';
+    const subjectName = (q.subjects && q.subjects.subject_name) || '';
     const statusBadge = q.status === 'answered'
       ? '<span class="status-badge status-badge--answered">' +
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg>' +
@@ -742,22 +636,20 @@
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>' +
           'Unanswered</span>';
 
-    const gradeHtml = q.grade_level
-      ? '<span class="question-row__dot">&middot;</span>' +
-        '<span class="question-row__grade">' + esc(q.grade_level) + '</span>'
+    const subjectChip = subjectName
+      ? '<span class="tag tag--hash" style="--tag-tint:' + tint + '">#' + esc(subjectName) + '</span>'
       : '';
-
-    const tagsHtml = (q.tags || []).map((t) =>
-      '<span class="tag" style="--tag-tint:' + tint + '">' + esc(t) + '</span>'
+    const userTags = (q.tags || []).map((t) =>
+      '<span class="tag tag--hash" style="--tag-tint:' + tint + '">#' + esc(t) + '</span>'
     ).join('');
+    const tagsHtml = subjectChip + userTags;
 
     const answersHtml = (q.answers || []).map((a) => renderAnswer(a, q, tint)).join('');
 
     return (
       '<div class="question-row__top">' +
         '<span class="question-row__meta-line">' +
-          '<span class="question-row__subject" style="--subject-tint:' + tint + '">' + esc(subjectName) + '</span>' +
-          gradeHtml +
+          '<span class="question-row__subject" style="--subject-tint:' + tint + '">' + esc(subjectName || 'General') + '</span>' +
           '<span class="question-row__dot">&middot;</span>' +
           '<span class="question-row__time">' + esc(relativeTime(q.created_at)) + '</span>' +
         '</span>' +
@@ -783,16 +675,12 @@
   function renderAnswer(a, q, tint) {
     const isAccepted = Boolean(a.is_accepted);
     const answererName = (a.users && a.users.user_name) || 'Anonymous';
-    const likePressed = isAccepted ? 'false' : 'false'; // viewer_has_liked would come from a per-answer endpoint; conservatively false for now
-    const likedClass = likePressed === 'true' ? ' is-liked' : '';
+    const likePressed = 'false'; // optimistic; flips on user click
 
     const acceptedBadge = isAccepted
       ? '<span class="badge-contributor">Accepted</span>'
       : '';
 
-    // The Accept button is only rendered when viewer_is_asker is true
-    // AND the question is still 'unanswered'. Accepted-as-state is shown
-    // as the badge above instead — so it doesn't double up.
     const acceptBtn = (q.viewer_is_asker && q.status === 'unanswered' && !isAccepted)
       ? '<button class="btn btn--outline btn--sm answer-accept-btn" type="button" data-question-id="' + esc(q.id) + '" data-answer-id="' + esc(a.id) + '">Accept</button>'
       : '';
@@ -810,7 +698,7 @@
           '</div>' +
           '<div class="comment-item__text">' + esc(a.content || '') + '</div>' +
           '<div class="comment-item__footer">' +
-            '<button class="answer-like-btn' + likedClass + '" type="button" aria-pressed="' + likePressed + '" data-answer-id="' + esc(a.id) + '" data-count="' + esc(a.likes_count || 0) + '">' +
+            '<button class="answer-like-btn" type="button" aria-pressed="' + likePressed + '" data-answer-id="' + esc(a.id) + '" data-count="' + esc(a.likes_count || 0) + '">' +
               '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3Zm0 0 4.5-8a2 2 0 0 1 3.6 1.2L14.5 8H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 19H10a3 3 0 0 1-3-3v-5Z"/></svg>' +
               '<span class="answer-like-btn__count">' + esc(a.likes_count || 0) + '</span>' +
             '</button>' +
@@ -822,8 +710,10 @@
   }
 
   // ---------- Ask modal ----------
-  // Subject dropdown is populated dynamically from /api/subjects so it
-  // stays in sync with the catalog without a redeploy.
+  // FB "Create Post" modal: avatar + asker name + 2 dropdowns (Subject
+  // + Grade Level = specific grade string) + big textarea with smile +
+  // "Add to your post!" row. Backend derives the education_level bucket
+  // from the explicit grade_level at write time.
   async function initAskModal() {
     const modal = document.getElementById('askModal');
     const backdrop = document.getElementById('askModalBackdrop');
@@ -832,17 +722,19 @@
     const postBtn = document.getElementById('askPostBtn');
     const errorMsg = document.getElementById('askModalError');
     const subjectSelect = document.getElementById('askSubjectSelect');
+    const levelSelect = document.getElementById('askLevelSelect');
     const descTextarea = document.getElementById('askDescTextarea');
-    const descCount = document.getElementById('askDescCount');
-    const tagsInput = document.getElementById('askTagsInput');
-    const tagsCount = document.getElementById('askTagsCount');
+    const askerNameEl = document.getElementById('askModalAsker');
+    const askerAvatarEl = document.getElementById('askModalAvatar');
 
     if (!modal) return;
 
-    // Populate the subject dropdown
+    // Populate the subject dropdown from /api/subjects
     if (subjectSelect) {
       try {
-        const data = await window.OlongNotes.api.get('/subjects');
+        // ?limit=100 — subjects are stored sparsely; the catalog endpoint
+        // paginates at 20 by default, the ask modal wants every subject.
+        const data = await window.OlongNotes.api.get('/subjects?limit=100');
         const subjects = Array.isArray(data) ? data : (data && data.subjects ? data.subjects : []);
         if (subjects.length) {
           subjects.sort((a, b) =>
@@ -867,26 +759,33 @@
       if (e.key === 'Escape' && modal.classList.contains('is-open')) closeAskModal();
     });
 
-    if (descTextarea && descCount) {
-      descTextarea.addEventListener('input', () => {
-        descCount.textContent = String(descTextarea.value.length);
-      });
-    }
-    if (tagsInput && tagsCount) {
-      tagsInput.addEventListener('input', () => {
-        const count = parseAskTags(tagsInput.value).length;
-        tagsCount.textContent = count + ' / 3';
-      });
-    }
-
     if (postBtn) postBtn.addEventListener('click', submitQuestion);
+
+    function refreshAskerChip() {
+      // Pull the cached user record (set by the auth flow on login).
+      // Fall back to "You" + a neutral avatar so the modal still has a
+      // face before login completes.
+      let name = 'You';
+      try {
+        const raw = localStorage.getItem('olongnotes_user');
+        if (raw) {
+          const u = JSON.parse(raw);
+          if (u && u.username) name = String(u.username);
+        }
+      } catch (_) { /* private mode etc. */ }
+      if (askerNameEl) askerNameEl.textContent = name;
+      if (askerAvatarEl) {
+        askerAvatarEl.textContent = initials(name);
+        askerAvatarEl.style.setProperty('--avatar-tint', tintFor(name));
+      }
+    }
 
     function openAskModal() {
       if (!isAuthed()) {
-        // Auth lives on index.html. Send them there in signup mode.
         window.location.href = 'index.html?auth=signup';
         return;
       }
+      refreshAskerChip();
       modal.classList.add('is-open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
@@ -901,18 +800,9 @@
 
     function resetForm() {
       if (subjectSelect) subjectSelect.value = '';
+      if (levelSelect) levelSelect.value = '';
       if (descTextarea) descTextarea.value = '';
-      if (descCount) descCount.textContent = '0';
-      if (tagsInput) tagsInput.value = '';
-      if (tagsCount) tagsCount.textContent = '0 / 3';
       if (errorMsg) errorMsg.hidden = true;
-    }
-
-    function parseAskTags(raw) {
-      return String(raw || '').split(',')
-        .map((t) => t.trim().replace(/^#/, ''))
-        .filter(Boolean)
-        .slice(0, 3);
     }
 
     async function submitQuestion() {
@@ -921,25 +811,30 @@
         return;
       }
       const subjectId = subjectSelect ? subjectSelect.value : '';
-      const desc = descTextarea ? descTextarea.value.trim() : '';
+      const gradeLevel = levelSelect ? levelSelect.value : '';
+      const body = descTextarea ? descTextarea.value.trim() : '';
 
-      if (!subjectId || !desc) {
-        if (errorMsg) errorMsg.hidden = false;
+      if (!subjectId || !gradeLevel || !body) {
+        if (errorMsg) {
+          errorMsg.textContent = 'Please fill in the subject, grade level, and question before posting.';
+          errorMsg.hidden = false;
+        }
         return;
       }
       if (errorMsg) errorMsg.hidden = true;
-
-      const tags = parseAskTags(tagsInput ? tagsInput.value : '');
 
       const originalLabel = postBtn.textContent;
       postBtn.disabled = true;
       postBtn.textContent = 'Posting…';
 
       try {
+        // Phase 4.0 ask payload: subject_id + explicit grade_level +
+        // body. Backend derives education_level bucket from grade_level
+        // via the same GRADE_LEVEL_ALIASES the GET filter uses.
         const payload = {
-          body: desc,
+          body,
           subject_id: parseInt(subjectId, 10),
-          tags,
+          grade_level: gradeLevel,
         };
         const res = await postQuestion(payload);
         resetForm();
@@ -968,9 +863,6 @@
   }
 
   // ---------- Inline banners ----------
-  // Tiny ephemeral banner above the question list for 401s and other
-  // transient feedback (instead of opening the index.html auth modal —
-  // which doesn't exist on this page anyway).
   function showInlineBanner(message, kind) {
     let host = document.getElementById('communityInlineBanner');
     if (!host) {
@@ -1000,12 +892,11 @@
 
   // ---------- Boot ----------
   document.addEventListener('DOMContentLoaded', async () => {
-    // Populate the subject dropdown before the first load so the
-    // question list can be filtered the moment the user clicks a subject.
-    await populateSubjectDropdown();
-    initQuestionTabs();
+    // Page filter is "All Levels" + Sort only — no subject bubble row.
+    // The ask modal populates its own subject dropdown internally.
     initDropdownFilters();
     initLikeButtons();
+    initCardClick();
     initQuestionModal();
     initAskModal();
     loadQuestions();

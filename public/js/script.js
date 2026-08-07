@@ -553,9 +553,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const noteFileInput = document.getElementById('noteFileInput');
   const noteFileDrop = document.getElementById('noteFileDrop');
   const noteFileDropText = document.getElementById('noteFileDropText');
+  const uploadSubjectField = document.getElementById('uploadSubjectField');
   const uploadSubjectSelect = document.getElementById('uploadSubjectSelect');
-  const uploadSchoolInput = document.getElementById('uploadSchoolInput');
-  const uploadSchoolId = document.getElementById('uploadSchoolId');
   const uploadGradeLevel = document.getElementById('uploadGradeLevel');
   const uploadCollegeFields = document.getElementById('uploadCollegeFields');
   const uploadCollegeCategorySelect = document.getElementById('uploadCollegeCategorySelect');
@@ -563,45 +562,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadCollegeMajorSelect = document.getElementById('uploadCollegeMajorSelect');
   const DEFAULT_NOTE_FILE_TEXT = 'Upload PDF, Word, PowerPoint, or an image';
 
+  [uploadGradeLevel, uploadSubjectSelect, uploadCollegeCategorySelect, uploadCollegeProgramSelect, uploadCollegeMajorSelect]
+    .forEach(initCustomSelect);
+
   const uploadModal = createModal({
     panel: document.getElementById('uploadModal'),
     backdrop: document.getElementById('uploadBackdrop'),
     closeBtn: document.getElementById('uploadClose'),
     bodyClass: 'upload-modal-open',
-  });
-
-  // EDIT 6: heroUploadBtn now role-gates before opening.
-  document.getElementById('heroUploadBtn')?.addEventListener('click', async () => {
-    if (!roleAllowedForUpload()) {
-      alert('You need to be a contributor (limited, verified, or admin) to upload. Contact an admin to upgrade your account.');
-      return;
-    }
-    await refreshUploadSubjects();
-    uploadModal.open();
-  });
-
-  noteFileInput?.addEventListener('change', () => {
-    const file = noteFileInput.files?.[0];
-    noteFileDropText.textContent = file ? file.name : DEFAULT_NOTE_FILE_TEXT;
-    noteFileDrop.classList.toggle('has-file', Boolean(file));
-  });
-
-  const syncSchoolIdFromInput = () => {
-    if (!uploadSchoolInput || !uploadSchoolId) return;
-    const entered = uploadSchoolInput.value.trim();
-    const dataList = document.getElementById('uploadSchoolDatalist');
-    if (!dataList) {
-      uploadSchoolId.value = '';
-      return;
-    }
-    const match = Array.from(dataList.options).find((option) => option.value === entered);
-    uploadSchoolId.value = match ? String(match.dataset.schoolId || '') : '';
-  };
-
-  uploadSchoolInput?.addEventListener('change', syncSchoolIdFromInput);
-  uploadSchoolInput?.addEventListener('blur', syncSchoolIdFromInput);
-  uploadSchoolInput?.addEventListener('input', () => {
-    if (uploadSchoolId) uploadSchoolId.value = '';
   });
 
   const createUploadOption = (value, label, disabled = false, selected = false) => {
@@ -633,151 +601,368 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const mapGradeLevelToEducationLevel = (gradeLevel) => {
-    if (gradeLevel === 'College') return 'college';
     if (gradeLevel === 'Grade 11' || gradeLevel === 'Grade 12') return 'senior_high';
     return 'k10';
+  };
+
+  const showUploadError = (msg) => {
+    if (!uploadForm) return;
+    let el = uploadForm.querySelector('.auth-form__error');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'auth-form__error';
+      el.setAttribute('role', 'alert');
+      el.style.cssText = 'color:#c53030;background:#fed7d7;padding:8px 12px;border-radius:4px;margin:0 0 12px;font-size:13px;';
+      uploadForm.querySelector('h2')?.insertAdjacentElement('afterend', el);
+    }
+    el.textContent = msg;
+  };
+
+  const MORE_SUBJECTS_VALUE = '__more_subjects__';
+  let uploadFullSubjectList = []; // senior_high only — cached for "More subjects" expansion
+
+  const subjectTrackStrand = (subject) => {
+    const strand = subject.shs_strands;
+    return {
+      strandName: strand ? strand.strand_name : null,
+      trackName: strand && strand.shs_tracks ? strand.shs_tracks.track_name : null,
+    };
+  };
+
+  const populateSubjectSelectGrouped = (select, items, placeholder) => {
+    if (!select) return;
+    select.innerHTML = '';
+    select.appendChild(createUploadOption('', placeholder, true, true));
+    select.disabled = items.length === 0;
+    if (items.length === 0) return;
+
+    const grouped = new Map();
+    items.forEach((item) => {
+      const { trackName, strandName } = subjectTrackStrand(item);
+      const track = trackName || 'Other';
+      const strand = strandName || 'General';
+      if (!grouped.has(track)) grouped.set(track, new Map());
+      const strandMap = grouped.get(track);
+      if (!strandMap.has(strand)) strandMap.set(strand, []);
+      strandMap.get(strand).push(item);
+    });
+
+    grouped.forEach((strandMap, trackName) => {
+      strandMap.forEach((subjects, strandName) => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = `${trackName} — ${strandName}`;
+        subjects.forEach((subject) => {
+          optgroup.appendChild(createUploadOption(subject.id, subject.subject_name));
+        });
+        select.appendChild(optgroup);
+      });
+    });
   };
 
   const loadSubjectsForLevel = async (educationLevel) => {
     try {
       const data = await window.OlongNotes.api.get(`/subjects?education_level=${encodeURIComponent(educationLevel)}`);
-      populateSelect(uploadSubjectSelect, Array.isArray(data) ? data : [], 'id', 'subject_name', 'Select a subject');
+      const subjects = Array.isArray(data) ? data : [];
+
+      if (educationLevel === 'senior_high') {
+        uploadFullSubjectList = subjects;
+        const core = subjects.filter((s) => !s.shs_strands);
+        resetSelect(uploadSubjectSelect, 'Select a subject', core.length === 0);
+        core.forEach((s) => uploadSubjectSelect.appendChild(createUploadOption(s.id, s.subject_name)));
+        if (subjects.length > core.length) {
+          const moreOpt = createUploadOption(MORE_SUBJECTS_VALUE, 'More subjects...');
+          moreOpt.dataset.action = 'more';
+          uploadSubjectSelect.appendChild(moreOpt);
+        }
+        uploadSubjectSelect.disabled = false;
+      } else {
+        uploadFullSubjectList = [];
+        populateSelect(uploadSubjectSelect, subjects, 'id', 'subject_name', 'Select a subject');
+      }
     } catch (err) {
       resetSelect(uploadSubjectSelect, 'Unable to load subjects');
+      showUploadError('Could not load subjects. Please try again.');
       console.error('[upload] Failed to load subjects for', educationLevel, err);
     }
   };
 
-  const loadSubjectsForProgram = async (programId) => {
-    if (!programId) {
-      resetSelect(uploadSubjectSelect, 'Select a course after choosing a program');
-      return;
-    }
-    try {
-      const data = await window.OlongNotes.api.get(`/subjects?program_id=${encodeURIComponent(programId)}`);
-      populateSelect(uploadSubjectSelect, Array.isArray(data) ? data : [], 'id', 'subject_name', 'Select a course');
-    } catch (err) {
-      resetSelect(uploadSubjectSelect, 'Unable to load courses');
-      console.error('[upload] Failed to load subjects for program', programId, err);
-    }
-  };
-
   const loadCollegeCategories = async () => {
+    resetSelect(uploadCollegeCategorySelect, 'Loading departments...', true);
     try {
       const data = await window.OlongNotes.api.get('/program-categories');
       populateSelect(uploadCollegeCategorySelect, Array.isArray(data) ? data : [], 'id', 'category_name', 'Select a department');
     } catch (err) {
       resetSelect(uploadCollegeCategorySelect, 'Unable to load departments');
+      showUploadError('Could not load departments. Please try again.');
       console.error('[upload] Failed to load college departments', err);
     }
     resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
     resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-    resetSelect(uploadSubjectSelect, 'Select a course after choosing a department', true);
   };
 
   const loadProgramsForCategory = async (categoryId) => {
+    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
     if (!categoryId) {
       resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
-      resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-      resetSelect(uploadSubjectSelect, 'Select a course after choosing a program', true);
       return;
     }
+    resetSelect(uploadCollegeProgramSelect, 'Loading programs...', true);
     try {
       const data = await window.OlongNotes.api.get(`/programs?category_id=${encodeURIComponent(categoryId)}`);
       populateSelect(uploadCollegeProgramSelect, Array.isArray(data) ? data : [], 'id', 'program_name', 'Select a program');
     } catch (err) {
       resetSelect(uploadCollegeProgramSelect, 'Unable to load programs', true);
+      showUploadError('Could not load programs. Please try again.');
       console.error('[upload] Failed to load programs for category', categoryId, err);
     }
-    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-    resetSelect(uploadSubjectSelect, 'Select a course after choosing a program', true);
   };
 
   const loadMajorsForProgram = async (programId) => {
     if (!programId) {
       resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-      resetSelect(uploadSubjectSelect, 'Select a course after choosing a major', true);
       return;
     }
-
+    resetSelect(uploadCollegeMajorSelect, 'Loading majors...', true);
     try {
       const data = await window.OlongNotes.api.get(`/programs?parent_program_id=${encodeURIComponent(programId)}`);
       const majors = Array.isArray(data) ? data : [];
       if (majors.length > 0) {
         populateSelect(uploadCollegeMajorSelect, majors, 'id', 'program_name', 'Select a major (optional)');
-        uploadCollegeMajorSelect.disabled = false;
-        resetSelect(uploadSubjectSelect, 'Select a course after choosing a major', true);
       } else {
         resetSelect(uploadCollegeMajorSelect, 'No majors available', true);
-        await loadSubjectsForProgram(programId);
       }
     } catch (err) {
       resetSelect(uploadCollegeMajorSelect, 'Unable to load majors', true);
-      resetSelect(uploadSubjectSelect, 'Select a course after choosing a major', true);
+      showUploadError('Could not load majors. Please try again.');
       console.error('[upload] Failed to load majors for program', programId, err);
     }
   };
 
+  const showCollegeMode = async () => {
+    if (uploadSubjectField) uploadSubjectField.style.display = 'none';
+    if (uploadSubjectSelect) uploadSubjectSelect.disabled = true;
+    if (uploadCollegeFields) uploadCollegeFields.style.display = 'grid';
+    await loadCollegeCategories();
+  };
+
+  const showK10OrShsMode = async (gradeLevel) => {
+    if (uploadCollegeFields) uploadCollegeFields.style.display = 'none';
+    resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
+    resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
+    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+    if (uploadSubjectField) uploadSubjectField.style.display = '';
+    await loadSubjectsForLevel(mapGradeLevelToEducationLevel(gradeLevel));
+  };
+
+  const resetUploadFieldsToPlaceholder = () => {
+    uploadFullSubjectList = [];
+    if (uploadSubjectField) uploadSubjectField.style.display = '';
+    resetSelect(uploadSubjectSelect, 'Select grade level first', true);
+    if (uploadCollegeFields) uploadCollegeFields.style.display = 'none';
+    resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
+    resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
+    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+  };
+
+  const openUploadModal = () => {
+    if (uploadGradeLevel) uploadGradeLevel.value = '';
+    resetUploadFieldsToPlaceholder();
+    uploadModal.open();
+  };
+
+  document.getElementById('heroUploadBtn')?.addEventListener('click', () => {
+    if (!roleAllowedForUpload()) {
+      alert('You need to be a contributor (limited, verified, or admin) to upload. Contact an admin to upgrade your account.');
+      return;
+    }
+    openUploadModal();
+  });
+
+  noteFileInput?.addEventListener('change', () => {
+    const file = noteFileInput.files?.[0];
+    noteFileDropText.textContent = file ? file.name : DEFAULT_NOTE_FILE_TEXT;
+    noteFileDrop.classList.toggle('has-file', Boolean(file));
+  });
+
+  /* ---------------- Custom select enhancement (visual layer only) ----------------
+     Wraps a native <select> with a styled trigger + panel. The select
+     stays the real value/data source — populateSelect(), resetSelect(),
+     and populateSubjectSelectGrouped() keep working exactly as before,
+     completely unaware this exists. A MutationObserver watches the
+     select's options/optgroups/disabled state and re-renders the panel
+     whenever they change, so no other code needs to know about this. */
+  function initCustomSelect(selectEl) {
+    if (!selectEl || selectEl.dataset.cselectInit) return;
+    selectEl.dataset.cselectInit = '1';
+
+    const wrapper = selectEl.parentElement;
+    wrapper.classList.add('cselect');
+    selectEl.classList.add('cselect__native');
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'cselect__trigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.innerHTML = `<span class="cselect__value"></span><svg class="cselect__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    wrapper.insertBefore(trigger, selectEl);
+
+    const panel = document.createElement('div');
+    panel.className = 'cselect__panel';
+    panel.setAttribute('role', 'listbox');
+    panel.hidden = true;
+    document.body.appendChild(panel);
+
+    const valueEl = trigger.querySelector('.cselect__value');
+
+    const closePanel = () => {
+      panel.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      wrapper.classList.remove('is-open');
+    };
+
+    const openPanel = () => {
+      if (selectEl.disabled) return;
+      const rect = trigger.getBoundingClientRect();
+      panel.style.top = `${rect.bottom + 4}px`;
+      panel.style.left = `${rect.left}px`;
+      panel.style.width = `${rect.width}px`;
+      panel.style.maxHeight = `${Math.max(120, Math.min(280, window.innerHeight - rect.bottom - 16))}px`;
+      panel.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      wrapper.classList.add('is-open');
+      const active = panel.querySelector('.cselect__option[aria-selected="true"]') || panel.querySelector('.cselect__option');
+      active?.scrollIntoView({ block: 'nearest' });
+    };
+
+    trigger.addEventListener('click', () => (panel.hidden ? openPanel() : closePanel()));
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openPanel();
+        panel.querySelector('.cselect__option')?.focus();
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!wrapper.contains(e.target) && !panel.contains(e.target)) closePanel();
+    });
+    document.getElementById('uploadCard')?.addEventListener('scroll', closePanel, { passive: true });
+    window.addEventListener('resize', closePanel);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.hidden) { closePanel(); trigger.focus(); }
+    });
+
+    const rebuild = () => {
+      trigger.disabled = selectEl.disabled;
+      wrapper.classList.toggle('is-disabled', selectEl.disabled);
+
+      const selectedOpt = selectEl.options[selectEl.selectedIndex];
+      valueEl.textContent = selectedOpt ? selectedOpt.textContent : '';
+      valueEl.classList.toggle('cselect__value--placeholder', !selectEl.value);
+
+      panel.innerHTML = '';
+
+      const buildRow = (opt) => {
+        if (opt.disabled && !opt.value) return; // skip placeholder rows in the panel
+        const row = document.createElement('div');
+        row.className = 'cselect__option';
+        if (opt.dataset.action === 'more') row.classList.add('cselect__option--action');
+        row.textContent = opt.textContent;
+        row.setAttribute('role', 'option');
+        row.tabIndex = -1;
+        if (opt.value === selectEl.value) row.setAttribute('aria-selected', 'true');
+        row.addEventListener('click', () => {
+          selectEl.value = opt.value;
+          rebuild();
+          selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+          closePanel();
+          trigger.focus();
+        });
+        row.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+          else if (e.key === 'Escape') { closePanel(); trigger.focus(); }
+          else if (e.key === 'ArrowDown') { e.preventDefault(); row.nextElementSibling?.focus(); }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); row.previousElementSibling?.focus(); }
+        });
+        panel.appendChild(row);
+      };
+
+      Array.from(selectEl.children).forEach((child) => {
+        if (child.tagName === 'OPTGROUP') {
+          const label = document.createElement('div');
+          label.className = 'cselect__group-label';
+          label.textContent = child.label;
+          panel.appendChild(label);
+          Array.from(child.children).forEach(buildRow);
+        } else if (child.tagName === 'OPTION') {
+          buildRow(child);
+        }
+      });
+    };
+
+    new MutationObserver(rebuild).observe(selectEl, {
+      childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'],
+    });
+    rebuild();
+  }
+
   uploadGradeLevel?.addEventListener('change', async () => {
     const selectedLevel = uploadGradeLevel.value;
-    if (selectedLevel === 'College') {
-      uploadCollegeFields.style.display = 'grid';
-      resetSelect(uploadCollegeCategorySelect, 'Loading departments...', true);
-      await loadCollegeCategories();
-      resetSelect(uploadSubjectSelect, 'Select a course after choosing a program', true);
+    if (!selectedLevel) {
+      resetUploadFieldsToPlaceholder();
+    } else if (selectedLevel === 'College') {
+      await showCollegeMode();
     } else {
-      uploadCollegeFields.style.display = 'none';
-      resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
-      resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
-      resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-      const educationLevel = mapGradeLevelToEducationLevel(selectedLevel);
-      await loadSubjectsForLevel(educationLevel);
+      await showK10OrShsMode(selectedLevel);
     }
   });
 
   uploadCollegeCategorySelect?.addEventListener('change', async () => {
-    const categoryId = uploadCollegeCategorySelect.value;
-    await loadProgramsForCategory(categoryId);
+    await loadProgramsForCategory(uploadCollegeCategorySelect.value);
   });
 
   uploadCollegeProgramSelect?.addEventListener('change', async () => {
-    const programId = uploadCollegeProgramSelect.value;
-    await loadMajorsForProgram(programId);
+    await loadMajorsForProgram(uploadCollegeProgramSelect.value);
   });
 
-  uploadCollegeMajorSelect?.addEventListener('change', async () => {
-    const majorId = uploadCollegeMajorSelect.value;
-    await loadSubjectsForProgram(majorId);
-  });
-
-  const refreshUploadSubjects = async () => {
-    const selectedLevel = uploadGradeLevel?.value;
-    if (!selectedLevel) return;
-    if (selectedLevel === 'College') {
-      uploadCollegeFields.style.display = 'grid';
-      await loadCollegeCategories();
-      resetSelect(uploadSubjectSelect, 'Select a course after choosing a program', true);
-    } else {
-      uploadCollegeFields.style.display = 'none';
-      resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
-      resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
-      resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-      const educationLevel = mapGradeLevelToEducationLevel(selectedLevel);
-      await loadSubjectsForLevel(educationLevel);
+  uploadSubjectSelect?.addEventListener('change', () => {
+    if (uploadSubjectSelect.value === MORE_SUBJECTS_VALUE) {
+      populateSubjectSelectGrouped(uploadSubjectSelect, uploadFullSubjectList, 'Select a subject');
     }
-  };
+  });
 
   // EDIT 5: real upload submit → POST /api/notes via api.upload().
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
 
     const fd = new FormData(uploadForm);
+    const gradeLevel = uploadGradeLevel?.value || '';
+
+    let subjectId = '';
+    if (gradeLevel === 'College') {
+      subjectId = uploadCollegeMajorSelect?.value || uploadCollegeProgramSelect?.value || '';
+    } else {
+      subjectId = uploadSubjectSelect?.value || '';
+    }
+
+    // Backend requires subject_id on every note (routes/notes.js: title,
+    // subject_id, grade_level are all mandatory) — a College upload with
+    // only a Department selected has no subject_id yet, so block it
+    // client-side with a clear message instead of letting it 400.
+    if (!subjectId) {
+      showUploadError(
+        gradeLevel === 'College'
+          ? 'Please select at least a program before uploading.'
+          : 'Please select a subject before uploading.'
+      );
+      return;
+    }
+
     const remapped = new FormData();
     remapped.append('title', fd.get('title') || '');
     remapped.append('annotation', fd.get('caption') || '');
-    remapped.append('subject_id', fd.get('subject_id') || '');
-    remapped.append('school_id', fd.get('school_id') || '');
-    remapped.append('grade_level', fd.get('grade_level') || '');
+    remapped.append('grade_level', gradeLevel);
+    remapped.append('subject_id', subjectId);
     const file = fd.get('note_file');
     if (file && file.size > 0) remapped.append('file', file);
     // tags intentionally dropped.
@@ -789,6 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await ON2.api.upload('/notes', remapped, { auth: true });
       uploadModal.close();
       uploadForm.reset();
+      resetUploadFieldsToPlaceholder();
       noteFileDropText.textContent = DEFAULT_NOTE_FILE_TEXT;
       noteFileDrop.classList.remove('has-file');
       if (data && data.note && data.note.id) {
@@ -800,25 +986,15 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = `document-viewer.html?id=${encodeURIComponent(data.note.id)}`;
       }
     } catch (err) {
-      let el = uploadForm.querySelector('.auth-form__error');
-      if (!el) {
-        el = document.createElement('div');
-        el.className = 'auth-form__error';
-        el.setAttribute('role', 'alert');
-        el.style.cssText = 'color:#c53030;background:#fed7d7;padding:8px 12px;border-radius:4px;margin:0 0 12px;font-size:13px;';
-        uploadForm.querySelector('h2')?.insertAdjacentElement('afterend', el);
-      }
-
       if (err && err.status === 401) {
         if (ON2.clearToken) ON2.clearToken();
         if (ON2.applyRole) ON2.applyRole('viewer');
         uploadModal.close();
-        el.textContent = 'Your session expired. Please log in again to upload.';
+        showUploadError('Your session expired. Please log in again to upload.');
         document.getElementById('authModal')?.classList.add('is-open');
         return;
       }
-
-      el.textContent = esc2((err && err.message) || 'Upload failed.');
+      showUploadError(esc2((err && err.message) || 'Upload failed.'));
     }
   };
 
@@ -835,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('You need to be a contributor (limited, verified, or admin) to upload. Contact an admin to upgrade your account.');
         return;
       }
-      uploadModal.open();
+      openUploadModal();
     } else {
       openAuth('signup');
     }
