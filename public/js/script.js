@@ -552,7 +552,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadForm = document.getElementById('uploadForm');
   const noteFileInput = document.getElementById('noteFileInput');
   const noteFileDrop = document.getElementById('noteFileDrop');
-  const noteFileDropText = document.getElementById('noteFileDropText');
+const noteFileDropText = document.getElementById('noteFileDropText');
+  const noteFileDropCount = document.getElementById('noteFileDropCount');
   const uploadSubjectField = document.getElementById('uploadSubjectField');
   const uploadSubjectSelect = document.getElementById('uploadSubjectSelect');
   const uploadGradeLevel = document.getElementById('uploadGradeLevel');
@@ -563,7 +564,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadSchoolSelect = document.getElementById('uploadSchoolSelect');
   const DEFAULT_NOTE_FILE_TEXT = 'Upload PDF, Word, PowerPoint, or an image';
 
-  [uploadGradeLevel, uploadSubjectSelect, uploadCollegeCategorySelect, uploadCollegeProgramSelect, uploadCollegeMajorSelect, uploadSchoolSelect]
+[uploadGradeLevel, uploadSubjectSelect, uploadCollegeCategorySelect, uploadCollegeProgramSelect, uploadCollegeMajorSelect, uploadSchoolSelect]
+    .forEach(initCustomSelect);
+
+  // Home-page search-card filters: make School / Grade / Subject dropdowns
+  // searchable + scrollable (same custom-select enhancement as the upload
+  // modal). They render inside .select wrappers — see CSS for the
+  // .select.cselect adjustments that keep the layout intact.
+  [document.getElementById('schoolFilter'), document.getElementById('gradeFilter'), document.getElementById('subjectFilter')]
+    .filter(Boolean)
     .forEach(initCustomSelect);
 
   const uploadModal = createModal({
@@ -806,9 +815,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   noteFileInput?.addEventListener('change', () => {
-    const file = noteFileInput.files?.[0];
-    noteFileDropText.textContent = file ? file.name : DEFAULT_NOTE_FILE_TEXT;
-    noteFileDrop.classList.toggle('has-file', Boolean(file));
+    const files = noteFileInput.files;
+    const count = files ? files.length : 0;
+    if (count === 0) {
+      noteFileDropText.textContent = DEFAULT_NOTE_FILE_TEXT;
+      noteFileDrop.classList.remove('has-file');
+      if (noteFileDropCount) noteFileDropCount.hidden = true;
+      return;
+    }
+    if (count === 1) {
+      noteFileDropText.textContent = files[0].name;
+    } else {
+      noteFileDropText.textContent = `${count} files selected`;
+    }
+    noteFileDrop.classList.add('has-file');
+    if (noteFileDropCount) {
+      noteFileDropCount.textContent = `${count} file(s)`;
+      noteFileDropCount.hidden = false;
+    }
   });
 
   /* ---------------- Custom select enhancement (visual layer only) ----------------
@@ -840,6 +864,18 @@ document.addEventListener('DOMContentLoaded', () => {
     panel.hidden = true;
     document.body.appendChild(panel);
 
+    // Search box (added per-select, lives at the top of the panel).
+    // Options are filtered live as the user types; only selects with
+    // many options (schools, subjects, grade levels) enable it.
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'cselect__search';
+    searchInput.setAttribute('aria-label', 'Search options');
+    searchInput.placeholder = 'Search…';
+    searchInput.autocomplete = 'off';
+    searchInput.hidden = true;
+    panel.appendChild(searchInput);
+
     const valueEl = trigger.querySelector('.cselect__value');
 
     const closePanel = () => {
@@ -854,12 +890,20 @@ document.addEventListener('DOMContentLoaded', () => {
       panel.style.top = `${rect.bottom + 4}px`;
       panel.style.left = `${rect.left}px`;
       panel.style.width = `${rect.width}px`;
-      panel.style.maxHeight = `${Math.max(120, Math.min(280, window.innerHeight - rect.bottom - 16))}px`;
+      panel.style.maxHeight = `${Math.max(160, Math.min(340, window.innerHeight - rect.bottom - 16))}px`;
       panel.hidden = false;
       trigger.setAttribute('aria-expanded', 'true');
       wrapper.classList.add('is-open');
-      const active = panel.querySelector('.cselect__option[aria-selected="true"]') || panel.querySelector('.cselect__option');
-      active?.scrollIntoView({ block: 'nearest' });
+      // Reset the filter every time the panel opens so a fresh list shows.
+      if (searchInput.value) { searchInput.value = ''; applyFilter(); }
+      // Ensure the search box is the first thing to receive focus for
+      // searchable selects, unless a selection already exists (then the
+      // selected option is scrolled into view and focus stays put).
+      if (!searchInput.hidden) searchInput.focus();
+      else {
+        const active = panel.querySelector('.cselect__option[aria-selected="true"]') || panel.querySelector('.cselect__option');
+        active?.scrollIntoView({ block: 'nearest' });
+      }
     };
 
     trigger.addEventListener('click', () => (panel.hidden ? openPanel() : closePanel()));
@@ -867,13 +911,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         openPanel();
-        panel.querySelector('.cselect__option')?.focus();
+        if (searchInput.hidden) panel.querySelector('.cselect__option')?.focus();
       }
     });
     document.addEventListener('click', (e) => {
       if (!wrapper.contains(e.target) && !panel.contains(e.target)) closePanel();
     });
-    document.getElementById('uploadCard')?.addEventListener('scroll', closePanel, { passive: true });
+    document.querySelectorAll('.upload-modal .contrib-card, .contrib-card').forEach((card) => {
+      card.addEventListener('scroll', closePanel, { passive: true });
+    });
     window.addEventListener('resize', closePanel);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !panel.hidden) { closePanel(); trigger.focus(); }
@@ -887,10 +933,30 @@ document.addEventListener('DOMContentLoaded', () => {
       valueEl.textContent = selectedOpt ? selectedOpt.textContent : '';
       valueEl.classList.toggle('cselect__value--placeholder', !selectEl.value);
 
+      // Enable the search box when there are enough options to search.
+      searchInput.hidden = selectEl.options.length < 8 || selectEl.disabled;
       panel.innerHTML = '';
+      panel.appendChild(searchInput);
+
+      // Render the (possibly filtered) list of options/groups.
+      applyFilter(false);
+    };
+
+    // Filter the visible options in the panel based on the search term.
+    // `openPanel` passes `false` to always render unfiltered.
+    const applyFilter = (respectQuery = true) => {
+      const query = respectQuery ? searchInput.value.trim().toLowerCase() : '';
+      // Clear any prior "no results" row.
+      const existingNoResults = panel.querySelector('.cselect__no-results');
+      if (existingNoResults) existingNoResults.remove();
+      panel.querySelectorAll('.cselect__option, .cselect__group-label').forEach((el) => el.remove());
+
+      let visibleCount = 0;
 
       const buildRow = (opt) => {
         if (opt.disabled && !opt.value) return; // skip placeholder rows in the panel
+        const text = opt.textContent.toLowerCase();
+        if (query && !text.includes(query)) return;
         const row = document.createElement('div');
         row.className = 'cselect__option';
         if (opt.dataset.action === 'more') row.classList.add('cselect__option--action');
@@ -912,20 +978,37 @@ document.addEventListener('DOMContentLoaded', () => {
           else if (e.key === 'ArrowUp') { e.preventDefault(); row.previousElementSibling?.focus(); }
         });
         panel.appendChild(row);
+        visibleCount++;
       };
 
       Array.from(selectEl.children).forEach((child) => {
         if (child.tagName === 'OPTGROUP') {
-          const label = document.createElement('div');
-          label.className = 'cselect__group-label';
-          label.textContent = child.label;
-          panel.appendChild(label);
-          Array.from(child.children).forEach(buildRow);
+          const groupOptions = Array.from(child.children).filter((o) => {
+            if (o.disabled && !o.value) return false;
+            return !query || o.textContent.toLowerCase().includes(query);
+          });
+          // Only render the group label once at least one member matches.
+          if (groupOptions.length > 0) {
+            const label = document.createElement('div');
+            label.className = 'cselect__group-label';
+            label.textContent = child.label;
+            panel.appendChild(label);
+            groupOptions.forEach(buildRow);
+          }
         } else if (child.tagName === 'OPTION') {
           buildRow(child);
         }
       });
+
+      if (visibleCount === 0 && respectQuery) {
+        const empty = document.createElement('div');
+        empty.className = 'cselect__no-results';
+        empty.textContent = 'No matches';
+        panel.appendChild(empty);
+      }
     };
+
+    searchInput.addEventListener('input', () => applyFilter(true));
 
     selectEl.refreshCselect = rebuild;
 
@@ -1008,32 +1091,51 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const remapped = new FormData();
+const remapped = new FormData();
       remapped.append('title', fd.get('title') || '');
       remapped.append('annotation', fd.get('caption') || '');
       remapped.append('grade_level', gradeLevel);
       if (subjectId) remapped.append('subject_id', subjectId);
       remapped.append('school_id', uploadSchoolSelect?.value || '');
-      const file = fd.get('note_file');
-      if (file && file.size > 0) remapped.append('file', file);
+      // Append every selected file under the same field name. The backend
+      // uses upload.array('file') so multi-image uploads arrive as one
+      // array; each file becomes its own note row sharing a group_id.
+      const fileList = noteFileInput?.files || [];
+      let appended = 0;
+      for (const file of fileList) {
+        if (file && file.size > 0) {
+          remapped.append('file', file);
+          appended++;
+        }
+      }
+      if (appended === 0) {
+        showUploadError('Please select a file to upload.');
+        return;
+      }
       // tags intentionally dropped.
 
       const ON2 = window.OlongNotes || {};
       const esc2 = ON2.escapeHtml || ((s) => String(s ?? ''));
 
       const data = await ON2.api.upload('/notes', remapped, { auth: true });
+      // The upload may create one note (single file) or several (grouped
+      // images). Navigate to the first created note's viewer.
+      const created = data && data.note;
+      const notes = data && (data.notes || []);
+      const firstNote = created || (notes && notes[0]);
       uploadModal.close();
       uploadForm.reset();
       resetUploadFieldsToPlaceholder();
       noteFileDropText.textContent = DEFAULT_NOTE_FILE_TEXT;
       noteFileDrop.classList.remove('has-file');
-      if (data && data.note && data.note.id) {
+      if (noteFileDropCount) noteFileDropCount.hidden = true;
+      if (firstNote && firstNote.id) {
         // Record the upload in the activity log before navigating away.
         // The backend also writes this row from POST /api/notes — this
         // is a safety net for the case where the backend write was
         // masked (e.g., a misconfigured RLS). Fire-and-forget.
-        recordActivity(data.note.id, 'note_uploaded');
-        window.location.href = `document-viewer.html?id=${encodeURIComponent(data.note.id)}`;
+        recordActivity(firstNote.id, 'note_uploaded');
+        window.location.href = `document-viewer.html?id=${encodeURIComponent(firstNote.id)}`;
       }
     } catch (err) {
       const ON2 = window.OlongNotes || {};

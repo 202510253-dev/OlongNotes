@@ -127,24 +127,53 @@ async function toggleInteraction(req, res, { table, idField, denormColumn }) {
   }
 }
 
-// Multer Confic - Memory storage, validate before the Supabase
+// Maps a file extension to its true MIME type. Browsers don't always
+// send a correct/consistent MIME for Office files (some send
+// application/octet-stream or application/zip for .docx), so we use the
+// extension as the source of truth for Word files. This keeps the row's
+// file_type correct and lets the document viewer pick the right renderer.
+const EXTENSION_MIME = {
+    'pdf': 'application/pdf',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'dotx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+    'docm': 'application/vnd.ms-word.document.macroEnabled.12',
+    'xls': 'application/vnd.ms-excel',
+    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'ppt': 'application/vnd.ms-powerpoint',
+    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png'
+}
+
+// All MIME types we accept for upload.
+const ALLOWED_MIMES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+    'application/vnd.ms-word.document.macroEnabled.12',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'image/jpeg',
+    'image/png'
+]
 
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 }, // Strictly 10MB hard limit
     fileFilter: (req, file, cb) => {
-        const allowed = [
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'image/jpeg',
-            'image/png'
-        ]
-        if (allowed.includes(file.mimetype)) {
+        // Resolve the true type from the extension first, falling back to
+        // the browser-provided mimetype when the extension is unknown.
+        const ext = file.originalname.split('.').pop().toLowerCase()
+        const mime = EXTENSION_MIME[ext] || file.mimetype
+        if (ALLOWED_MIMES.includes(mime)) {
+            // Normalize the stored mimetype to our canonical value so the
+            // DB row (and the document viewer) always sees a known type.
+            file.mimetype = mime
             cb(null, true)
         } else {
             cb(new Error('File type not allowed'), false)
@@ -153,8 +182,12 @@ const upload = multer({
 })
 
 // POST /api/notes - verified or limited only
+// Supports single-file uploads (PDF/Word/PPT/image) AND multi-image
+// uploads. Each uploaded file becomes its own note row; all files sent
+// in one request share a single `group_id` so a gallery can be grouped.
 router.post('/', auth, (req, res, next) => {
-  upload.single('file')(req, res, (err) => {
+  // Max 10 files per request (images usually). Same 10MB/file limit.
+  upload.array('file', 10)(req, res, (err) => {
     if (err) return next(err) // passes to global error handler in server.js
     next()
   })
@@ -164,11 +197,12 @@ router.post('/', auth, (req, res, next) => {
     return res.status(403).json({ message: 'Only contributors can upload notes.' })
   }
 
-  if (!req.file) {
+  const files = req.files || []
+  if (!files.length) {
     return res.status(400).json({ message: 'No file uploaded.' })
   }
 
-const { title, subject_id, school_id, grade_level, annotation } = req.body
+  const { title, subject_id, school_id, grade_level, annotation } = req.body
 
   if (!title || !grade_level) {
     return res.status(400).json({ message: 'Title and grade level are required.' })
@@ -191,74 +225,93 @@ const { title, subject_id, school_id, grade_level, annotation } = req.body
     }
   }
 
-  const fileExt = req.file.originalname.split('.').pop()
-  const fileName = `${uuidv4()}.${fileExt}`
-  const filePath = `notes/${fileName}`
+  // All files in this request share one group_id so grouped uploads can
+  // be stitched back together (e.g. a multi-page image set). Single
+  // uploads still get a group_id (harmless) so the schema stays uniform.
+  const groupId = uuidv4()
 
   try {
-    // Upload file to Supabase Storage
-    const { error: storageError } = await supabase.storage
-      .from('olongnotes')
-      .upload(filePath, req.file.buffer, {
-        contentType: req.file.mimetype,
-        upsert: false
-      })
+    const createdNotes = []
+    const uploadedPaths = []
 
-    if (storageError) {
-      console.error('Storage upload error:', storageError)
-      return res.status(500).json({ message: 'File upload failed. Please try again.' })
-    }
+    // Upload each file to Supabase Storage and insert a note row per file.
+    // If anything fails partway, we clean up the files already uploaded
+    // and the DB rows already inserted so no orphans remain.
+    for (const file of files) {
+      const fileExt = file.originalname.split('.').pop()
+      const fileName = `${uuidv4()}.${fileExt}`
+      const filePath = `notes/${fileName}`
 
-    // Get the public URL
-    const { data: urlData } = supabase.storage
-      .from('olongnotes')
-      .getPublicUrl(filePath)
-
-    const fileUrl = urlData.publicUrl
-
-    // Save note record to database
-const { data: note, error: dbError } = await supabase
-      .from('notes')
-      .insert({
-        title,
-        subject_id: parsedSubjectId,
-        school_id: school_id ? parseInt(school_id) : null,
-        grade_level,
-        annotation: annotation || null,
-        file_url: fileUrl,
-        file_type: req.file.mimetype,
-        file_size: req.file.size,
-        user_id: req.user.id,
-        status: req.user.role === 'admin' ? STATUS.PUBLISHED : STATUS.PENDING,
-        download_count: 0,
-        view_count: 0,
-        created_at: new Date().toISOString()
-      })
-      .select()
-      .single()
-
-    if (dbError) {
-      console.error('DB insert error:', dbError)
-      await supabase.storage
+      const { error: storageError } = await supabase.storage
         .from('olongnotes')
-        .remove([filePath])
-      return res.status(500).json({ message: 'Could not save note. Please try again.' })
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        })
+
+      if (storageError) {
+        console.error('Storage upload error:', storageError)
+        throw new Error('File upload failed. Please try again.')
+      }
+      uploadedPaths.push(filePath)
+
+      const { data: urlData } = supabase.storage
+        .from('olongnotes')
+        .getPublicUrl(filePath)
+      const fileUrl = urlData.publicUrl
+
+      const { data: note, error: dbError } = await supabase
+        .from('notes')
+        .insert({
+          title,
+          subject_id: parsedSubjectId,
+          school_id: school_id ? parseInt(school_id) : null,
+          grade_level,
+          annotation: annotation || null,
+          file_url: fileUrl,
+          file_type: file.mimetype,
+          file_size: file.size,
+          user_id: req.user.id,
+          status: req.user.role === 'admin' ? STATUS.PUBLISHED : STATUS.PENDING,
+          group_id: groupId,
+          download_count: 0,
+          view_count: 0,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (dbError) {
+        console.error('DB insert error:', dbError)
+        throw new Error('Could not save note. Please try again.')
+      }
+
+      createdNotes.push(note)
     }
 
-    // Record the upload in the activity log. Fire-and-forget — the
-    // helper never throws, so a log failure won't roll back the upload.
-    writeActivity(req.user.id, 'note_uploaded', note.id, `Note ${note.id} uploaded by user ${req.user.id}`)
+    // Record the upload in the activity log for the first created note.
+    // Fire-and-forget — the helper never throws, so a log failure won't
+    // roll back the upload.
+    if (createdNotes[0]) {
+      writeActivity(req.user.id, 'note_uploaded', createdNotes[0].id, `Note ${createdNotes[0].id} uploaded by user ${req.user.id}`)
+    }
 
     return res.status(201).json({
-      message: 'Note uploaded successfully. It will appear after admin review.',
-      note
+      message: createdNotes.length > 1
+        ? `${createdNotes.length} notes uploaded successfully. They will appear after admin review.`
+        : 'Note uploaded successfully. It will appear after admin review.',
+      notes: createdNotes,
+      note: createdNotes[0],
+      group_id: groupId
     })
 
   } catch (err) {
     console.error('Upload error:', err)
-    // Also attempt cleanup on unexpected errors
-    await supabase.storage.from('olongnotes').remove([filePath]).catch(() => {})
-    return res.status(500).json({ message: 'Server error. Please try again.' })
+    // Attempt cleanup of any files already uploaded to storage.
+    if (uploadedPaths.length) {
+      await supabase.storage.from('olongnotes').remove(uploadedPaths).catch(() => {})
+    }
+    return res.status(500).json({ message: err.message || 'Server error. Please try again.' })
   }
 })
 
@@ -341,6 +394,52 @@ router.get('/', async (req, res) => {
   }
 })
 
+// GET /api/notes/group/:groupId - public
+// Returns every published note that shares the given group_id (a
+// multi-image upload). Ordered by created_at ascending so the gallery
+// shows the images in the order they were uploaded. Empty array when
+// the group doesn't exist or has no published notes yet.
+router.get('/group/:groupId', async (req, res) => {
+    const { groupId } = req.params
+
+    try {
+        const { data, error } = await supabase
+            .from('notes')
+            .select(`
+        id,
+        title,
+        annotation,
+        file_url,
+        file_type,
+        file_size,
+        grade_level,
+        group_id,
+        download_count,
+        view_count,
+        likes_count,
+        bookmarks_count,
+        created_at,
+        status,
+        users ( user_name ),
+        schools ( school_name ),
+        subjects ( subject_name )
+      `)
+            .eq('group_id', groupId)
+            .eq('status', STATUS.PUBLISHED)
+            .order('created_at', { ascending: true })
+
+        if (error) {
+            console.error('GET /api/notes/group/:groupId error:', error)
+            return res.status(500).json({ message: 'Could not fetch group.' })
+        }
+
+        return res.status(200).json(data || [])
+    } catch (err) {
+        console.error('GET /api/notes/group/:groupId error:', err)
+        return res.status(500).json({ message: 'Server error.' })
+    }
+})
+
 // GET /api/notes/:id - public, increments view_count
 //
 // If a valid auth token is present, the response also carries
@@ -363,6 +462,7 @@ router.get('/:id', async (req, res) => {
         file_type,
         file_size,
         grade_level,
+        group_id,
         download_count,
         view_count,
         likes_count,

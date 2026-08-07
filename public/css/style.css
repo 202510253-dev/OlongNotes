@@ -635,6 +635,59 @@ body.modal-open .footer {
   padding: 6px;
 }
 
+/* Search box inside the custom-select dropdown. Typing filters the
+   options below it. Sticky so it stays visible while scrolling a long
+   list (e.g. all schools). */
+.cselect__search {
+  position: sticky;
+  top: -6px;
+  z-index: 1;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--gray-50);
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: var(--gray-800);
+  outline: none;
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+.cselect__search:focus {
+  border-color: var(--accent-blue);
+  background: var(--surface);
+}
+.cselect__search::placeholder {
+  color: var(--gray-400);
+}
+
+.cselect__no-results {
+  padding: 12px 10px;
+  font-size: 0.85rem;
+  color: var(--gray-400);
+  text-align: center;
+}
+
+/* Home-page search-card filters: when a .select wrapper becomes a
+   .cselect, drop its own border/background so only the custom trigger
+   (which carries the same look) shows — no doubled outline. */
+.select.cselect {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+.select.cselect .select svg {
+  display: none;
+}
+.select.cselect .cselect__trigger {
+  flex: 1;
+  min-height: 42px;
+}
+.select.cselect .cselect__trigger svg:last-child {
+  color: var(--gray-600);
+}
+
 .cselect__group-label {
   font-size: 0.72rem;
   font-weight: 700;
@@ -733,6 +786,16 @@ body.modal-open .footer {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.file-drop__count {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  background: var(--navy-100, rgba(61, 107, 240, 0.1));
+  padding: 4px 10px;
+  border-radius: 999px;
 }
 
 .contrib-form__note {

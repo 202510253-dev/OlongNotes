@@ -23,7 +23,7 @@ app.use((err, req, res, next) => {
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
+defaultSrc: ["'self'"],
 imgSrc: [
         "'self'",
         "data:",
@@ -32,7 +32,15 @@ imgSrc: [
         "https://images.unsplash.com",
         "https://*.unsplash.com"
       ],
-      frameSrc: ["'self'", "https://eqllumjkfkwgikauklth.supabase.co"],
+      // frameSrc must include docs.google.com so the Word/Office preview
+      // (Google Docs Viewer) can be embedded in <iframe>. Kept to the
+      // minimal set of embeddable origins.
+      frameSrc: [
+        "'self'",
+        "https://eqllumjkfkwgikauklth.supabase.co",
+        "https://*.supabase.co",
+        "https://docs.google.com"
+      ],
     },
   },
 }))

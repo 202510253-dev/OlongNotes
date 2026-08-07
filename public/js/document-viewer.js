@@ -55,7 +55,7 @@
     return sub.split('+')[0].toUpperCase();
   }
 
-  function showError(message) {
+function showError(message) {
     const main = document.querySelector('main') || document.body;
     main.innerHTML = `
       <div class="container" style="padding: 60px 20px; text-align: center;">
@@ -66,12 +66,38 @@
     `;
   }
 
-  // ---------- Adapter: backend row → viewer shape ----------
+// ---------- Adapter: backend row → viewer shape ----------
 
   function adaptNote(row) {
     const fileType = row.file_type || '';
     const isPdf = fileType === 'application/pdf' || /\.pdf(\?|$)/i.test(row.file_url || '');
     const isImage = fileType.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(row.file_url || '');
+    // Word documents: official MIME types, or a .doc/.docx/.dotx/.docm
+    // extension on the URL (some storage buckets / CDNs strip the MIME,
+    // so we fall back to the extension like we already do for PDF/image).
+const isWord =
+      fileType === 'application/msword' ||
+      fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.template' ||
+      fileType === 'application/vnd.ms-word' ||
+      fileType === 'application/vnd.ms-word.document.macroEnabled.12' ||
+      fileType === 'application/vnd.ms-word.template.macroEnabledTemplate.12' ||
+      fileType.includes('word') ||
+      /\.(docx?|dotx|docm)(\?|$)/i.test(row.file_url || '');
+    // PowerPoint documents: official MIME types, or a .ppt/.pptx/.potx/
+    // .ppsx/.pptm/.potm/.ppsm extension on the URL. Rendered via Google
+    // Docs Viewer, same as Word.
+    const isPowerPoint =
+      fileType === 'application/vnd.ms-powerpoint' ||
+      fileType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      fileType === 'application/vnd.openxmlformats-officedocument.presentationml.template' ||
+      fileType === 'application/vnd.openxmlformats-officedocument.presentationml.slideshow' ||
+      fileType === 'application/vnd.ms-powerpoint.presentation.macroEnabled.12' ||
+      fileType === 'application/vnd.ms-powerpoint.template.macroEnabled.12' ||
+      fileType === 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12' ||
+      fileType.includes('powerpoint') ||
+      fileType.includes('presentation') ||
+      /\.(pptx?|potx|ppsx|pptm|potm|ppsm)(\?|$)/i.test(row.file_url || '');
     return {
       id: row.id,
       title: row.title || 'Untitled',
@@ -96,8 +122,14 @@
       // anonymous viewers.
       viewerHasLiked: Boolean(row.viewer_has_liked),
       viewerHasBookmarked: Boolean(row.viewer_has_bookmarked),
+      // Present when this note was uploaded as one of several files in a
+      // multi-image upload. The viewer uses it to load the whole group
+      // and render a gallery instead of a single image.
+groupId: row.group_id || '',
       isPdf,
       isImage,
+      isWord,
+      isPowerPoint,
     };
   }
 
@@ -151,35 +183,93 @@
 
   // ---------- Document page rendering ----------
 
-  // Render the actual file inline when possible (PDF or image). Falls
-  // back to the cover-page scaffolding when the file type isn't one
-  // we can embed directly (e.g. docx, pptx).
+// Render the actual file inline when possible (PDF, image, or Word via
+  // Google Docs viewer). Falls back to the cover-page scaffolding when
+  // the file type isn't one we can embed directly (e.g. pptx, xlsx).
   function renderFileEmbed(doc) {
-    // ---- DEBUG (Step 2): log the exact URL being displayed ----
-    console.log('Image/File URL being used:', doc.fileUrl);
     if (doc.isPdf && doc.fileUrl) {
       return `
         <iframe
           src="${esc(doc.fileUrl)}"
           title="${esc(doc.title)}"
-          loading="eager"
+          loading="lazy"
         ></iframe>
       `;
     }
-    if (doc.isImage && doc.fileUrl) {
+if (doc.isImage && doc.fileUrl) {
+      // Fixed-size image display that fits the viewer. No zoom/pan
+      // controls — images scale to fit the available space, keep their
+      // aspect ratio, and always show in full. Reliable on all devices
+      // and simple to maintain (fixed display is the intended UX).
       return `
-        <div class="doc-page__image" style="text-align: center; padding: 24px;">
-          <img src="${esc(doc.fileUrl)}"
-               alt="${esc(doc.title)}"
-               style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);" />
+        <div class="viewer-image">
+          <img
+            class="viewer-image__img"
+            src="${esc(doc.fileUrl)}"
+            alt="${esc(doc.title)}"
+            loading="lazy"
+          />
         </div>
-        <div class="doc-page__pagenum">${esc(doc.title)}</div>
+      `;
+    }
+// Word documents are previewed via Google's Docs Viewer. Wrap it in a
+    // full-bleed container so it fills the viewer panel on all screens.
+    // The loading spinner / iframe visibility is toggled from JS (see
+    // wireWordLoadEvents) — we cannot use inline onload handlers because
+    // the CSP (helmet) sets script-src-attr 'none', which blocks them.
+    // The user-controlled file URL is escaped.
+    if (doc.isWord && doc.fileUrl) {
+      const encodedUrl = encodeURIComponent(doc.fileUrl);
+      return `
+        <div class="viewer-word">
+          <div class="viewer-loading" id="wordLoading">Loading Word document…</div>
+          <iframe
+            class="viewer-word__frame"
+            id="wordFrame"
+            src="https://docs.google.com/gview?url=${encodedUrl}&embedded=true"
+            title="${esc(doc.title)}"
+            loading="lazy"
+          ></iframe>
+          <div class="viewer-word__bar">
+            <span class="viewer-word__label"><strong>Word Document</strong> — Preview powered by Google Docs</span>
+            <a class="viewer-word__download" href="${esc(doc.fileUrl)}" target="_blank" rel="noopener noreferrer">⬇ Download Original</a>
+          </div>
+        </div>
       `;
     }
     return renderCoverPage(doc);
   }
 
-  // Fallback cover page when no embeddable file — uses real title,
+  // Wire up the Word preview iframe without inline event handlers.
+  // The CSP (helmet) sets script-src-attr 'none', so inline onload is
+  // blocked. Instead we attach listeners from JS: hide the spinner once
+  // the iframe loads, and show a "download directly" fallback if Google
+  // Docs takes too long (or the file isn't reachable by the viewer).
+  function wireWordLoadEvents(doc) {
+    const iframe = document.getElementById('wordFrame');
+    const loading = document.getElementById('wordLoading');
+    if (!iframe) return;
+
+    iframe.addEventListener('load', () => {
+      if (loading) loading.style.display = 'none';
+      iframe.style.display = 'block';
+    });
+
+    // Fallback — if the iframe hasn't fired 'load' within 10s, offer a
+    // direct link instead of leaving an endless spinner.
+    setTimeout(() => {
+      if (loading && loading.style.display !== 'none') {
+        loading.innerHTML = `
+          Loading is taking too long.
+          <a href="${esc(doc.fileUrl)}" target="_blank" rel="noopener noreferrer"
+             style="color:#0066cc;">Open the document directly</a>
+        `;
+        iframe.style.display = 'none';
+      }
+    }, 10000);
+  }
+
+// Fallback cover page when no embeddable file — uses real title,
   // subject, school, author (every dynamic field is escaped).
   function renderCoverPage(doc) {
     return `
@@ -209,13 +299,128 @@
     `;
   }
 
+// ---------- Multi-image gallery ----------
+  //
+  // When a note has a group_id (it was uploaded as part of a multi-image
+  // set), the viewer fetches the whole group and shows a gallery with a
+  // main image, prev/next navigation, a counter, and tappable thumbnails.
+  // This lets the user see ALL uploaded images, not just the first one.
+  // Navigation is wired from JS (CSP-safe; no inline onclick handlers).
+
+  // Fetch every published note in the same group, adapted to viewer shape.
+  async function loadGroupNotes(doc) {
+    if (!api || !doc.groupId) return [];
+    try {
+      const rows = await api.get(`/notes/group/${encodeURIComponent(doc.groupId)}`);
+      const items = (Array.isArray(rows) ? rows : []).map(adaptNote);
+      // Only group images together (a multi-image upload). If the group
+      // contains non-image files, fall back to the single-note view.
+      return items.filter((n) => n.isImage && n.fileUrl);
+    } catch (e) {
+      console.error('[OlongNotes] Failed to load image group.', e);
+      return [];
+    }
+  }
+
+  // Render a gallery of images into the viewer page.
+  function renderGallery(viewerPage, notes) {
+    const escNoteUrl = (n) => esc(n.fileUrl);
+    const escNoteTitle = (n) => esc(n.title);
+
+    viewerPage.innerHTML = `
+      <div class="gallery">
+        <div class="gallery__main">
+          <img
+            class="gallery__image"
+            data-index="0"
+            src="${escNoteUrl(notes[0])}"
+            alt="${escNoteTitle(notes[0])}"
+            loading="eager"
+          />
+        </div>
+        ${
+          notes.length > 1
+            ? `
+            <div class="gallery__nav">
+              <button class="gallery__btn" type="button" data-dir="-1" aria-label="Previous image">‹</button>
+              <span class="gallery__counter">1 / ${notes.length}</span>
+              <button class="gallery__btn" type="button" data-dir="1" aria-label="Next image">›</button>
+            </div>
+            <div class="gallery__thumbs">
+              ${notes
+                .map(
+                  (n, i) => `
+                  <button
+                    class="gallery__thumb${i === 0 ? ' is-active' : ''}"
+                    type="button"
+                    data-index="${i}"
+                    aria-label="Image ${i + 1}"
+                  >
+                    <img src="${escNoteUrl(n)}" alt="${escNoteTitle(n)}" loading="lazy" />
+                  </button>`
+                )
+                .join('')}
+            </div>`
+            : ''
+        }
+      </div>
+    `;
+
+    // Wire prev/next + thumbnail navigation (CSP-safe).
+    const img = viewerPage.querySelector('.gallery__image');
+    const counter = viewerPage.querySelector('.gallery__counter');
+    const thumbs = Array.from(viewerPage.querySelectorAll('.gallery__thumb'));
+    let index = 0;
+
+    const show = (i) => {
+      index = (i + notes.length) % notes.length;
+      img.src = notes[index].fileUrl;
+      img.alt = notes[index].title;
+      if (counter) counter.textContent = `${index + 1} / ${notes.length}`;
+      thumbs.forEach((t, ti) => t.classList.toggle('is-active', ti === index));
+    };
+
+    viewerPage.querySelectorAll('.gallery__btn').forEach((btn) => {
+      btn.addEventListener('click', () => show(index + Number(btn.dataset.dir || 0)));
+    });
+    thumbs.forEach((t) => {
+      t.addEventListener('click', () => show(Number(t.dataset.index)));
+    });
+  }
+
   function renderPage(doc) {
     const viewerPage = document.getElementById('viewerPage');
     const viewerScrollarea = document.getElementById('viewerScrollarea');
     if (!viewerPage) return;
+
+    // Multi-image upload: load the whole group and render a gallery.
+    if (doc.groupId && doc.isImage) {
+      loadGroupNotes(doc).then((notes) => {
+        if (notes.length > 1) {
+          renderGallery(viewerPage, notes);
+        } else {
+          renderSinglePage(doc, viewerPage, viewerScrollarea);
+        }
+      });
+      return;
+    }
+
+    renderSinglePage(doc, viewerPage, viewerScrollarea);
+  }
+
+  // Render a single file (PDF / single image / Word / cover page).
+  function renderSinglePage(doc, viewerPage, viewerScrollarea) {
+    if (!viewerPage) return;
     viewerPage.innerHTML = renderFileEmbed(doc);
-    viewerPage.classList.toggle('viewer-page--pdf', doc.isPdf);
-    viewerScrollarea?.classList.toggle('viewer-scrollarea--pdf', doc.isPdf);
+    // Word docs are embedded as full-bleed iframes (like PDFs), so they
+    // share the same full-bleed page/scrollarea classes. This keeps the
+    // viewer mobile-friendly — the iframe fills the panel width. Images
+    // use a fixed, fitted display inside the normal scrolling page.
+    const fullBleed = doc.isPdf || doc.isWord;
+    viewerPage.classList.toggle('viewer-page--pdf', fullBleed);
+    viewerScrollarea?.classList.toggle('viewer-scrollarea--pdf', fullBleed);
+    // Attach CSP-safe load listeners for the Word preview iframe.
+    if (doc.isWord) wireWordLoadEvents(doc);
   }
 
   // ---------- Toolbar handlers ----------
@@ -232,31 +437,45 @@
       }
     });
 
-    let zoom = 100;
-    const viewerPage = document.getElementById('viewerPage');
-    const zoomLevel = document.getElementById('zoomLevel');
+const viewerPage = document.getElementById('viewerPage');
     const viewerScrollarea = document.getElementById('viewerScrollarea');
 
-    const applyZoom = () => {
-      // Only scale if we rendered the cover page (no PDF iframe to scale).
-      if (doc.isPdf || doc.isImage) return;
-      viewerPage.style.transform = `scale(${zoom / 100})`;
-      zoomLevel.textContent = `${zoom}%`;
+// PDFs and Word docs have their own built-in zoom controls, and images
+    // use a fixed fitted display — so the toolbar zoom buttons are
+    // irrelevant for all three. Disable them so they don't act like dead
+    // "reload" buttons. Only the cover-page fallback keeps them enabled.
+    if (doc.isPdf || doc.isWord || doc.isImage) {
+      ['zoomInBtn', 'zoomOutBtn', 'resetBtn'].forEach((id) => {
+        const b = document.getElementById(id);
+        if (b) b.disabled = true;
+      });
+    }
+
+    // Zoom controls for the cover-page fallback (no embeddable file).
+    // PDF/Word embeds have their own controls and images are fixed, so
+    // this only scales the cover page.
+    let coverZoom = 100;
+    const zoomLevel = document.getElementById('zoomLevel');
+
+    const applyCoverZoom = () => {
+      if (doc.isPdf || doc.isImage || doc.isWord) return;
+      viewerPage.style.transform = `scale(${coverZoom / 100})`;
+      zoomLevel.textContent = `${coverZoom}%`;
     };
 
     document.getElementById('zoomInBtn')?.addEventListener('click', () => {
-      zoom = Math.min(zoom + 10, 200);
-      applyZoom();
+      coverZoom = Math.min(coverZoom + 10, 200);
+      applyCoverZoom();
     });
 
     document.getElementById('zoomOutBtn')?.addEventListener('click', () => {
-      zoom = Math.max(zoom - 10, 50);
-      applyZoom();
+      coverZoom = Math.max(coverZoom - 10, 50);
+      applyCoverZoom();
     });
 
     document.getElementById('resetBtn')?.addEventListener('click', () => {
-      zoom = 100;
-      applyZoom();
+      coverZoom = 100;
+      applyCoverZoom();
       viewerScrollarea?.scrollTo({ top: 0 });
     });
 
