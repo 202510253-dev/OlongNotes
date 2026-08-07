@@ -20,7 +20,22 @@ app.use((err, req, res, next) => {
   return res.status(500).json({ message: 'Server error. Please try again.' })
 })
 // Security middleware
-app.use(helmet())
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+imgSrc: [
+        "'self'",
+        "data:",
+        "https://eqllumjkfkwgikauklth.supabase.co",
+        "https://*.supabase.co",
+        "https://images.unsplash.com",
+        "https://*.unsplash.com"
+      ],
+      frameSrc: ["'self'", "https://eqllumjkfkwgikauklth.supabase.co"],
+    },
+  },
+}))
 app.use(cors({
     origin: 'http://localhost:3000'
 }))
@@ -59,3 +74,4 @@ const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
     console.log(`OlongNotes running on http://localhost:${PORT}`)
 })
+

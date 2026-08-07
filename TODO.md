@@ -64,3 +64,13 @@
 - [x] `node --check` passes for `script.js`.
 
 **All tasks complete.**
+
+## College upload 500 fix + hardening (feedback round 6)
+
+- [x] Root cause: College upload sent `subject_id` = the selected program/major **ID from the `programs` table**, but `notes.subject_id` is a FK to `subjects.id`. Posting a program ID violated `notes_subject_id_fkey` → 500.
+- [x] `routes/notes.js`: `subject_id` is now optional. Backend validates a provided `subject_id` must be a positive integer (rejects non-numeric/<=0 with a 400 instead of a PostgREST type-guess 500). Insert uses the parsed `parsedSubjectId` (null when omitted/empty).
+- [x] `script.js` submit handler: for **College**, resolve the real subject via `GET /api/subjects?program_id=<programOrMajorId>` and send that subject's `id`; if no row maps, send empty `subject_id` (backend stores NULL) instead of a program ID. For **K-10/SHS**, still require a real subject selection.
+- [x] `script.js` submit handler: added a double-submit guard (`form.dataset.uploading`) so rapid clicks can't stack duplicate uploads; released in `finally`.
+- [x] `server.js` CSP: expanded `imgSrc` to allow `https://*.supabase.co` and `https://images.unsplash.com` / `https://*.unsplash.com` (previously only the exact storage bucket — external images were blocked).
+- [x] Debugging instrumentation (from the task's steps): `document-viewer.js` logs the exact `fileUrl` being rendered; `supabase.js` logs `process.env.SUPABASE_URL` and `supabase.supabaseUrl` on server start.
+- [x] `node --check` passes for `server.js`, `routes/notes.js`, `supabase.js`, `public/js/script.js`, `public/js/document-viewer.js`.

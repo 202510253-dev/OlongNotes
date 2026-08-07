@@ -268,14 +268,19 @@ async function resolveViewerUserId(req) {
 
 // ---------- POST /api/questions ----------
 //
-// Body: { body, subject_id (int), education_level (k10|senior_high|college)?, tags (string[]?) }
+// Body: { body, subject_id (int), grade_level (string), tags (string[]?) }
 // Auth: required + role gate (limited / verified / admin).
 //
-// Phase 4.0 mockup — the ask modal exposes a single 3-bucket dropdown
-// (K-10 / SHS / College) instead of a free-text grade_level. We map the
-// bucket to a representative grade_level string when writing the row so
-// existing GET filters that join on grade_level still work. If no bucket
-// is provided, grade_level is left NULL.
+// Phase 4.0 mockup — the ask modal exposes a Grade Level dropdown of
+// specific grade strings (Grade 9 through 4th Year College), so the
+// frontend sends grade_level directly. The backend stores the grade
+// string verbatim; the GET filter derives the 3-bucket education_level
+// grouping via GRADE_LEVEL_ALIASES at read time.
+//
+// For backward compat with the previous Phase 4.0 ask modal that sent
+// { education_level: 'k10' | 'senior_high' | 'college' }, we accept that
+// too and map it to a representative grade_level string. New callers
+// should send grade_level, not education_level.
 //
 // Behavior:
 //   1. Validate required fields.
@@ -283,7 +288,8 @@ async function resolveViewerUserId(req) {
 //   3. If tags provided (array of strings), INSERT into question_tags.
 //   4. writeActivity('question_asked') — fire-and-forget.
 const BUCKET_TO_GRADE = {
-  k10: 'Grade 7',          // representative value within the bucket
+  // Legacy fallback for callers that still send education_level buckets.
+  k10: 'Grade 7',
   senior_high: 'Grade 11',
   college: 'College',
 }
@@ -303,14 +309,16 @@ router.post('/', auth, async (req, res) => {
     return res.status(400).json({ message: 'subject_id is required.' })
   }
 
-  // Resolve the grade_level write value: prefer the new education_level
-  // bucket when present (it owns the Phase 4.0 ask modal), fall back to
-  // an explicit grade_level string for legacy callers, else NULL.
+  // Resolve the grade_level write value. Prefer an explicit grade_level
+  // string (Phase 4.0 ask modal — Grade 9 through 4th Year College). Fall
+  // back to mapping a legacy education_level bucket to a representative
+  // grade_level. Either field is sufficient; both missing leaves
+  // grade_level NULL.
   let gradeLevelWrite = null
-  if (education_level && BUCKET_TO_GRADE[String(education_level)]) {
+  if (grade_level && typeof grade_level === 'string' && grade_level.trim().length > 0) {
+    gradeLevelWrite = grade_level.trim().slice(0, 50)
+  } else if (education_level && BUCKET_TO_GRADE[String(education_level)]) {
     gradeLevelWrite = BUCKET_TO_GRADE[String(education_level)]
-  } else if (grade_level) {
-    gradeLevelWrite = String(grade_level)
   }
 
   const title = deriveTitle(body)

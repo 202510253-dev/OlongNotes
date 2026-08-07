@@ -168,10 +168,27 @@ router.post('/', auth, (req, res, next) => {
     return res.status(400).json({ message: 'No file uploaded.' })
   }
 
-  const { title, subject_id, school_id, grade_level, annotation } = req.body
+const { title, subject_id, school_id, grade_level, annotation } = req.body
 
-  if (!title || !subject_id || !grade_level) {
-    return res.status(400).json({ message: 'Title, subject, and grade level are required.' })
+  if (!title || !grade_level) {
+    return res.status(400).json({ message: 'Title and grade level are required.' })
+  }
+
+  // subject_id is optional. For K-10 / SHS tiers it must map to a real
+  // subjects.id. For College uploads there may be no row in `subjects`
+  // for the selected program/major (programs live in a separate table),
+  // so we allow null rather than send a program ID that violates the
+  // FK constraint `notes_subject_id_fkey` (which caused 500s).
+  //
+  // Strengthening: if a subject_id IS provided, it must be a positive
+  // integer. A non-numeric value would make PostgREST guess the column
+  // type and could throw — reject it explicitly.
+  let parsedSubjectId = null
+  if (subject_id !== undefined && subject_id !== null && subject_id !== '') {
+    parsedSubjectId = parseInt(subject_id, 10)
+    if (Number.isNaN(parsedSubjectId) || parsedSubjectId <= 0) {
+      return res.status(400).json({ message: 'Invalid subject_id. It must be a positive integer or omitted for College tier.' })
+    }
   }
 
   const fileExt = req.file.originalname.split('.').pop()
@@ -200,11 +217,11 @@ router.post('/', auth, (req, res, next) => {
     const fileUrl = urlData.publicUrl
 
     // Save note record to database
-    const { data: note, error: dbError } = await supabase
+const { data: note, error: dbError } = await supabase
       .from('notes')
       .insert({
         title,
-        subject_id: parseInt(subject_id),
+        subject_id: parsedSubjectId,
         school_id: school_id ? parseInt(school_id) : null,
         grade_level,
         annotation: annotation || null,

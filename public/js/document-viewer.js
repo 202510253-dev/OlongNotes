@@ -155,16 +155,15 @@
   // back to the cover-page scaffolding when the file type isn't one
   // we can embed directly (e.g. docx, pptx).
   function renderFileEmbed(doc) {
+    // ---- DEBUG (Step 2): log the exact URL being displayed ----
+    console.log('Image/File URL being used:', doc.fileUrl);
     if (doc.isPdf && doc.fileUrl) {
       return `
-        <div class="pdf-placeholder">
-          <div class="pdf-placeholder-icon">📄</div>
-          <p class="pdf-placeholder-title">${esc(doc.title)}</p>
-          <p class="pdf-placeholder-desc">PDF documents open in a new tab for the best viewing experience.</p>
-          <a href="${esc(doc.fileUrl)}" target="_blank" rel="noopener noreferrer" class="pdf-open-btn">
-            Open PDF
-          </a>
-        </div>
+        <iframe
+          src="${esc(doc.fileUrl)}"
+          title="${esc(doc.title)}"
+          loading="eager"
+        ></iframe>
       `;
     }
     if (doc.isImage && doc.fileUrl) {
@@ -212,8 +211,11 @@
 
   function renderPage(doc) {
     const viewerPage = document.getElementById('viewerPage');
+    const viewerScrollarea = document.getElementById('viewerScrollarea');
     if (!viewerPage) return;
     viewerPage.innerHTML = renderFileEmbed(doc);
+    viewerPage.classList.toggle('viewer-page--pdf', doc.isPdf);
+    viewerScrollarea?.classList.toggle('viewer-scrollarea--pdf', doc.isPdf);
   }
 
   // ---------- Toolbar handlers ----------

@@ -960,47 +960,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // EDIT 5: real upload submit → POST /api/notes via api.upload().
+// EDIT 5: real upload submit → POST /api/notes via api.upload().
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
 
-    const fd = new FormData(uploadForm);
-    const gradeLevel = uploadGradeLevel?.value || '';
-
-    let subjectId = '';
-    if (gradeLevel === 'College') {
-      subjectId = uploadCollegeMajorSelect?.value || uploadCollegeProgramSelect?.value || '';
-    } else {
-      subjectId = uploadSubjectSelect?.value || '';
-    }
-
-    // Backend requires subject_id on every note (routes/notes.js: title,
-    // subject_id, grade_level are all mandatory) — a College upload with
-    // only a Department selected has no subject_id yet, so block it
-    // client-side with a clear message instead of letting it 400.
-    if (!subjectId) {
-      showUploadError(
-        gradeLevel === 'College'
-          ? 'Please select at least a program before uploading.'
-          : 'Please select a subject before uploading.'
-      );
-      return;
-    }
-
-    const remapped = new FormData();
-    remapped.append('title', fd.get('title') || '');
-    remapped.append('annotation', fd.get('caption') || '');
-    remapped.append('grade_level', gradeLevel);
-    remapped.append('subject_id', subjectId);
-    remapped.append('school_id', uploadSchoolSelect?.value || '');
-    const file = fd.get('note_file');
-    if (file && file.size > 0) remapped.append('file', file);
-    // tags intentionally dropped.
-
-    const ON2 = window.OlongNotes || {};
-    const esc2 = ON2.escapeHtml || ((s) => String(s ?? ''));
+    // Prevent double-submit while an upload is in-flight (stacking guard).
+    // This also covers the case where the button is clicked twice before
+    // the modal closes — only one request is ever sent.
+    if (uploadForm.dataset.uploading === '1') return;
+    uploadForm.dataset.uploading = '1';
 
     try {
+      const fd = new FormData(uploadForm);
+      const gradeLevel = uploadGradeLevel?.value || '';
+
+      // Resolve the real subject_id. For K-10 / SHS it comes straight
+      // from the subject dropdown. For College the dropdowns carry
+      // *program/major* IDs (from the `programs` table), which are NOT
+      // valid `subjects.id` values — sending them as subject_id violates
+      // the notes_subject_id_fkey FK and causes a 500. So for College we
+      // look up the subject row for the selected program/major via
+      // GET /api/subjects?program_id=<id>. If one exists we send its id;
+      // otherwise we send empty (backend stores NULL) rather than a
+      // program ID that would break the constraint.
+      let subjectId = '';
+      if (gradeLevel === 'College') {
+        const programOrMajorId = uploadCollegeMajorSelect?.value || uploadCollegeProgramSelect?.value || '';
+        if (programOrMajorId && window.OlongNotes?.api) {
+          try {
+            const subjects = await window.OlongNotes.api.get(`/subjects?program_id=${encodeURIComponent(programOrMajorId)}`);
+            const list = Array.isArray(subjects) ? subjects : [];
+            if (list.length > 0) subjectId = String(list[0].id);
+          } catch (_) {
+            // Lookup failed — fall through with empty subjectId.
+          }
+        }
+      } else {
+        subjectId = uploadSubjectSelect?.value || '';
+      }
+
+      // Backend now accepts empty subject_id (stores NULL) — but for
+      // K-10/SHS we still require a real subject selection. For College
+      // we allow an empty subject if no subjects row maps to the
+      // selected program/major.
+      if (!subjectId && gradeLevel !== 'College') {
+        showUploadError('Please select a subject before uploading.');
+        return;
+      }
+
+      const remapped = new FormData();
+      remapped.append('title', fd.get('title') || '');
+      remapped.append('annotation', fd.get('caption') || '');
+      remapped.append('grade_level', gradeLevel);
+      if (subjectId) remapped.append('subject_id', subjectId);
+      remapped.append('school_id', uploadSchoolSelect?.value || '');
+      const file = fd.get('note_file');
+      if (file && file.size > 0) remapped.append('file', file);
+      // tags intentionally dropped.
+
+      const ON2 = window.OlongNotes || {};
+      const esc2 = ON2.escapeHtml || ((s) => String(s ?? ''));
+
       const data = await ON2.api.upload('/notes', remapped, { auth: true });
       uploadModal.close();
       uploadForm.reset();
@@ -1016,6 +1036,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = `document-viewer.html?id=${encodeURIComponent(data.note.id)}`;
       }
     } catch (err) {
+      const ON2 = window.OlongNotes || {};
+      const esc2 = ON2.escapeHtml || ((s) => String(s ?? ''));
       if (err && err.status === 401) {
         if (ON2.clearToken) ON2.clearToken();
         if (ON2.applyRole) ON2.applyRole('viewer');
@@ -1025,10 +1047,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       showUploadError(esc2((err && err.message) || 'Upload failed.'));
+    } finally {
+      // Always release the lock so the user can retry on failure.
+      delete uploadForm.dataset.uploading;
     }
   };
 
   if (uploadForm) {
+    // Guard against double-binding: remove then re-add so hot-reloads /
+    // multiple initializations never stack duplicate submit handlers.
     uploadForm.removeEventListener('submit', handleUploadSubmit);
     uploadForm.addEventListener('submit', handleUploadSubmit);
   }
