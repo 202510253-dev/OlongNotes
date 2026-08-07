@@ -560,9 +560,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadCollegeCategorySelect = document.getElementById('uploadCollegeCategorySelect');
   const uploadCollegeProgramSelect = document.getElementById('uploadCollegeProgramSelect');
   const uploadCollegeMajorSelect = document.getElementById('uploadCollegeMajorSelect');
+  const uploadSchoolSelect = document.getElementById('uploadSchoolSelect');
   const DEFAULT_NOTE_FILE_TEXT = 'Upload PDF, Word, PowerPoint, or an image';
 
-  [uploadGradeLevel, uploadSubjectSelect, uploadCollegeCategorySelect, uploadCollegeProgramSelect, uploadCollegeMajorSelect]
+  [uploadGradeLevel, uploadSubjectSelect, uploadCollegeCategorySelect, uploadCollegeProgramSelect, uploadCollegeMajorSelect, uploadSchoolSelect]
     .forEach(initCustomSelect);
 
   const uploadModal = createModal({
@@ -738,6 +739,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  let uploadSchoolsLoaded = false;
+  const loadSchoolsForUpload = async () => {
+    if (uploadSchoolsLoaded || !uploadSchoolSelect) return;
+    try {
+      const data = await window.OlongNotes.api.get('/schools');
+      const schools = Array.isArray(data) ? data : [];
+      uploadSchoolSelect.innerHTML = '';
+      uploadSchoolSelect.appendChild(createUploadOption('', 'No specific school', false, true));
+      schools.forEach((s) => uploadSchoolSelect.appendChild(createUploadOption(s.id, s.school_name)));
+      uploadSchoolsLoaded = true;
+    } catch (err) {
+      uploadSchoolSelect.innerHTML = '';
+      uploadSchoolSelect.appendChild(createUploadOption('', 'No specific school', false, true));
+      showUploadError('Could not load the schools list. You can still upload without selecting one.');
+      console.error('[upload] Failed to load schools', err);
+    }
+  };
+
   const showCollegeMode = async () => {
     if (uploadSubjectField) uploadSubjectField.style.display = 'none';
     if (uploadSubjectSelect) uploadSubjectSelect.disabled = true;
@@ -762,11 +781,19 @@ document.addEventListener('DOMContentLoaded', () => {
     resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
     resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
     resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+    if (uploadSchoolSelect) {
+      uploadSchoolSelect.value = '';
+      uploadSchoolSelect.refreshCselect?.();
+    }
   };
 
-  const openUploadModal = () => {
-    if (uploadGradeLevel) uploadGradeLevel.value = '';
+  const openUploadModal = async () => {
+    if (uploadGradeLevel) {
+      uploadGradeLevel.value = '';
+      uploadGradeLevel.refreshCselect?.();
+    }
     resetUploadFieldsToPlaceholder();
+    await loadSchoolsForUpload();
     uploadModal.open();
   };
 
@@ -900,6 +927,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     };
 
+    selectEl.refreshCselect = rebuild;
+
     new MutationObserver(rebuild).observe(selectEl, {
       childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'],
     });
@@ -963,6 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
     remapped.append('annotation', fd.get('caption') || '');
     remapped.append('grade_level', gradeLevel);
     remapped.append('subject_id', subjectId);
+    remapped.append('school_id', uploadSchoolSelect?.value || '');
     const file = fd.get('note_file');
     if (file && file.size > 0) remapped.append('file', file);
     // tags intentionally dropped.

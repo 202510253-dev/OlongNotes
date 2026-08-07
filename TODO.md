@@ -51,4 +51,16 @@
 - [x] Fix: add a direct `rebuild();` call in the row click handler immediately after `selectEl.value = opt.value;` and before dispatching the `change` event, so the trigger label updates before downstream handlers run. Applies to all five selects (they share `initCustomSelect`).
 - [x] `node --check` passes for `script.js`.
 
+## School field re-add (feedback round 5)
+
+- [x] HTML: add a School field (`#uploadSchoolSelect` with `name="school_id"`, default "No specific school") as a `<div class="auth-field">` right after `#uploadCollegeFields` closes and before the Document file field. Uses the same `.cselect` machinery as the other dropdowns.
+- [x] JS: declare `uploadSchoolSelect` and register it in the custom-select enhancer list.
+- [x] JS: expose `selectEl.refreshCselect = rebuild;` inside `initCustomSelect` so any code that sets `.value` directly can force a re-render (fixes the pre-existing Grade Level reset bug too).
+- [x] JS: add `loadSchoolsForUpload()` — lazy-loads `GET /api/schools` once, caches, falls back to "No specific school" on error.
+- [x] JS: `resetUploadFieldsToPlaceholder()` now resets School's value and calls `refreshCselect()`.
+- [x] JS: `openUploadModal()` is now async — resets Grade Level with `refreshCselect()`, then awaits `loadSchoolsForUpload()` before opening.
+- [x] JS: submit handler appends `school_id` (empty string → backend stores `null` via `school_id ? parseInt(...) : null`).
+- [x] CSS: zero changes — School reuses existing `.cselect` styling.
+- [x] `node --check` passes for `script.js`.
+
 **All tasks complete.**

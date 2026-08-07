@@ -193,6 +193,14 @@
             </div>
           </div>
 
+          <div class="auth-field" style="grid-column: 1 / -1;">
+            <span class="auth-field__label">School</span>
+            <select id="uploadSchoolSelect" name="school_id">
+              <option value="" selected>No specific school</option>
+            </select>
+            <span class="auth-field__hint">Optional — leave as "No specific school" if not tied to one.</span>
+          </div>
+
           <label class="auth-field auth-field--file" for="noteFileInput" style="grid-column: 1 / -1;">
             <span class="auth-field__label">Document file</span>
             <div class="file-drop" id="noteFileDrop">
@@ -297,7 +305,7 @@
           <button class="btn btn--primary btn--sm" type="button" id="navSignupBtn">Sign Up</button>
         </div>
 
-        <!-- USER: profile chip (avatar + username). Hidden entirely for "viewer". -->
+    
         <button class="navbar__profile-chip" id="navProfileChip" type="button" hidden>
           <span class="navbar__profile-avatar" id="navProfileAvatar" aria-hidden="true">JD</span>
           <span class="navbar__profile-name" id="navProfileName">Juan Dela Cruz</span>
