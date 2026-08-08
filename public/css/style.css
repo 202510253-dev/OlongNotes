@@ -1373,6 +1373,22 @@ body.upload-modal-open .footer {
 }
 .featured-card__rank svg { flex-shrink: 0; }
 
+/* Gallery badge — shows on a feed card that collapsed a multi-image
+   upload into one entry. Sits top-right next to the rank badge. */
+.featured-card__gallery {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  background: rgba(11, 31, 77, 0.75);
+  padding: 5px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
 .featured-card__body { flex: 1; }
 .featured-card__title {
   font-family: var(--font-display);

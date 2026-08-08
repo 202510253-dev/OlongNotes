@@ -1,0 +1,45 @@
+/* =========================================================
+   PROFILE PLACEHOLDER — static "coming soon" page
+========================================================= */
+
+.profile-placeholder {
+  padding: 72px 24px;
+}
+
+.profile-placeholder__card {
+  max-width: 460px;
+  margin: 0 auto;
+  background: var(--surface);
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
+  padding: 48px 40px;
+  text-align: center;
+}
+
+.profile-placeholder__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(61, 107, 240, 0.12);
+  color: var(--accent-blue, #3d6bf0);
+  margin-bottom: 20px;
+}
+
+.profile-placeholder__title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 12px;
+}
+
+.profile-placeholder__text {
+  font-size: 0.95rem;
+  color: var(--gray-600, #8891a0);
+  line-height: 1.55;
+  margin: 0 0 24px;
+}
+

@@ -65,6 +65,8 @@ function adaptNoteFromApi(row) {
     subject: (row.subjects && row.subjects.subject_name) || 'General',
     likes: typeof row.likes_count === 'number' ? row.likes_count : 0,
     downloads: typeof row.download_count === 'number' ? row.download_count : 0,
+    group_id: row.group_id || '',
+    fileType: row.file_type || '',
   };
 }
 
@@ -80,9 +82,26 @@ async function fetchFeaturedNotes() {
     return FEATURED_NOTES;
   }
   try {
-    const data = await ON.api.get('/notes?limit=4');
-    const notes = (data && data.notes) || [];
-    return notes.map(adaptNoteFromApi);
+    // GET /api/featured already returns notes grouped by group_id
+    // (multi-image uploads collapsed into one entry with `imageCount`).
+    // We pass a cache-buster timestamp so the browser/any intermediary
+    // never serves a stale featured list after a new upload.
+    const data = await ON.api.get(`/featured?t=${Date.now()}`);
+    const featured = Array.isArray(data) ? data : [];
+
+    // The backend already shapes each item with the fields the renderer
+    // expects (id, title, school, grade, subject, likes, downloads,
+    // imageCount). Map through adaptNoteFromApi only as a safety net for
+    // any raw row that somehow lacks that shape.
+    return featured.map((item) => {
+      // Backend `featured` already carries imageCount. If for any reason
+      // an item lacks the grouped shape (e.g. a cached raw row), derive
+      // imageCount from a single note.
+      const base = item.imageCount !== undefined
+        ? item
+        : { ...adaptNoteFromApi(item), imageCount: 1 };
+      return base;
+    });
   } catch (e) {
     console.warn('[OlongNotes] Failed to load featured notes — using fallback.', e);
     return FEATURED_NOTES;
@@ -109,12 +128,19 @@ function renderFeaturedNotes(notes = FEATURED_NOTES) {
       const tint = UNIFIED_TINT;
       const tintSoft = hexToSoftTint(tint);
       const rankBadge = index === 0 ? `<span class="featured-card__rank">${CROWN_ICON_SVG}Most Popular</span>` : '';
+      // Multi-image uploads are collapsed into a single card (see
+      // fetchFeaturedNotes). When that happens we show a small gallery
+      // badge so visitors know the card represents several images.
+      const galleryBadge = note.imageCount > 1
+        ? `<span class="featured-card__gallery">🖼 ${note.imageCount} images</span>`
+        : '';
       // Note: `data-note-id` carries the backend ID for Step 4 wiring
       // (document viewer fetches by ?id=X).
       return `
         <article class="featured-card" style="--tint:${tint}; --tint-soft:${tintSoft};" data-note-id="${esc(note.id || '')}">
           <div class="featured-card__top">
             <span class="featured-card__icon" aria-hidden="true">${NOTE_ICON_SVG}</span>
+            ${galleryBadge}
             ${rankBadge}
           </div>
           <div class="featured-card__body">
@@ -1057,15 +1083,7 @@ const noteFileDropText = document.getElementById('noteFileDropText');
       const fd = new FormData(uploadForm);
       const gradeLevel = uploadGradeLevel?.value || '';
 
-      // Resolve the real subject_id. For K-10 / SHS it comes straight
-      // from the subject dropdown. For College the dropdowns carry
-      // *program/major* IDs (from the `programs` table), which are NOT
-      // valid `subjects.id` values — sending them as subject_id violates
-      // the notes_subject_id_fkey FK and causes a 500. So for College we
-      // look up the subject row for the selected program/major via
-      // GET /api/subjects?program_id=<id>. If one exists we send its id;
-      // otherwise we send empty (backend stores NULL) rather than a
-      // program ID that would break the constraint.
+      // Subject is optional for K-10/SHS.
       let subjectId = '';
       if (gradeLevel === 'College') {
         const programOrMajorId = uploadCollegeMajorSelect?.value || uploadCollegeProgramSelect?.value || '';
@@ -1082,10 +1100,7 @@ const noteFileDropText = document.getElementById('noteFileDropText');
         subjectId = uploadSubjectSelect?.value || '';
       }
 
-      // Backend now accepts empty subject_id (stores NULL) — but for
-      // K-10/SHS we still require a real subject selection. For College
-      // we allow an empty subject if no subjects row maps to the
-      // selected program/major.
+      // Subject is required for K-10/SHS.
       if (!subjectId && gradeLevel !== 'College') {
         showUploadError('Please select a subject before uploading.');
         return;
@@ -1097,9 +1112,7 @@ const remapped = new FormData();
       remapped.append('grade_level', gradeLevel);
       if (subjectId) remapped.append('subject_id', subjectId);
       remapped.append('school_id', uploadSchoolSelect?.value || '');
-      // Append every selected file under the same field name. The backend
-      // uses upload.array('file') so multi-image uploads arrive as one
-      // array; each file becomes its own note row sharing a group_id.
+
       const fileList = noteFileInput?.files || [];
       let appended = 0;
       for (const file of fileList) {
@@ -1130,10 +1143,8 @@ const remapped = new FormData();
       noteFileDrop.classList.remove('has-file');
       if (noteFileDropCount) noteFileDropCount.hidden = true;
       if (firstNote && firstNote.id) {
-        // Record the upload in the activity log before navigating away.
-        // The backend also writes this row from POST /api/notes — this
-        // is a safety net for the case where the backend write was
-        // masked (e.g., a misconfigured RLS). Fire-and-forget.
+
+        // Record the activity.
         recordActivity(firstNote.id, 'note_uploaded');
         window.location.href = `document-viewer.html?id=${encodeURIComponent(firstNote.id)}`;
       }
@@ -1192,10 +1203,7 @@ const remapped = new FormData();
   };
 
   if (discoverScroll && discoverItems.length) {
-    // Matches the @media (max-width: 1100px) breakpoint in style.css —
-    // when the discover section collapses to stacked flow, the
-    // scroll-pinned swap effect doesn't make sense, so skip the
-    // scroll listener entirely.
+
     const isNarrowViewport = () => window.matchMedia('(max-width: 1100px)').matches;
 
     if (isNarrowViewport()) {
@@ -1240,10 +1248,7 @@ const remapped = new FormData();
   const navProfileName = document.getElementById('navProfileName');
   const navProfileAvatar = document.getElementById('navProfileAvatar');
 
-  // Legacy navbar (other pages): standalone Log In / Sign Up buttons +
-  // a .profile-icon button that's always visible today. We hide/show
-  // these in lockstep with the modern navbar so login state reflects
-  // everywhere, not just on the landing page.
+  // Legacy navbar (document-viewer.html): profile icon.
   const legacyLoginBtn = document.getElementById('navLoginBtn');
   const legacySignupBtn = document.getElementById('navSignupBtn');
   const legacyProfileIcon = document.querySelector('.profile-icon');

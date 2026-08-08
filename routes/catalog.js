@@ -128,6 +128,92 @@ try {
 })
 
 // ─────────────────────────────────────────────
+// GET /api/featured — public
+// Featured notes for the landing page. Returns multi-image uploads as
+// ONE entry (grouped by group_id) so the feed isn't cluttered with N
+// separate cards for a single N-image upload. Each returned item is
+// shaped like the frontend's adapted note (id/title/school/grade/
+// subject/likes/downloads) plus an `imageCount` field so the feed can
+// show a gallery badge. Single notes are returned as-is (imageCount 1).
+//
+// The response is explicitly no-cache. The frontend also appends a
+// ?t=<timestamp> cache-buster, but the header guarantees the browser /
+// any intermediary never serves a stale featured list.
+// ─────────────────────────────────────────────
+router.get('/featured', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('notes')
+      .select(`
+        id,
+        title,
+        file_url,
+        file_type,
+        grade_level,
+        group_id,
+        download_count,
+        likes_count,
+        created_at,
+        status,
+        users ( user_name ),
+        schools ( school_name ),
+        subjects ( subject_name )
+      `)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    if (error) {
+      console.error('Fetch featured notes error:', error)
+      return res.status(500).json({ message: 'Could not fetch featured notes.' })
+    }
+
+    const notes = data || []
+
+    // Group by group_id. Keep insertion order stable by walking the
+    // already-descending list and preserving the first occurrence.
+    const groupMap = new Map()
+    notes.forEach((n) => {
+      const key = n.group_id || `single_${n.id}`
+      if (!groupMap.has(key)) groupMap.set(key, [])
+      groupMap.get(key).push(n)
+    })
+
+    const featured = []
+    groupMap.forEach((members) => {
+      const rep = members[0]
+      const isImage = (rep.file_type || '').startsWith('image/')
+      // Only a genuine multi-IMAGE set collapses into a gallery card.
+      // Anything else (a single image, or two files that happen to share
+      // a group_id) stays as individual cards.
+      const multiImages = members.filter((m) => (m.file_type || '').startsWith('image/'))
+      const imageCount = isImage ? multiImages.length : 1
+
+      featured.push({
+        id: rep.id,
+        title: rep.title || 'Untitled',
+        school: (rep.schools && rep.schools.school_name) || 'Unknown school',
+        grade: rep.grade_level || '',
+        subject: (rep.subjects && rep.subjects.subject_name) || 'General',
+        likes: members.reduce((s, m) => s + (parseInt(m.likes_count) || 0), 0),
+        downloads: members.reduce((s, m) => s + (parseInt(m.download_count) || 0), 0),
+        group_id: rep.group_id || '',
+        imageCount,
+      })
+    })
+
+    // No-cache so the feed always reflects the latest published notes.
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+    res.setHeader('Pragma', 'no-cache')
+    return res.status(200).json(featured)
+
+  } catch (err) {
+    console.error('GET /api/featured error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
+// ─────────────────────────────────────────────
 // GET /api/program-categories — public
 // ─────────────────────────────────────────────
 router.get('/program-categories', async (req, res) => {

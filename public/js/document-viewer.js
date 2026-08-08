@@ -55,6 +55,76 @@
     return sub.split('+')[0].toUpperCase();
   }
 
+  // Friendly, human-readable label for the file type shown in the
+  // Statistics panel. The stored MIME strings for Office files are long
+  // and cryptic (e.g. "application/vnd.openxmlformats-officedocument.
+  // presentationml.presentation"), so we map known types to short labels
+  // and fall back to the URL extension when the MIME is unknown.
+  function getFileTypeLabel(fileType, fileUrl) {
+    if (!fileType && !fileUrl) return 'Unknown';
+
+    const type = String(fileType || '').toLowerCase();
+    const url = String(fileUrl || '').toLowerCase();
+
+    // Image types
+    if (type.startsWith('image/')) {
+      const imgMap = {
+        png: 'PNG Image',
+        jpeg: 'JPEG Image',
+        jpg: 'JPEG Image',
+        gif: 'GIF Image',
+        webp: 'WebP Image',
+        svg: 'SVG Image',
+        bmp: 'BMP Image'
+      };
+      for (const ext of Object.keys(imgMap)) {
+        if (type.includes(ext)) return imgMap[ext];
+      }
+      return 'Image';
+    }
+
+    // PDF
+    if (type === 'application/pdf' || url.includes('.pdf')) {
+      return 'PDF Document';
+    }
+
+    // Word — check MIME first, then the specific .docx/.doc match so the
+    // "word" keyword inside MATLAB/excel-style types doesn't false-match.
+    if (type.includes('msword') || type.includes('wordprocessingml') ||
+        type.includes('ms-word') ||
+        /\.(docx|dotx|docm)$/.test(url) ||
+        /\.doc$/.test(url)) {
+      return 'Word Document';
+    }
+
+    // PowerPoint — cover the raw MIME fragments users actually see
+    // (e.g. "presentationml" from the pptx MIME) plus the legacy types.
+    if (type.includes('presentationml') ||
+        type.includes('powerpoint') ||
+        type.includes('ms-powerpoint') ||
+        /\.(pptx|ppsx|potx|pptm|potm|ppsm)$/.test(url) ||
+        /\.ppt$/.test(url)) {
+      return 'PowerPoint Presentation';
+    }
+
+    // Excel
+    if (type.includes('excel') || type.includes('ms-excel') ||
+        type.includes('spreadsheetml') ||
+        /\.(xlsx|xlsm|xlsb)$/.test(url) ||
+        /\.xls$/.test(url)) {
+      return 'Excel Spreadsheet';
+    }
+
+    // Plain text
+    if (type === 'text/plain' || url.includes('.txt')) {
+      return 'Text File';
+    }
+
+    // Fallback — derive a label from the URL extension.
+    const ext = url.split('#')[0].split('?')[0].split('.').pop();
+    return ext ? `${ext.toUpperCase()} File` : 'File';
+  }
+
 function showError(message) {
     const main = document.querySelector('main') || document.body;
     main.innerHTML = `
@@ -171,7 +241,7 @@ groupId: row.group_id || '',
 
     document.getElementById('statLikes').textContent = formatCount(doc.likes);
     document.getElementById('statDownloads').textContent = formatCount(doc.downloads);
-    document.getElementById('statFileType').textContent = formatFileType(doc.fileType) || 'FILE';
+    document.getElementById('statFileType').textContent = getFileTypeLabel(doc.fileType, doc.fileUrl);
 
     // Pre-set the like / save buttons based on whether the current
     // viewer has already liked/bookmarked. Without this, the buttons
@@ -237,6 +307,31 @@ if (doc.isImage && doc.fileUrl) {
         </div>
       `;
     }
+    // PowerPoint documents are previewed via Google's Docs Viewer too.
+    // We reuse the exact same Word container/styles (loading spinner,
+    // full-bleed iframe, download bar) so the experience is consistent.
+    // The user-controlled file URL is escaped; loading/iframe visibility
+    // is toggled from JS (wirePowerPointLoadEvents) because the CSP
+    // (helmet) blocks inline onload handlers.
+    if (doc.isPowerPoint && doc.fileUrl) {
+      const encodedUrl = encodeURIComponent(doc.fileUrl);
+      return `
+        <div class="viewer-word">
+          <div class="viewer-loading" id="pptLoading">Loading PowerPoint presentation…</div>
+          <iframe
+            class="viewer-word__frame"
+            id="pptFrame"
+            src="https://docs.google.com/gview?url=${encodedUrl}&embedded=true"
+            title="${esc(doc.title)}"
+            loading="lazy"
+          ></iframe>
+          <div class="viewer-word__bar">
+            <span class="viewer-word__label"><strong>PowerPoint Presentation</strong> — Preview powered by Google Docs</span>
+            <a class="viewer-word__download" href="${esc(doc.fileUrl)}" target="_blank" rel="noopener noreferrer">⬇ Download Original</a>
+          </div>
+        </div>
+      `;
+    }
     return renderCoverPage(doc);
   }
 
@@ -269,7 +364,34 @@ if (doc.isImage && doc.fileUrl) {
     }, 10000);
   }
 
-// Fallback cover page when no embeddable file — uses real title,
+  // Wire up the PowerPoint preview iframe without inline event handlers.
+  // Identical in behavior to wireWordLoadEvents. Uses its own element
+  // IDs (pptFrame/pptLoading) so it never collides with a Word embed.
+  function wirePowerPointLoadEvents(doc) {
+    const iframe = document.getElementById('pptFrame');
+    const loading = document.getElementById('pptLoading');
+    if (!iframe) return;
+
+    iframe.addEventListener('load', () => {
+      if (loading) loading.style.display = 'none';
+      iframe.style.display = 'block';
+    });
+
+    // Fallback — if the iframe hasn't fired 'load' within 10s, offer a
+    // direct link instead of leaving an endless spinner.
+    setTimeout(() => {
+      if (loading && loading.style.display !== 'none') {
+        loading.innerHTML = `
+          Loading is taking too long.
+          <a href="${esc(doc.fileUrl)}" target="_blank" rel="noopener noreferrer"
+             style="color:#0066cc;">Open the presentation directly</a>
+        `;
+        iframe.style.display = 'none';
+      }
+    }, 10000);
+  }
+
+  // Fallback cover page when no embeddable file — uses real title,
   // subject, school, author (every dynamic field is escaped).
   function renderCoverPage(doc) {
     return `
@@ -412,15 +534,17 @@ if (doc.isImage && doc.fileUrl) {
   function renderSinglePage(doc, viewerPage, viewerScrollarea) {
     if (!viewerPage) return;
     viewerPage.innerHTML = renderFileEmbed(doc);
-    // Word docs are embedded as full-bleed iframes (like PDFs), so they
-    // share the same full-bleed page/scrollarea classes. This keeps the
-    // viewer mobile-friendly — the iframe fills the panel width. Images
-    // use a fixed, fitted display inside the normal scrolling page.
-    const fullBleed = doc.isPdf || doc.isWord;
+    // PDF, Word, and PowerPoint docs are embedded as full-bleed iframes
+    // (Google Docs viewer for the Office files), so they share the same
+    // full-bleed page/scrollarea classes. This keeps the viewer
+    // mobile-friendly — the iframe fills the panel width. Images use a
+    // fixed, fitted display inside the normal scrolling page.
+    const fullBleed = doc.isPdf || doc.isWord || doc.isPowerPoint;
     viewerPage.classList.toggle('viewer-page--pdf', fullBleed);
     viewerScrollarea?.classList.toggle('viewer-scrollarea--pdf', fullBleed);
-    // Attach CSP-safe load listeners for the Word preview iframe.
+    // Attach CSP-safe load listeners for the Word/PowerPoint preview iframes.
     if (doc.isWord) wireWordLoadEvents(doc);
+    if (doc.isPowerPoint) wirePowerPointLoadEvents(doc);
   }
 
   // ---------- Toolbar handlers ----------
@@ -440,11 +564,11 @@ if (doc.isImage && doc.fileUrl) {
 const viewerPage = document.getElementById('viewerPage');
     const viewerScrollarea = document.getElementById('viewerScrollarea');
 
-// PDFs and Word docs have their own built-in zoom controls, and images
-    // use a fixed fitted display — so the toolbar zoom buttons are
-    // irrelevant for all three. Disable them so they don't act like dead
-    // "reload" buttons. Only the cover-page fallback keeps them enabled.
-    if (doc.isPdf || doc.isWord || doc.isImage) {
+// PDFs, Word, and PowerPoint docs have their own built-in zoom controls,
+    // and images use a fixed fitted display — so the toolbar zoom buttons
+    // are irrelevant for all of them. Disable them so they don't act like
+    // dead "reload" buttons. Only the cover-page fallback keeps them enabled.
+    if (doc.isPdf || doc.isWord || doc.isImage || doc.isPowerPoint) {
       ['zoomInBtn', 'zoomOutBtn', 'resetBtn'].forEach((id) => {
         const b = document.getElementById(id);
         if (b) b.disabled = true;
@@ -452,13 +576,13 @@ const viewerPage = document.getElementById('viewerPage');
     }
 
     // Zoom controls for the cover-page fallback (no embeddable file).
-    // PDF/Word embeds have their own controls and images are fixed, so
-    // this only scales the cover page.
+    // PDF/Word/PowerPoint embeds have their own controls and images are
+    // fixed, so this only scales the cover page.
     let coverZoom = 100;
     const zoomLevel = document.getElementById('zoomLevel');
 
     const applyCoverZoom = () => {
-      if (doc.isPdf || doc.isImage || doc.isWord) return;
+      if (doc.isPdf || doc.isImage || doc.isWord || doc.isPowerPoint) return;
       viewerPage.style.transform = `scale(${coverZoom / 100})`;
       zoomLevel.textContent = `${coverZoom}%`;
     };

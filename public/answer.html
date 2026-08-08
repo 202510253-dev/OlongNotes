@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Answer - OlongNotes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/answer-page.css" />
+</head>
+<body>
+
+  <!-- ===================== NAVIGATION BAR ===================== -->
+  <header class="navbar" id="navbar">
+    <div class="navbar__inner container">
+      <button class="navbar__burger" id="navBurger" type="button" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <a href="index.html" class="navbar__brand">
+        <span class="navbar__logo" aria-hidden="true">
+          <img src="img/olongnotes.png" alt="OlongNotes logo" />
+        </span>
+        <span class="navbar__title-group">
+          <span class="navbar__title">OlongNotes</span>
+          <span class="navbar__tagline">Knowledge shared, Future shared</span>
+        </span>
+      </a>
+
+      <nav class="navbar__links" id="navLinks" aria-label="Primary">
+        <a href="community.html">Q&amp;A</a>
+        <a href="schools.html">Schools</a>
+        <a href="subjects.html">Subjects</a>
+        <a href="index.html#about">About</a>
+      </nav>
+
+      <div class="navbar__actions">
+        <button class="btn btn--outline btn--sm" type="button" id="navLoginBtn">Log In</button>
+        <button class="btn btn--primary btn--sm" type="button" id="navSignupBtn">Sign Up</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="siteMain">
+    <section class="answer-page container">
+      <div class="answer-page__inner">
+
+        <!-- Back — goes through quit-check (see answer-page.js) -->
+        <a class="answer-page__back" href="community.html" id="answerBackLink">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 5-7 7 7 7M4 12h16"/></svg>
+          Cancel
+        </a>
+
+        <!-- Read-only context header, filled by answer-page.js -->
+        <div id="answerContext" class="answer-context"></div>
+
+        <!-- Answer composer -->
+        <div class="answer-composer">
+          <div class="answer-composer__head">
+            <span class="answer-composer__icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </span>
+            <div>
+              <p class="answer-composer__title">Add Your Answer</p>
+              <p class="answer-composer__subtitle">Share your knowledge and help the community.</p>
+            </div>
+          </div>
+
+          <div class="answer-composer__field">
+            <textarea id="answerTextarea" placeholder="Write your answer here..."></textarea>
+            <div class="answer-composer__toolbar">
+              <button class="toolbar-btn" type="button" data-format="bold" title="Bold" aria-label="Bold"><strong>B</strong></button>
+              <button class="toolbar-btn toolbar-btn--italic" type="button" data-format="italic" title="Italic" aria-label="Italic">I</button>
+              <button class="toolbar-btn" type="button" data-format="list" title="Bulleted list" aria-label="Bulleted list">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="answer-composer__actions">
+            <button class="btn btn--outline btn--sm" type="button" id="answerCancelBtn">Cancel</button>
+            <button class="btn btn--accent-blue btn--sm" type="button" id="answerPostBtn">Post Answer</button>
+          </div>
+
+          <div class="answer-composer__tip">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3Z"/></svg>
+            <span>
+              <strong>Be kind and helpful.</strong>
+              Your answer can make a big difference!
+            </span>
+          </div>
+        </div>
+
+        <p id="answerError" class="answer-error" hidden></p>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== QUIT-CONFIRMATION MODAL ===================== -->
+  <div class="quit-modal" id="quitModal" aria-hidden="true">
+    <div class="quit-modal__backdrop" id="quitModalBackdrop"></div>
+    <div class="quit-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="quitModalTitle">
+      <span class="quit-modal__icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21l-9-9 9-9 1.4 1.4L3.8 12l6.6 6.6Z"/><path d="M14 17.2 12.8 16 17 11.8 19.2 14"/><path d="M19.8 6.4A4 4 0 1 0 20 8l2 1.4V4h-5Z"/></svg>
+      </span>
+      <h2 class="quit-modal__title" id="quitModalTitle">Are you sure you want to quit answering this question?</h2>
+      <p class="quit-modal__text">When you quit, someone else may answer this question!</p>
+      <div class="quit-modal__actions">
+        <button class="btn btn--primary" type="button" id="quitStayBtn">I want to stay and answer it</button>
+        <button class="btn btn--outline" type="button" id="quitLeaveBtn">Yes, I want to quit</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-drawer.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/answer-page.js"></script>
+</body>
+</html>
+
