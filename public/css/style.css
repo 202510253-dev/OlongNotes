@@ -70,9 +70,29 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
+  overflow-y: auto;
 }
+/* Overlay-style scrollbar — when content does overflow, the scrollbar
+   appears as a thin 6px pill instead of the chunky 17px default. With
+   overflow-y: auto (not scroll) + no scrollbar-gutter, the bar is also
+   absent entirely on short pages where nothing overflows, so it doesn't
+   intrude into the layout on heroes and short forms. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(154, 163, 178, 0.55) transparent;
+}
+html::-webkit-scrollbar { width: 6px; height: 6px; }
+html::-webkit-scrollbar-track { background: transparent; }
+html::-webkit-scrollbar-thumb {
+  background: rgba(154, 163, 178, 0.45);
+  border-radius: 999px;
+}
+html::-webkit-scrollbar-thumb:hover { background-color: rgba(154, 163, 178, 0.8); }
+html::-webkit-scrollbar-thumb:active { background-color: rgba(91, 100, 114, 0.85); }
+[data-theme="dark"] html { scrollbar-color: rgba(123, 134, 158, 0.6) transparent; }
+[data-theme="dark"] html::-webkit-scrollbar-thumb { background-color: rgba(123, 134, 158, 0.55); }
+[data-theme="dark"] html::-webkit-scrollbar-thumb:hover { background-color: rgba(160, 172, 196, 0.9); }
+[data-theme="dark"] html::-webkit-scrollbar-thumb:active { background-color: rgba(200, 210, 230, 1); }
 body {
   margin: 0;
   font-family: var(--font-body);
@@ -884,20 +904,21 @@ body.upload-modal-open .footer {
   justify-content: center;
   align-items: center;
   gap: 5px;
-  width: 40px;
-  height: 40px;
-  background: none;
-  border: none;
+  width: 44px;
+  height: 44px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-sm);
   padding: 6px;
-  margin-right: 16px;
+  margin-right: 18px;
   flex-shrink: 0;
-  transition: background 0.18s var(--ease);
+  transition: background 0.18s var(--ease), border-color 0.18s var(--ease);
 }
-.navbar__burger:hover { background: var(--gray-100); }
+.navbar__burger:hover { background: var(--gray-100); border-color: var(--gray-600); }
+.navbar__burger:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
 .navbar__burger span {
-  width: 20px;
-  height: 2px;
+  width: 22px;
+  height: 2.5px;
   background: var(--text-heading);
   border-radius: 2px;
   transition: transform 0.25s var(--ease), opacity 0.2s var(--ease);

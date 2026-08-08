@@ -1086,17 +1086,29 @@ const remapped = new FormData();
     window.dispatchEvent(new CustomEvent('olongnotes:auth-changed', { detail: { role } }));
   }
 
-  // EDIT 11: navbar profile chip → logout.
-  const ONlogout = window.OlongNotes || {};
-  const apiLogout = ONlogout.api;
-  const clearToken = ONlogout.clearToken;
-  navProfileChip?.addEventListener('click', async () => {
-    if (!confirm('Log out?')) return;
-    try { await apiLogout.post('/auth/logout', {}, { auth: true }); }
-    catch (_) { /* still log out on client even if backend call fails */ }
-    clearToken();
-    writeStoredUser(null);
-    applyRole('viewer');
+  // EDIT 11: navbar profile chip → navigate to own profile (logout lives
+  // in the Settings tab on the profile page — clicking the avatar should
+  // take the user to their profile, not log them out).
+  navProfileChip?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const u = readStoredUser();
+    const selfId = u && (u.id || u.user_id);
+    if (!selfId) return;
+    window.location.href = `profile.html?user=${encodeURIComponent(selfId)}`;
+  });
+
+  // Legacy navbar profile icon (document-viewer.html etc.) — same nav
+  // behavior: logged in → own profile; logged out → bounce to index
+  // with the auth modal open in signin mode (index.html owns the modal).
+  legacyProfileIcon?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const u = readStoredUser();
+    const selfId = u && (u.id || u.user_id);
+    if (selfId) {
+      window.location.href = `profile.html?user=${encodeURIComponent(selfId)}`;
+      return;
+    }
+    window.location.href = 'index.html?auth=signin';
   });
 
   // EDIT 7: dev role switcher block — DELETED. Real session decides role.

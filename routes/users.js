@@ -388,6 +388,107 @@ router.get('/:id/stats', async (req, res) => {
   }
 })
 
+// ---------- GET /api/users/:id/activities ----------
+//
+// Public. Recent activity_log rows for this user, newest first. Same
+// shape as GET /api/activities (so the frontend renders both surfaces
+// with the same activity-item markup), but filtered to the profile
+// owner — anyone can see another user's public activity.
+//
+// No ?type= filter in this cut. The profile page renders the list as
+// is, one row per event; the front-end filter chips (heart, download,
+// bookmark, etc.) are a Phase 6.3 add.
+//
+// Query params:
+//   limit      page size (default 50, max 100)
+//   offset     page offset (default 0)
+//
+// Returns { activities: [...], pagination: { total, limit, offset, has_more } }.
+//
+// Row shape mirrors /api/activities:
+//   { id, type, note_id, title, subject_name, school_name, created_at }
+router.get('/:id/activities', async (req, res) => {
+  const userId = parseIdParam(req.params.id)
+  if (!userId) {
+    return res.status(400).json({ message: 'Invalid user id.' })
+  }
+
+  const pageLimit = Math.min(
+    parseInt(req.query.limit) || PAGE_LIMIT_DEFAULT,
+    PAGE_LIMIT_MAX
+  )
+  const pageOffset = parseInt(req.query.offset) || 0
+
+  try {
+    // Uses supabaseAdmin so the activity_log RLS policy doesn't block
+    // — see routes/activities.js:27-37 for the long version of the
+    // same note. Public profiles are intentionally readable by anyone.
+    const { data: logRows, error: logError, count } = await supabaseAdmin
+      .from('activity_log')
+      .select('id, activity_type, target_id, created_at', { count: 'exact' })
+      .eq('user_id', userId)
+      .eq('target_type', 'note')
+      .order('created_at', { ascending: false })
+      .range(pageOffset, pageOffset + pageLimit - 1)
+
+    if (logError) {
+      console.error('[users] GET /:id/activities log error:', logError)
+      return res.status(200).json({
+        activities: [],
+        pagination: { total: 0, limit: pageLimit, offset: pageOffset, has_more: false },
+      })
+    }
+
+    // Join the note metadata for each distinct target_id. activity_log
+    // doesn't have a declared FK to notes, so we have to fetch in two
+    // queries and stitch in JS — same trick as routes/activities.js.
+    const noteIds = Array.from(
+      new Set((logRows || []).map((r) => r.target_id).filter((id) => id != null))
+    )
+
+    let notesById = {}
+    if (noteIds.length > 0) {
+      const { data: notesData, error: notesError } = await supabaseAdmin
+        .from('notes')
+        .select('id, title, subjects ( subject_name ), schools ( school_name )')
+        .in('id', noteIds)
+      if (!notesError) {
+        for (const n of notesData || []) notesById[n.id] = n
+      }
+    }
+
+    const rows = (logRows || []).map((row) => {
+      const note = notesById[row.target_id] || null
+      return {
+        id: row.id,
+        type: row.activity_type,
+        note_id: row.target_id,
+        title: note && note.title ? note.title : 'Untitled note',
+        subject_name: note && note.subjects ? note.subjects.subject_name : null,
+        school_name: note && note.schools ? note.schools.school_name : null,
+        created_at: row.created_at,
+      }
+    })
+
+    const total = typeof count === 'number' ? count : rows.length
+    return res.status(200).json({
+      activities: rows,
+      pagination: {
+        total,
+        limit: pageLimit,
+        offset: pageOffset,
+        has_more: pageOffset + pageLimit < total,
+      },
+    })
+  } catch (err) {
+    console.error('[users] GET /:id/activities exception:', err)
+    return res.status(200).json({
+      activities: [],
+      pagination: { total: 0, limit: pageLimit, offset: pageOffset, has_more: false },
+    })
+  }
+})
+
 // ---------- PATCH /api/users/:id ----------
 //
 // Auth required. Owner of the row OR an admin can edit.
