@@ -104,10 +104,11 @@
     return data;
   }
 
-  // ---------- Convenience methods ----------
+// ---------- Convenience methods ----------
   const get  = (path, opts = {}) => apiFetch(path, { ...opts, method: 'GET' });
   const post = (path, body = null, opts = {}) => apiFetch(path, { ...opts, method: 'POST', body });
   const del  = (path, opts = {}) => apiFetch(path, { ...opts, method: 'DELETE', body: null });
+  const patch = (path, body = null, opts = {}) => apiFetch(path, { ...opts, method: 'PATCH', body });
 
   /**
    * Upload helper — wraps apiFetch for multipart/form-data.
@@ -134,7 +135,7 @@
   // Merge with whatever already lives there (e.g. notes-data.js puts
   // subjectLabels and notes on the same namespace).
   window.OlongNotes = window.OlongNotes || {};
-  window.OlongNotes.api = { get, post, delete: del, upload };
+window.OlongNotes.api = { get, post, patch, delete: del, upload };
   window.OlongNotes.apiFetch = apiFetch;       // raw, for unusual cases
   window.OlongNotes.ApiError = ApiError;
   window.OlongNotes.getToken = getToken;

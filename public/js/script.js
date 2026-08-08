@@ -455,11 +455,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = `subject-notes.html?${params.toString()}`;
   });
 
-  /* ---------------- Placeholder buttons (hero only) -------------------- */
+  /* ---------------- Hero "Browse Questions" button → Q&A page ---------------- */
   document.querySelectorAll('.hero__actions .btn--goldenrod').forEach((btn) => {
     btn.addEventListener('click', (e) => {
+      // The hero goldenrod button is the "Browse Questions" link. Let the
+      // browser follow its href to the Q&A page (community.html). We only
+      // guard the case where the element is genuinely a link and has an href.
+      if (btn.tagName === 'A' && btn.getAttribute('href')) {
+        return; // allow default navigation
+      }
       e.preventDefault();
-      console.info('[OlongNotes] Placeholder action — not yet implemented.');
+      window.location.href = 'community.html';
     });
   });
 
@@ -590,7 +596,11 @@ const noteFileDropText = document.getElementById('noteFileDropText');
   const uploadSchoolSelect = document.getElementById('uploadSchoolSelect');
   const DEFAULT_NOTE_FILE_TEXT = 'Upload PDF, Word, PowerPoint, or an image';
 
-[uploadGradeLevel, uploadSubjectSelect, uploadCollegeCategorySelect, uploadCollegeProgramSelect, uploadCollegeMajorSelect, uploadSchoolSelect]
+// Custom-select enhancement is shared (community-shared.js): it works on
+  // ANY native <select>, so we resolve it from the shared namespace here.
+  const initCustomSelect = (window.OlongNotes?.shared?.initCustomSelect) || (() => {});
+
+  [uploadGradeLevel, uploadSubjectSelect, uploadCollegeCategorySelect, uploadCollegeProgramSelect, uploadCollegeMajorSelect, uploadSchoolSelect]
     .forEach(initCustomSelect);
 
   // Home-page search-card filters: make School / Grade / Subject dropdowns
@@ -722,57 +732,21 @@ const noteFileDropText = document.getElementById('noteFileDropText');
     }
   };
 
-  const loadCollegeCategories = async () => {
-    resetSelect(uploadCollegeCategorySelect, 'Loading departments...', true);
-    try {
-      const data = await window.OlongNotes.api.get('/program-categories');
-      populateSelect(uploadCollegeCategorySelect, Array.isArray(data) ? data : [], 'id', 'category_name', 'Select a department');
-    } catch (err) {
-      resetSelect(uploadCollegeCategorySelect, 'Unable to load departments');
-      showUploadError('Could not load departments. Please try again.');
-      console.error('[upload] Failed to load college departments', err);
-    }
-    resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
-    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-  };
+// College Department → Program (→ Major) cascade is shared with the
+  // Q&A ask modal (community-shared.js → createCollegeCascade). We keep
+  // the upload page's own wrappers so callers below don't change, but the
+  // fetch/populate/disabled logic lives in ONE place.
+  const collegeCascade = (window.OlongNotes?.shared?.createCollegeCascade)({
+    api: window.OlongNotes?.api,
+    categorySelect: uploadCollegeCategorySelect,
+    programSelect: uploadCollegeProgramSelect,
+    majorSelect: uploadCollegeMajorSelect,
+    onError: showUploadError,
+  });
 
-  const loadProgramsForCategory = async (categoryId) => {
-    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-    if (!categoryId) {
-      resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
-      return;
-    }
-    resetSelect(uploadCollegeProgramSelect, 'Loading programs...', true);
-    try {
-      const data = await window.OlongNotes.api.get(`/programs?category_id=${encodeURIComponent(categoryId)}`);
-      populateSelect(uploadCollegeProgramSelect, Array.isArray(data) ? data : [], 'id', 'program_name', 'Select a program');
-    } catch (err) {
-      resetSelect(uploadCollegeProgramSelect, 'Unable to load programs', true);
-      showUploadError('Could not load programs. Please try again.');
-      console.error('[upload] Failed to load programs for category', categoryId, err);
-    }
-  };
-
-  const loadMajorsForProgram = async (programId) => {
-    if (!programId) {
-      resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
-      return;
-    }
-    resetSelect(uploadCollegeMajorSelect, 'Loading majors...', true);
-    try {
-      const data = await window.OlongNotes.api.get(`/programs?parent_program_id=${encodeURIComponent(programId)}`);
-      const majors = Array.isArray(data) ? data : [];
-      if (majors.length > 0) {
-        populateSelect(uploadCollegeMajorSelect, majors, 'id', 'program_name', 'Select a major (optional)');
-      } else {
-        resetSelect(uploadCollegeMajorSelect, 'No majors available', true);
-      }
-    } catch (err) {
-      resetSelect(uploadCollegeMajorSelect, 'Unable to load majors', true);
-      showUploadError('Could not load majors. Please try again.');
-      console.error('[upload] Failed to load majors for program', programId, err);
-    }
-  };
+  const loadCollegeCategories = () => collegeCascade.populateDepartments();
+  const loadProgramsForCategory = (categoryId) => collegeCascade.loadProgramsForCategory(categoryId);
+  const loadMajorsForProgram = (programId) => collegeCascade.loadMajorsForProgram(programId);
 
   let uploadSchoolsLoaded = false;
   const loadSchoolsForUpload = async () => {
@@ -860,189 +834,6 @@ const noteFileDropText = document.getElementById('noteFileDropText');
       noteFileDropCount.hidden = false;
     }
   });
-
-  /* ---------------- Custom select enhancement (visual layer only) ----------------
-     Wraps a native <select> with a styled trigger + panel. The select
-     stays the real value/data source — populateSelect(), resetSelect(),
-     and populateSubjectSelectGrouped() keep working exactly as before,
-     completely unaware this exists. A MutationObserver watches the
-     select's options/optgroups/disabled state and re-renders the panel
-     whenever they change, so no other code needs to know about this. */
-  function initCustomSelect(selectEl) {
-    if (!selectEl || selectEl.dataset.cselectInit) return;
-    selectEl.dataset.cselectInit = '1';
-
-    const wrapper = selectEl.parentElement;
-    wrapper.classList.add('cselect');
-    selectEl.classList.add('cselect__native');
-
-    const trigger = document.createElement('button');
-    trigger.type = 'button';
-    trigger.className = 'cselect__trigger';
-    trigger.setAttribute('aria-haspopup', 'listbox');
-    trigger.setAttribute('aria-expanded', 'false');
-    trigger.innerHTML = `<span class="cselect__value"></span><svg class="cselect__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
-    wrapper.insertBefore(trigger, selectEl);
-
-    const panel = document.createElement('div');
-    panel.className = 'cselect__panel';
-    panel.setAttribute('role', 'listbox');
-    panel.hidden = true;
-    document.body.appendChild(panel);
-
-    // Search box (added per-select, lives at the top of the panel).
-    // Options are filtered live as the user types; only selects with
-    // many options (schools, subjects, grade levels) enable it.
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    searchInput.className = 'cselect__search';
-    searchInput.setAttribute('aria-label', 'Search options');
-    searchInput.placeholder = 'Search…';
-    searchInput.autocomplete = 'off';
-    searchInput.hidden = true;
-    panel.appendChild(searchInput);
-
-    const valueEl = trigger.querySelector('.cselect__value');
-
-    const closePanel = () => {
-      panel.hidden = true;
-      trigger.setAttribute('aria-expanded', 'false');
-      wrapper.classList.remove('is-open');
-    };
-
-    const openPanel = () => {
-      if (selectEl.disabled) return;
-      const rect = trigger.getBoundingClientRect();
-      panel.style.top = `${rect.bottom + 4}px`;
-      panel.style.left = `${rect.left}px`;
-      panel.style.width = `${rect.width}px`;
-      panel.style.maxHeight = `${Math.max(160, Math.min(340, window.innerHeight - rect.bottom - 16))}px`;
-      panel.hidden = false;
-      trigger.setAttribute('aria-expanded', 'true');
-      wrapper.classList.add('is-open');
-      // Reset the filter every time the panel opens so a fresh list shows.
-      if (searchInput.value) { searchInput.value = ''; applyFilter(); }
-      // Ensure the search box is the first thing to receive focus for
-      // searchable selects, unless a selection already exists (then the
-      // selected option is scrolled into view and focus stays put).
-      if (!searchInput.hidden) searchInput.focus();
-      else {
-        const active = panel.querySelector('.cselect__option[aria-selected="true"]') || panel.querySelector('.cselect__option');
-        active?.scrollIntoView({ block: 'nearest' });
-      }
-    };
-
-    trigger.addEventListener('click', () => (panel.hidden ? openPanel() : closePanel()));
-    trigger.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openPanel();
-        if (searchInput.hidden) panel.querySelector('.cselect__option')?.focus();
-      }
-    });
-    document.addEventListener('click', (e) => {
-      if (!wrapper.contains(e.target) && !panel.contains(e.target)) closePanel();
-    });
-    document.querySelectorAll('.upload-modal .contrib-card, .contrib-card').forEach((card) => {
-      card.addEventListener('scroll', closePanel, { passive: true });
-    });
-    window.addEventListener('resize', closePanel);
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !panel.hidden) { closePanel(); trigger.focus(); }
-    });
-
-    const rebuild = () => {
-      trigger.disabled = selectEl.disabled;
-      wrapper.classList.toggle('is-disabled', selectEl.disabled);
-
-      const selectedOpt = selectEl.options[selectEl.selectedIndex];
-      valueEl.textContent = selectedOpt ? selectedOpt.textContent : '';
-      valueEl.classList.toggle('cselect__value--placeholder', !selectEl.value);
-
-      // Enable the search box when there are enough options to search.
-      searchInput.hidden = selectEl.options.length < 8 || selectEl.disabled;
-      panel.innerHTML = '';
-      panel.appendChild(searchInput);
-
-      // Render the (possibly filtered) list of options/groups.
-      applyFilter(false);
-    };
-
-    // Filter the visible options in the panel based on the search term.
-    // `openPanel` passes `false` to always render unfiltered.
-    const applyFilter = (respectQuery = true) => {
-      const query = respectQuery ? searchInput.value.trim().toLowerCase() : '';
-      // Clear any prior "no results" row.
-      const existingNoResults = panel.querySelector('.cselect__no-results');
-      if (existingNoResults) existingNoResults.remove();
-      panel.querySelectorAll('.cselect__option, .cselect__group-label').forEach((el) => el.remove());
-
-      let visibleCount = 0;
-
-      const buildRow = (opt) => {
-        if (opt.disabled && !opt.value) return; // skip placeholder rows in the panel
-        const text = opt.textContent.toLowerCase();
-        if (query && !text.includes(query)) return;
-        const row = document.createElement('div');
-        row.className = 'cselect__option';
-        if (opt.dataset.action === 'more') row.classList.add('cselect__option--action');
-        row.textContent = opt.textContent;
-        row.setAttribute('role', 'option');
-        row.tabIndex = -1;
-        if (opt.value === selectEl.value) row.setAttribute('aria-selected', 'true');
-        row.addEventListener('click', () => {
-          selectEl.value = opt.value;
-          rebuild();
-          selectEl.dispatchEvent(new Event('change', { bubbles: true }));
-          closePanel();
-          trigger.focus();
-        });
-        row.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
-          else if (e.key === 'Escape') { closePanel(); trigger.focus(); }
-          else if (e.key === 'ArrowDown') { e.preventDefault(); row.nextElementSibling?.focus(); }
-          else if (e.key === 'ArrowUp') { e.preventDefault(); row.previousElementSibling?.focus(); }
-        });
-        panel.appendChild(row);
-        visibleCount++;
-      };
-
-      Array.from(selectEl.children).forEach((child) => {
-        if (child.tagName === 'OPTGROUP') {
-          const groupOptions = Array.from(child.children).filter((o) => {
-            if (o.disabled && !o.value) return false;
-            return !query || o.textContent.toLowerCase().includes(query);
-          });
-          // Only render the group label once at least one member matches.
-          if (groupOptions.length > 0) {
-            const label = document.createElement('div');
-            label.className = 'cselect__group-label';
-            label.textContent = child.label;
-            panel.appendChild(label);
-            groupOptions.forEach(buildRow);
-          }
-        } else if (child.tagName === 'OPTION') {
-          buildRow(child);
-        }
-      });
-
-      if (visibleCount === 0 && respectQuery) {
-        const empty = document.createElement('div');
-        empty.className = 'cselect__no-results';
-        empty.textContent = 'No matches';
-        panel.appendChild(empty);
-      }
-    };
-
-    searchInput.addEventListener('input', () => applyFilter(true));
-
-    selectEl.refreshCselect = rebuild;
-
-    new MutationObserver(rebuild).observe(selectEl, {
-      childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'],
-    });
-    rebuild();
-  }
 
   uploadGradeLevel?.addEventListener('change', async () => {
     const selectedLevel = uploadGradeLevel.value;

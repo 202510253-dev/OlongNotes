@@ -299,8 +299,8 @@
             <div class="ask-field">
               <label class="ask-field__label" for="askSubjectSelect">Subjects</label>
               <div class="ask-select">
-                <select id="askSubjectSelect">
-                  <option value="" disabled selected>Select a subject</option>
+                <select id="askSubjectSelect" disabled>
+                  <option value="" disabled selected>Select a grade level first</option>
                 </select>
                 <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </div>
@@ -311,9 +311,36 @@
               <div class="ask-select">
                 <select id="askLevelSelect">
                   <option value="" disabled selected>Select a grade level</option>
-                  <option value="k10">K-10</option>
-                  <option value="senior_high">Senior High</option>
-                  <option value="college">College</option>
+                  <option value="Grade 7">Grade 7</option>
+                  <option value="Grade 8">Grade 8</option>
+                  <option value="Grade 9">Grade 9</option>
+                  <option value="Grade 10">Grade 10</option>
+                  <option value="Grade 11">Grade 11</option>
+                  <option value="Grade 12">Grade 12</option>
+                  <option value="College">College</option>
+                </select>
+                <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- College-only cascade: shown when Grade Level = College.
+               Department → Program (→ Major), shared with the upload flow. -->
+<div id="askCollegeFields" class="ask-college" style="display: none;">
+            <div class="ask-field">
+              <label class="ask-field__label" for="askDeptSelect">Department</label>
+              <div class="ask-select">
+                <select id="askDeptSelect">
+                  <option value="" disabled selected>Select a department</option>
+                </select>
+                <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+            </div>
+            <div class="ask-field">
+              <label class="ask-field__label" for="askProgramSelect">Program</label>
+              <div class="ask-select">
+                <select id="askProgramSelect" disabled>
+                  <option value="" disabled selected>Select a program</option>
                 </select>
                 <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </div>
@@ -327,24 +354,35 @@
             </span>
           </div>
 
+          <!-- Formatting toolbar: Bold / Italic / List / Math — driven by the
+               shared toolbar.js module (same helper as the answer page). Math
+               inserts LaTeX-style \\( \\) markup at the cursor. -->
+          <div class="ask-toolbar" role="toolbar" aria-label="Formatting">
+            <button class="toolbar-btn" type="button" data-format="bold" title="Bold" aria-label="Bold"><strong>B</strong></button>
+            <button class="toolbar-btn toolbar-btn--italic" type="button" data-format="italic" title="Italic" aria-label="Italic">I</button>
+            <button class="toolbar-btn" type="button" data-format="list" title="Bulleted list" aria-label="Bulleted list">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>
+            </button>
+            <button class="toolbar-btn" type="button" data-format="math" title="Insert math formula" aria-label="Insert math formula">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg>
+            </button>
+          </div>
+
           <p class="ask-modal__error" id="askModalError" hidden>Please fill in the subject, grade level, and question before posting.</p>
 
-          <!-- Add to your post row: decorative tool icons + the ONE submit button.
-               The old floating "Post" bubble has been removed; askPostBtn below
-               is now the single submit trigger for this form. -->
+          <!-- Add to your post row: decorative, inert icons (image / mention /
+               emoji) + the single Ask submit button. The icons do nothing when
+               clicked (no backend attachment support) but remain visibly present. -->
           <div class="ask-attach" aria-label="Add to your post">
             <div class="ask-attach__buttons">
-              <button class="ask-attach__btn" type="button" id="askAttachImage" aria-label="Add an image" title="Add an image (coming soon)" disabled>
+              <button class="ask-attach__btn" type="button" id="askAttachImage" aria-label="Add an image" title="Add an image (coming soon)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="1.8"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg>
               </button>
-              <button class="ask-attach__btn" type="button" id="askAttachFormula" aria-label="Add a math formula" title="Add a formula (coming soon)" disabled>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3d6bf0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h5M4 5l4.5 14M4 19h5M14 5h5l-3 7 3 7h-5"/></svg>
-              </button>
-              <button class="ask-attach__btn" type="button" id="askAttachSymbol" aria-label="Add a science symbol" title="Add a symbol (coming soon)" disabled>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg>
-              </button>
-              <button class="ask-attach__btn" type="button" id="askAttachMention" aria-label="Mention someone" title="Mention (coming soon)" disabled>
+              <button class="ask-attach__btn" type="button" id="askAttachMention" aria-label="Mention someone" title="Mention (coming soon)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0973c" stroke-width="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+              </button>
+              <button class="ask-attach__btn" type="button" id="askAttachEmoji" aria-label="Add an emoji" title="Emoji (coming soon)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0b23c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="0.8" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="0.8" fill="currentColor" stroke="none"/></svg>
               </button>
             </div>
             <button class="ask-attach__btn ask-attach__btn--post" type="button" id="askPostBtn">Ask a Question!</button>
@@ -413,7 +451,9 @@
 
   <script src="js/api.js"></script>
   <script src="js/auth-drawer.js"></script>
+  <script src="js/community-shared.js"></script>
   <script src="js/script.js"></script>
+  <script src="js/toolbar.js"></script>
   <script src="js/browse-community.js"></script>
 </body>
 </html>

@@ -808,6 +808,29 @@
   gap: 10px;
 }
 
+/* College-only cascade (Department → Program), same two-column layout
+   as .ask-filters. Shown only when Grade Level = College. */
+.ask-college {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .ask-college {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* When a native <select> inside .ask-select is upgraded to the shared
+   custom-select UI (community-shared.js adds .cselect to the wrapper),
+   the absolutely-positioned decorative chevron would overlap the custom
+   trigger's own embedded chevron. Hide it there — the trigger renders its
+   own. */
+.ask-select.cselect .ask-select__chevron {
+  display: none;
+}
+
 .ask-field__label {
   display: block;
   font-size: 0.78rem;
@@ -979,6 +1002,48 @@
 
 .ask-attach__btn:hover {
   background: var(--navy-100, #f2f4f8);
+  color: var(--text-heading);
+}
+
+/* Icon row renders horizontally (flex row), never stacked vertically. */
+.ask-attach__buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-flow: row nowrap;
+}
+
+/* Formatting toolbar (Bold / Italic / List / Math) — reuses the shared
+   .toolbar-btn styles so it matches the answer page's composer. */
+.ask-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--navy-100, #eef1f6);
+  border-radius: 12px;
+  background: var(--gray-50);
+}
+
+.ask-toolbar .toolbar-btn {
+  background: none;
+  border: none;
+  color: var(--gray-600, #8891a0);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.15s ease;
+}
+
+.ask-toolbar .toolbar-btn--italic {
+  font-style: italic;
+}
+
+.ask-toolbar .toolbar-btn:hover {
   color: var(--text-heading);
 }
 

@@ -707,10 +707,11 @@ router.post('/:id/answer', auth, async (req, res) => {
   }
 
   try {
-    // Verify the question exists. Cheap existence check before insert.
+    // Verify the question exists AND block the asker from answering their
+    // own question (FIX 3c). We need user_id so fetch both columns.
     const { data: exists, error: existsError } = await supabase
       .from('questions')
-      .select('id')
+      .select('id, user_id')
       .eq('id', questionId)
       .maybeSingle()
 
@@ -720,6 +721,10 @@ router.post('/:id/answer', auth, async (req, res) => {
     }
     if (!exists) {
       return res.status(404).json({ message: 'Question not found.' })
+    }
+    // req.user.id is the public.users bigint (see middleware/auth.js).
+    if (exists.user_id === req.user.id) {
+      return res.status(403).json({ message: "You can't answer your own question." })
     }
 
     const { data: answer, error: insertError } = await supabase
@@ -745,6 +750,100 @@ router.post('/:id/answer', auth, async (req, res) => {
     return res.status(201).json({ message: 'Answer submitted.', answer })
   } catch (err) {
     console.error('[questions] answer POST error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
+// ---------- PATCH /api/questions/:id ----------
+//
+// Edit a question (FIX 3b). Owner of the question (or admin) only.
+// Editable fields: title, body, subject_id (and optionally school_id,
+// grade_level). We derive the title from body when body changes and a
+// new title isn't supplied, matching the POST create behavior.
+router.patch('/:id', auth, async (req, res) => {
+  const questionId = parseInt(req.params.id)
+  if (!questionId || Number.isNaN(questionId)) {
+    return res.status(400).json({ message: 'Invalid question id.' })
+  }
+
+  const { title, body, subject_id, school_id, grade_level } = req.body || {}
+
+  // At least one editable field must be present.
+  const hasEdits = [title, body, subject_id]
+    .some((v) => v !== undefined && v !== null && String(v).trim().length > 0)
+    || school_id !== undefined
+    || grade_level !== undefined
+  if (!hasEdits) {
+    return res.status(400).json({ message: 'Nothing to update.' })
+  }
+
+  try {
+    const { data: question, error: fetchError } = await supabase
+      .from('questions')
+      .select('id, user_id, title, body')
+      .eq('id', questionId)
+      .maybeSingle()
+
+    if (fetchError) {
+      console.error('[questions] patch fetch error:', fetchError)
+      return res.status(500).json({ message: 'Server error.' })
+    }
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found.' })
+    }
+    if (question.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only edit your own questions.' })
+    }
+
+    // Validate the new body if provided.
+    if (body !== undefined && body !== null && typeof body === 'string' && body.trim().length === 0) {
+      return res.status(400).json({ message: 'Question body cannot be empty.' })
+    }
+
+    const patch = {}
+    if (title !== undefined && title !== null && String(title).trim().length > 0) {
+      patch.title = String(title).trim().slice(0, 140)
+    }
+    if (body !== undefined && body !== null) {
+      patch.body = String(body).trim()
+      // Re-derive the title from the new body unless an explicit title win.
+      if (patch.title === undefined) {
+        patch.title = deriveTitle(patch.body)
+      }
+    }
+    if (subject_id !== undefined && subject_id !== null) {
+      const sid = parseInt(subject_id)
+      if (!sid || Number.isNaN(sid)) {
+        return res.status(400).json({ message: 'subject_id must be a valid id.' })
+      }
+      patch.subject_id = sid
+    }
+    if (school_id !== undefined && school_id !== null) {
+      const scid = parseInt(school_id)
+      if (Number.isNaN(scid)) {
+        return res.status(400).json({ message: 'school_id must be a valid id.' })
+      }
+      patch.school_id = scid
+    }
+    if (grade_level !== undefined && grade_level !== null) {
+      patch.grade_level = String(grade_level).trim().slice(0, 50)
+    }
+
+    const { data: updated, error: updateError } = await supabase
+      .from('questions')
+      .update(patch)
+      .eq('id', questionId)
+      .select('id, title, body, subject_id, school_id, grade_level, status, created_at')
+      .single()
+
+    if (updateError || !updated) {
+      console.error('[questions] patch update error:', updateError)
+      return res.status(500).json({ message: 'Could not update question.' })
+    }
+
+    return res.status(200).json({ message: 'Question updated.', question: updated })
+  } catch (err) {
+    console.error('[questions] PATCH error:', err)
     return res.status(500).json({ message: 'Server error.' })
   }
 })

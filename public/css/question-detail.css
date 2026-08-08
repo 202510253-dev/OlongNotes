@@ -410,6 +410,312 @@
   padding: 48px 20px;
 }
 
+/* =========================================================
+   BATCH B — Asker action menus (three-dot kebab)
+========================================================= */
+
+/* Place the status badge + kebab on the right of the question meta row */
+.question-row__top-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Kebab (three-dot) trigger + popover menu */
+.kebab {
+  position: relative;
+  display: inline-flex;
+}
+
+.kebab__btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gray-600, #8891a0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.kebab__btn:hover {
+  background: var(--navy-100, #f2f4f8);
+  color: var(--text-heading);
+}
+
+.kebab__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--navy-100, #eef1f6);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  z-index: 40;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kebab__menu[hidden] {
+  display: none;
+}
+
+.kebab__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.kebab__item:hover {
+  background: var(--navy-100, #f2f4f8);
+}
+
+.kebab__item--danger {
+  color: #e0556f;
+}
+
+.kebab__item--danger:hover {
+  background: rgba(224, 85, 111, 0.1);
+}
+
+/* Accepted answer highlight */
+.comment-item--accepted {
+  border-color: rgba(46, 158, 91, 0.4);
+  background: rgba(46, 158, 91, 0.04);
+}
+
+/* =========================================================
+   BATCH B — Edit Question modal (reuses ask-modal styles)
+========================================================= */
+/* The edit modal is built in JS with the .ask-modal shell, so the
+   .ask-modal / .ask-modal__dialog / .ask-modal__body / .ask-input /
+   .ask-attach styles in browse-community.css apply here. This page
+   loads browse-community.css? No — it loads question-detail.css. To be
+   safe, re-declare the minimal pieces the edit modal relies on. */
+
+/* Base modal shell — the .ask-modal family normally lives in
+   browse-community.css, which question.html does NOT load, so we
+   reproduce the shell scoped to #editModal here. */
+#editModal.ask-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 20px;
+  overflow-y: auto;
+}
+
+#editModal.ask-modal.is-open {
+  display: flex;
+}
+
+#editModal .ask-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 20, 45, 0.55);
+}
+
+#editModal .ask-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 620px;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 30px 32px 28px;
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 640px) {
+  #editModal.ask-modal {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  #editModal .ask-modal__dialog {
+    max-width: none;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+}
+
+#editModal .ask-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#editModal .ask-input {
+  width: 100%;
+  border: 1.5px solid var(--navy-100, #eef1f6);
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text-heading);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+#editModal .ask-input:focus {
+  border-color: var(--accent-blue, #3d6bf0);
+}
+
+#editModal .ask-textarea-wrap {
+  position: relative;
+  border: 1.5px solid var(--navy-100, #eef1f6);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+}
+
+#editModal .ask-textarea-wrap textarea {
+  width: 100%;
+  min-height: 140px;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-heading);
+  resize: vertical;
+  outline: none;
+  background: transparent;
+}
+
+#editModal .ask-attach {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--navy-100, #eef1f6);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+#editModal .ask-attach__label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+#editModal .ask-attach__btn--post {
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent-blue, #3d6bf0);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#editModal .ask-attach__btn--post:hover {
+  background: #2a55d0;
+}
+
+#editModal .ask-attach__btn--post:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#editModal .ask-modal__error {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e0556f;
+  background: rgba(224, 85, 111, 0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0;
+}
+
+#editModal .ask-modal__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--navy-100, #f2f4f8);
+  color: var(--gray-600, #8891a0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+#editModal .ask-modal__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--navy-100, #eef1f6);
+}
+
+#editModal .ask-modal__avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--avatar-tint, var(--accent-blue, #3d6bf0));
+}
+
+#editModal .ask-modal__head-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#editModal .ask-modal__asker {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  line-height: 1.2;
+}
+
+#editModal .ask-modal__title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--gray-600, #8891a0);
+  line-height: 1.2;
+  margin: 0;
+}
+
 /* Responsive */
 @media (max-width: 980px) {
   .question-detail__grid {

@@ -377,17 +377,17 @@
     });
   }
 
-  // ---------- Ask modal ----------
+// ---------- Ask modal ----------
   // "Ask a Question!" create-post modal:
-  //   - Grade Level is now THREE buckets only (K-10 / Senior High /
-  //     College). The selector holds the *bucket* value directly.
-  //   - Subjects CASCADES from Grade Level: once a bucket is chosen we
-  //     fetch GET /api/subjects?education_level={bucket} (endpoint ALREADY
-  //     EXISTS in routes/catalog.js — confirmed) to populate the Subjects
-  //     dropdown. Subjects is disabled until a Grade is selected.
-  //   - Payload sends body + optional subject_id + grade_level. The
-  //     backend accepts a bucket value as grade_level / education_level
-  //     (BUCKET_TO_GRADE mapping on server) — confirmed as safe.
+  //   - Grade Level holds SPECIFIC grades (Grade 7–12, College), matching
+  //     the upload flow. Subjects cascade from the grade (via the shared
+  //     education-level bucket helper).
+  //   - When Grade = College, a Department → Program cascade appears
+  //     (shared with the upload flow via community-shared.js). The chosen
+  //     program resolves to a subject via GET /api/subjects?program_id=X
+  //     (Option A: the program is persisted indirectly through the
+  //     subject's program_id FK — no schema change).
+  //   - All dropdowns use the shared dark custom-select UI.
   async function initAskModal() {
     const modal = document.getElementById('askModal');
     const backdrop = document.getElementById('askModalBackdrop');
@@ -400,54 +400,142 @@
     const descTextarea = document.getElementById('askDescTextarea');
     const askerNameEl = document.getElementById('askModalAsker');
     const askerAvatarEl = document.getElementById('askModalAvatar');
+    const collegeFields = document.getElementById('askCollegeFields');
+    const deptSelect = document.getElementById('askDeptSelect');
+    const programSelect = document.getElementById('askProgramSelect');
 
     if (!modal) return;
 
-    // Start with Subjects disabled + empty — a Grade must be picked first.
-    if (subjectSelect) {
-      subjectSelect.disabled = true;
-      subjectSelect.innerHTML = '<option value="" disabled selected>Select a grade level first</option>';
+    // Shared dark custom-select UI (same component + styles as the upload
+    // page — extracted to community-shared.js so neither flow duplicates
+    // the renderer/MutationObserver logic).
+    const shared = (window.OlongNotes && window.OlongNotes.shared) || {};
+    const initCustomSelect = shared.initCustomSelect || (() => {});
+    [subjectSelect, levelSelect, deptSelect, programSelect].forEach((el) => el && initCustomSelect(el));
+
+    // College Department → Program cascade, shared with the upload flow.
+    // No major tier in the ask modal (questions are coarser than notes).
+    const collegeCascade = shared.createCollegeCascade ? shared.createCollegeCascade({
+      api: window.OlongNotes && window.OlongNotes.api,
+      categorySelect: deptSelect,
+      programSelect: programSelect,
+      majorSelect: null,
+      onError: (msg) => showAskError(msg),
+    }) : null;
+
+    // Education level → bucket used to load the subject dropdown.
+    const educationLevelFor = (gradeLevel) => {
+      if (gradeLevel === 'College') return 'college';
+      if (gradeLevel === 'Grade 11' || gradeLevel === 'Grade 12') return 'senior_high';
+      return 'k10';
+    };
+
+    function resetSubjectSelect(placeholder, disabled) {
+      if (!subjectSelect) return;
+      if (shared.resetSelect) {
+        shared.resetSelect(subjectSelect, placeholder || 'Select a grade level first', disabled !== false);
+      } else {
+        subjectSelect.value = '';
+        subjectSelect.disabled = disabled !== false;
+        subjectSelect.innerHTML = '<option value="" disabled selected>' + (placeholder || 'Select a grade level first') + '</option>';
+      }
+      if (subjectSelect.refreshCselect) subjectSelect.refreshCselect();
     }
 
-    const LABELS = { k10: 'K-10', senior_high: 'Senior High', college: 'College' };
-
-    // Cascade Subjects from the chosen Grade bucket.
-    async function loadSubjectsForLevel(bucket) {
+    async function loadSubjectsForGrade(gradeLevel) {
       if (!subjectSelect) return;
-      subjectSelect.disabled = false;
-      subjectSelect.innerHTML = '<option value="" disabled selected>Loading subjects…</option>';
+      if (shared.resetSelect) shared.resetSelect(subjectSelect, 'Loading subjects…', true);
+      else {
+        subjectSelect.disabled = true;
+        subjectSelect.innerHTML = '<option value="" disabled selected>Loading subjects…</option>';
+      }
       try {
-        const data = await window.OlongNotes.api.get('/subjects?education_level=' + encodeURIComponent(bucket));
+        const eduLevel = educationLevelFor(gradeLevel);
+        // limit=100 — /api/subjects paginates at 20 by default; the subject
+        // dropdown wants the full set for the grade so none are missing.
+        const data = await window.OlongNotes.api.get('/subjects?education_level=' + encodeURIComponent(eduLevel) + '&limit=100');
         const subjects = Array.isArray(data) ? data : (data && data.subjects ? data.subjects : []);
-        if (subjects.length) {
-          subjects.sort((a, b) =>
-            String(a.subject_name || '').localeCompare(String(b.subject_name || ''))
-          );
-          const opts = ['<option value="" disabled selected>Select a subject</option>']
-            .concat(subjects.map((s) =>
-              '<option value="' + esc(s.id) + '">' + esc(s.subject_name) + '</option>'
-            ));
-          subjectSelect.innerHTML = opts.join('');
-          subjectSelect.disabled = false;
+        if (shared.populateSelect) {
+          shared.populateSelect(subjectSelect, subjects, 'id', 'subject_name', 'Select a subject');
         } else {
-          subjectSelect.innerHTML = '<option value="" disabled selected>No subjects for this level</option>';
+          resetSubjectSelect('Select a subject', subjects.length === 0);
+          subjects.forEach((s) => {
+            const o = document.createElement('option');
+            o.value = s.id;
+            o.textContent = s.subject_name;
+            subjectSelect.appendChild(o);
+          });
+          subjectSelect.disabled = subjects.length === 0;
         }
+        if (subjectSelect.refreshCselect) subjectSelect.refreshCselect();
+        if (!subjects.length) showAskError('No subjects available for this grade level yet.');
       } catch (err) {
-        console.warn('[community] could not load subjects for level:', err);
-        subjectSelect.innerHTML = '<option value="" disabled selected>Could not load subjects</option>';
+        console.warn('[community] could not load subjects for', gradeLevel, err);
+        resetSubjectSelect('Could not load subjects', true);
+        showAskError('Could not load subjects. Please try again.');
       }
     }
 
-    if (levelSelect) {
-      levelSelect.addEventListener('change', () => {
-        if (errorMsg) errorMsg.hidden = true;
-        if (subjectSelect) {
-          subjectSelect.disabled = true;
-          subjectSelect.innerHTML = '<option value="" disabled selected>Select a grade level first</option>';
-        }
-        const bucket = levelSelect.value;
-        if (bucket) loadSubjectsForLevel(bucket);
-      });
+    async function onGradeChange(gradeLevel) {
+      resetSubjectSelect('Select a grade level first', true);
+      if (collegeFields) collegeFields.style.display = 'none';
+      if (collegeCascade) collegeCascade.reset();
+
+      if (!gradeLevel) return;
+      if (gradeLevel === 'College') {
+        if (collegeFields) collegeFields.style.display = 'grid';
+        if (collegeCascade) await collegeCascade.populateDepartments();
+      } else {
+        await loadSubjectsForGrade(gradeLevel);
+      }
+    }
+
+    if (levelSelect) levelSelect.addEventListener('change', () => onGradeChange(levelSelect.value));
+    if (deptSelect) deptSelect.addEventListener('change', () => {
+      // Changing the department invalidates any previously chosen program →
+      // reset the subject field too so a stale program value can't leak into
+      // validation/payload.
+      resetSubjectSelect('Select a grade level first', true);
+      if (collegeCascade) collegeCascade.loadProgramsForCategory(deptSelect.value);
+    });
+
+    // When a Program is chosen (College), feed the chosen Program's ID into
+    // the SAME #askSubjectSelect field that the plain K-10/SHS Subjects
+    // dropdown drives. That field is the single source of truth for the
+    // Subjects display label AND the submit-button validation/payload
+    // (resolveSubjectId reads #askSubjectSelect.value). We set the value to
+    // the Program's ID directly — no separate Department/Program state that
+    // never reaches the validated field.
+    if (programSelect) programSelect.addEventListener('change', () => {
+      const programId = collegeCascade ? collegeCascade.getProgramId() : '';
+      if (!programId) return;
+
+      // Label = the chosen program's name (same text the user just picked).
+      const selectedOpt = programSelect.options[programSelect.selectedIndex];
+      const programName = (selectedOpt && selectedOpt.textContent) || 'Selected program';
+
+      // Rebuild #askSubjectSelect with a single option carrying the Program's
+      // ID, then select it. This mirrors exactly what the K-10/SHS Subjects
+      // dropdown does when the user picks a subject: the select's value is
+      // what validation and the submit payload read.
+      resetSubjectSelect('Select a subject', false);
+      const o = document.createElement('option');
+      o.value = programId;
+      o.textContent = programName;
+      subjectSelect.appendChild(o);
+      subjectSelect.value = programId;
+      if (subjectSelect.refreshCselect) subjectSelect.refreshCselect();
+      clearAskError();
+    });
+
+    // Bold / Italic / List / Math formatting — shared toolbar.js module
+    // (same helper as the answer page). Wire it once per modal open so it
+    // attaches to the ask modal's .ask-toolbar and drives #askDescTextarea.
+    function initFormatToolbar() {
+      const toolbar = document.querySelector('.ask-toolbar');
+      if (toolbar && window.OlongNotesToolbar && typeof window.OlongNotesToolbar.init === 'function') {
+        window.OlongNotesToolbar.init(toolbar, descTextarea);
+      }
     }
 
     if (openBtn) openBtn.addEventListener('click', openAskModal);
@@ -459,6 +547,16 @@
     });
 
     if (postBtn) postBtn.addEventListener('click', submitQuestion);
+
+    function showAskError(msg) {
+      if (errorMsg) {
+        errorMsg.textContent = msg;
+        errorMsg.hidden = false;
+      }
+    }
+    function clearAskError() {
+      if (errorMsg) errorMsg.hidden = true;
+    }
 
     function refreshAskerChip() {
       let name = 'You';
@@ -486,11 +584,18 @@
         }
         return;
       }
+      onGradeChange(''); // reset cascade-dependent fields
+      if (levelSelect) {
+        levelSelect.value = '';
+        if (levelSelect.refreshCselect) levelSelect.refreshCselect();
+      }
+      if (descTextarea) descTextarea.value = '';
+      clearAskError();
       refreshAskerChip();
+      initFormatToolbar();
       modal.classList.add('is-open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
-      if (errorMsg) errorMsg.hidden = true;
     }
 
     function closeAskModal() {
@@ -499,15 +604,12 @@
       document.body.style.overflow = '';
     }
 
-    function resetForm() {
-      if (subjectSelect) {
-        subjectSelect.value = '';
-        subjectSelect.disabled = true;
-        subjectSelect.innerHTML = '<option value="" disabled selected>Select a grade level first</option>';
-      }
-      if (levelSelect) levelSelect.value = '';
-      if (descTextarea) descTextarea.value = '';
-      if (errorMsg) errorMsg.hidden = true;
+    async function resolveSubjectId() {
+      // The resolved subject now always lives in #askSubjectSelect: K-10/SHS
+      // populate it directly, and the College program-change handler above
+      // feeds the resolved program's subject into the same field. Reading it
+      // from here keeps display label + validation + submit payload aligned.
+      return subjectSelect && !subjectSelect.disabled ? String(subjectSelect.value || '') : '';
     }
 
     async function submitQuestion() {
@@ -521,25 +623,26 @@
         }
         return;
       }
-      const subjectId = subjectSelect && !subjectSelect.disabled ? subjectSelect.value : '';
       const gradeLevel = levelSelect ? levelSelect.value : '';
       const body = descTextarea ? descTextarea.value.trim() : '';
 
-      if (!body || body.length < 10) {
-        if (errorMsg) {
-          errorMsg.textContent = 'Please write at least 10 characters for your question.';
-          errorMsg.hidden = false;
-        }
-        return;
-      }
       if (!gradeLevel) {
-        if (errorMsg) {
-          errorMsg.textContent = 'Please select a grade level.';
-          errorMsg.hidden = false;
-        }
+        showAskError('Please select a grade level before posting.');
         return;
       }
-      if (errorMsg) errorMsg.hidden = true;
+      if (!body || body.length < 10) {
+        showAskError('Please write at least 10 characters for your question.');
+        return;
+      }
+      clearAskError();
+
+      const subjectId = await resolveSubjectId();
+      if (!subjectId) {
+        showAskError(gradeLevel === 'College'
+          ? 'Please select a department and program. No matching subject is available yet.'
+          : 'Please select a subject before posting.');
+        return;
+      }
 
       const originalLabel = postBtn.textContent;
       postBtn.disabled = true;
@@ -547,15 +650,17 @@
 
       try {
         // Per spec: body required, subject_id/grade_level optional, never
-        // send a title. The backend accepts the *bucket* value as the
-        // grade_level (BUCKET_TO_GRADE mapping lives server-side) — the
-        // confirmed contract for FIX 3.
-        const payload = { body };
-        if (subjectId) payload.subject_id = parseInt(subjectId, 10);
-        payload.grade_level = gradeLevel; // 'k10' | 'senior_high' | 'college'
+        // send a title. We send grade_level + a resolved subject_id (the
+        // college program is persisted indirectly via subject.program_id).
+        const payload = { body, grade_level: gradeLevel, subject_id: parseInt(subjectId, 10) };
 
         const res = await postQuestion(payload);
-        resetForm();
+        onGradeChange(''); // reset
+        if (levelSelect) {
+          levelSelect.value = '';
+          if (levelSelect.refreshCselect) levelSelect.refreshCselect();
+        }
+        if (descTextarea) descTextarea.value = '';
         closeAskModal();
         showInlineBanner('Question posted!', 'success');
 
@@ -573,10 +678,7 @@
         }
       } catch (err) {
         console.error('[community] submit question failed:', err);
-        if (errorMsg) {
-          errorMsg.textContent = (err && err.message) || 'Could not post question.';
-          errorMsg.hidden = false;
-        }
+        showAskError((err && err.message) || 'Could not post question.');
       } finally {
         postBtn.disabled = false;
         postBtn.textContent = originalLabel;

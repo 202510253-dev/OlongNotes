@@ -10,6 +10,9 @@
 //   reach the composer.
 // - Posts { content } to POST /api/questions/:id/answer on success,
 //   then navigates to question.html?id={id}.
+// - FIX 3c: if the logged-in user is the question's asker, the composer
+//   is disabled and a notice is shown — you can't answer your own
+//   question (the backend also enforces this).
 //
 // QUIT-CONFIRMATION:
 //   If the textarea has unsaved text and the user tries to leave
@@ -42,9 +45,23 @@
   const quitLeaveBtn = document.getElementById('quitLeaveBtn');
   const quitBackdrop = document.getElementById('quitModalBackdrop');
 
-  // ---------- Auth gate ----------
+  // ---------- Auth helpers ----------
   function isAuthed() {
     return !!(window.OlongNotes && window.OlongNotes.getToken && window.OlongNotes.getToken());
+  }
+
+  // Best-effort current-user id from the cached profile, if the login
+  // flow stored it. Used only for the "can't answer your own question"
+  // gate; if we can't read it we simply don't block (backend still does).
+  function currentUserId() {
+    try {
+      const raw = localStorage.getItem('olongnotes_user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (u && (u.id || u.user_id)) return u.id || u.user_id;
+      }
+    } catch (_err) { /* ignore */ }
+    return null;
   }
 
   // ---------- Quit-confirmation state ----------
@@ -108,37 +125,37 @@
     });
   }
 
-  // ---------- beforeunload (browser tab-close / back-button) ----------
+// ---------- beforeunload (browser tab-close / back-button) ----------
   // The custom modal can't intercept browser-native navigation, so we
   // use `beforeunload` to prompt when there's unsaved text. The browser
   // controls the prompt copy — it will NOT match our custom modal text.
-  window.addEventListener('beforeunload', (e) => {
+  //
+  // We keep a named reference so we can REMOVE this listener before the
+  // app's own post-success redirect (Bug 2). The guard should only fire
+  // for an accidental navigate-away with unsaved text — never for the
+  // redirect that happens after a successful post.
+  function onBeforeUnload(e) {
     if (hasUnsavedText()) {
       // Standard: setting returnValue triggers the browser dialog.
       e.preventDefault();
       e.returnValue = '';
     }
-  });
+  }
+  window.addEventListener('beforeunload', onBeforeUnload);
 
-  // ---------- Formatting toolbar ----------
+  // Call this once a post succeeds (or the composer is otherwise done)
+  // so the "Leave site?" prompt never blocks the app's own redirect.
+  function disarmBeforeUnload() {
+    window.removeEventListener('beforeunload', onBeforeUnload);
+  }
+
+  // ---------- Formatting toolbar (shared module) ----------
+  // The selection-wrap logic lives in js/toolbar.js so the Answer page
+  // and the Ask-question modal (browse-community.js) behave the same.
   function initToolbar() {
     const toolbar = document.querySelector('.answer-composer__toolbar');
     if (!toolbar || !textarea) return;
-    toolbar.addEventListener('click', (e) => {
-      const btn = e.target.closest('.toolbar-btn');
-      if (!btn) return;
-      e.preventDefault();
-      const fmt = btn.dataset.format;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selected = textarea.value.slice(start, end) || 'text';
-      let wrapped = '';
-      if (fmt === 'bold') wrapped = '**' + selected + '**';
-      else if (fmt === 'italic') wrapped = '_' + selected + '_';
-      else if (fmt === 'list') wrapped = '- ' + selected.split('\n').join('\n- ');
-      textarea.setRangeText(wrapped, start, end, 'end');
-      textarea.focus();
-    });
+    window.OlongNotesToolbar && window.OlongNotesToolbar.init(toolbar, textarea);
   }
 
   // ---------- Load context header ----------
@@ -161,9 +178,26 @@
           '<span class="answer-context__pill answer-context__pill--subject">' + esc(subjectName) + '</span>' +
           '<span class="answer-context__pill answer-context__pill--' + bucket + '">' + esc(BUCKET_LABEL[bucket] || 'All Levels') + '</span>' +
         '</div>';
+
+      // FIX 3c: you can't answer your own question. The backend enforces
+      // this too, but disable the composer up-front for better UX.
+      const uid = currentUserId();
+      if (uid != null && q.user_id != null && String(uid) === String(q.user_id)) {
+        blockComposer("You can't answer your own question.");
+      }
     } catch (err) {
       console.error('[answer-page] context load failed:', err);
       contextEl.innerHTML = '<p class="question-detail__status">Could not load the question.</p>';
+    }
+  }
+
+  // Disable the composer and show a clear notice.
+  function blockComposer(message) {
+    if (textarea) textarea.disabled = true;
+    if (postBtn) postBtn.disabled = true;
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
     }
   }
 
@@ -184,11 +218,20 @@
   }
 
   // ---------- Post answer ----------
+  // `posting` is an in-flight flag that guards against double submission
+  // (Bug 1). The button's `disabled` attribute is also toggled for
+  // visual feedback, but the flag is the authoritative re-entry guard so
+  // a second click can't fire a second POST even if the disabled state
+  // hasn't visually landed in time.
+  let posting = false;
+
   async function postAnswer() {
+    if (posting) return; // already a request in flight — drop the click
     if (!isAuthed()) {
       window.location.href = 'index.html?auth=signup';
       return;
     }
+    if (textarea && textarea.disabled) return; // blocked (own question)
     const content = textarea ? textarea.value.trim() : '';
     if (!content) {
       if (errorEl) {
@@ -207,25 +250,40 @@
     }
 
     const originalLabel = postBtn.textContent;
+    posting = true;
     postBtn.disabled = true;
     postBtn.textContent = 'Posting…';
     if (errorEl) errorEl.hidden = true;
 
     try {
       await window.OlongNotes.api.post('/questions/' + questionId + '/answer', { content }, { auth: true });
-      // Success → land back on the question with the new answer visible.
+      // Success. Remove the beforeunload guard AND clear the textarea so
+      // the app's own redirect to question.html never triggers "Leave
+      // site?" (Bug 2). Do this before navigating away.
+      disarmBeforeUnload();
+      if (textarea) textarea.value = '';
       window.location.href = 'question.html?id=' + encodeURIComponent(questionId);
     } catch (err) {
       console.error('[answer-page] post failed:', err);
       if (errorEl) {
-        errorEl.textContent = (err && err.message) || 'Could not post answer.';
+        if (err && err.status === 403 && /own question/i.test((err && err.message) || '')) {
+          errorEl.textContent = (err && err.message) || "You can't answer your own question.";
+          blockComposer('You can only answer questions from other students.');
+        } else {
+          errorEl.textContent = (err && err.message) || 'Could not post answer.';
+        }
         errorEl.hidden = false;
       }
       if (err && err.status === 401) {
+        disarmBeforeUnload();
         window.location.href = 'index.html?auth=signup';
         return;
       }
     } finally {
+      // Only reset the button if we're not navigating away. On success we
+      // set location.href, so resetting is harmless; on error we must
+      // re-enable so the user can retry.
+      posting = false;
       postBtn.disabled = false;
       postBtn.textContent = originalLabel;
     }
