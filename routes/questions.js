@@ -304,9 +304,16 @@ router.post('/', auth, async (req, res) => {
   if (!body || typeof body !== 'string' || body.trim().length === 0) {
     return res.status(400).json({ message: 'Question body is required.' })
   }
-  const subjectId = parseInt(subject_id)
-  if (!subjectId || Number.isNaN(subjectId)) {
-    return res.status(400).json({ message: 'subject_id is required.' })
+  // subject_id is optional — only attach when the caller provided a valid
+  // integer. The College ask modal can't always resolve a subjects row
+  // (current seed has no college subjects yet), so missing/empty
+  // subject_id is allowed and we just don't set it on the insert.
+  let subjectId = null
+  if (subject_id !== undefined && subject_id !== null && subject_id !== '') {
+    subjectId = parseInt(subject_id)
+    if (Number.isNaN(subjectId) || subjectId <= 0) {
+      return res.status(400).json({ message: 'subject_id must be a valid id.' })
+    }
   }
 
   // Resolve the grade_level write value. Prefer an explicit grade_level
@@ -333,7 +340,11 @@ router.post('/', auth, async (req, res) => {
       .from('questions')
       .insert({
         user_id: req.user.id,
-        subject_id: subjectId,
+        // subject_id is optional — only included when the caller supplied
+        // a valid integer. Omitting the key lets the DB default kick in
+        // instead of forcing a NULL that may violate NOT NULL on legacy
+        // schemas; passing null explicitly also works on this schema.
+        ...(subjectId ? { subject_id: subjectId } : {}),
         school_id: req.body.school_id ? parseInt(req.body.school_id) : null,
         grade_level: gradeLevelWrite,
         title,

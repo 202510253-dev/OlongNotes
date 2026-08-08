@@ -296,7 +296,7 @@
 
         <div class="ask-modal__body">
           <div class="ask-filters">
-            <div class="ask-field">
+            <div class="ask-field" id="askSubjectField">
               <label class="ask-field__label" for="askSubjectSelect">Subjects</label>
               <div class="ask-select">
                 <select id="askSubjectSelect" disabled>
@@ -322,25 +322,17 @@
                 <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </div>
             </div>
-          </div>
 
-          <!-- College-only cascade: shown when Grade Level = College.
-               Department → Program (→ Major), shared with the upload flow. -->
-<div id="askCollegeFields" class="ask-college" style="display: none;">
-            <div class="ask-field">
+            <!-- College-only: lives in the SAME .ask-filters grid so it
+                 lands right next to Grade Level when Subjects is hidden.
+                 The id is still on the wrapper (kept for JS back-compat)
+                 but the wrapper is display:none in K-10/SHS so the
+                 Department field only takes a grid cell in College mode. -->
+            <div class="ask-field" id="askCollegeFields" style="display: none;">
               <label class="ask-field__label" for="askDeptSelect">Department</label>
               <div class="ask-select">
                 <select id="askDeptSelect">
                   <option value="" disabled selected>Select a department</option>
-                </select>
-                <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </div>
-            </div>
-            <div class="ask-field">
-              <label class="ask-field__label" for="askProgramSelect">Program</label>
-              <div class="ask-select">
-                <select id="askProgramSelect" disabled>
-                  <option value="" disabled selected>Select a program</option>
                 </select>
                 <svg class="ask-select__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </div>

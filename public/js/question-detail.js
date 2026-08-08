@@ -149,10 +149,25 @@ function renderQuestionDetail(q) {
     // Report button on the question (wired to the existing endpoint).
     const qReport = '<button class="report-btn" type="button" data-report-question="' + esc(q.id) + '">' + reportIcon() + ' Report</button>';
 
-    // BATCH B — Asker question-menu (three-dot: Edit / Delete). Shown only
-    // when the logged-in user IS the asker (server-provided viewer_is_asker)
-    // or an admin (users.role === 'admin').
-    const canManageQuestion = Boolean(q.viewer_is_asker) || (q.users && q.users.role === 'admin');
+    // BATCH B — Asker question-menu (three-dot: Edit / Delete). Shown ONLY
+    // to the asker themselves (server-provided viewer_is_asker) or an
+    // admin. Regular viewers / commenters / other logged-in users never
+    // see this menu — the kebab is the only path to destructive actions
+    // on the question, and it must be asker-only.
+    //
+    // Defensive double-check: even if the server-side flag is stale or
+    // missing, we also compare the localStorage user id against the
+    // question's user_id so a viewer can never render the Edit/Delete
+    // controls on someone else's question.
+    const cachedUser = (() => {
+      try { return JSON.parse(localStorage.getItem('olongnotes_user') || 'null'); }
+      catch (_) { return null; }
+    })();
+    const cachedUserId = cachedUser && (cachedUser.id || cachedUser.user_id);
+    const askerIsAdmin = Boolean(cachedUser && cachedUser.role === 'admin');
+    const askerIsViewer = Boolean(q.viewer_is_asker)
+      || (cachedUserId && String(cachedUserId) === String(askerId));
+    const canManageQuestion = askerIsViewer || askerIsAdmin;
     const askerMenu = canManageQuestion
       ? '<div class="kebab" data-kebab="question">' +
           '<button class="kebab__btn" type="button" aria-label="Question options" aria-haspopup="true" aria-expanded="false">' +

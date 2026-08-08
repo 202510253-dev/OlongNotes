@@ -3,18 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile - OlongNotes</title>
+  <title>Profile — OlongNotes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/profile.css" />
 </head>
-<body>
+<body data-role="viewer">
+
+  <!-- ===================== SIDE DRAWER MENU ===================== -->
+  <div class="side-drawer" id="sideDrawer" aria-hidden="true">
+    <div class="side-drawer__backdrop" id="sideDrawerBackdrop"></div>
+
+    <nav class="side-drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+      <div class="side-drawer__head">
+        <a href="index.html" class="side-drawer__brand">
+          <img src="img/olongnotes.png" alt="" />
+          <span class="side-drawer__brand-title">OlongNotes</span>
+        </a>
+        <button class="side-drawer__close" id="sideDrawerClose" type="button" aria-label="Close menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+        </button>
+      </div>
+
+      <div class="side-drawer__nav">
+        <a class="side-drawer__link" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5a1 1 0 0 0 1 1h3.5v-6h3v6H17a1 1 0 0 0 1-1V10"/></svg>
+          Home
+        </a>
+        <a class="side-drawer__link" href="community.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          Q&amp;A
+        </a>
+        <a class="side-drawer__link" href="schools.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
+          Schools
+        </a>
+        <a class="side-drawer__link" href="subjects.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+          Subjects
+        </a>
+        <a class="side-drawer__link" href="contributors.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8" r="3"/><path d="M2.5 19c1-3 3.3-4.6 6-4.6s5 1.6 6 4.6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.3 14.6c2.7.3 4.3 1.7 5 3.9"/></svg>
+          Top Contributors
+        </a>
+      </div>
+
+      <div class="side-drawer__foot">© 2026 OlongNotes</div>
+    </nav>
+  </div>
+
   <!-- ===================== NAVIGATION BAR ===================== -->
   <header class="navbar" id="navbar">
     <div class="navbar__inner container">
-      <button class="navbar__burger" id="navBurger" type="button" aria-label="Open menu" aria-expanded="false">
+      <button class="navbar__ burger" id="navBurger" type="button" aria-label="Open menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
 
@@ -44,27 +87,295 @@
 
         <button class="btn btn--outline btn--sm" type="button" id="navLoginBtn">Log In</button>
         <button class="btn btn--primary btn--sm" type="button" id="navSignupBtn">Sign Up</button>
+
+        <button class="profile-icon" type="button" aria-label="Profile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+        </button>
       </div>
     </div>
   </header>
 
   <main id="siteMain">
-    <section class="profile-placeholder container">
-      <div class="profile-placeholder__card">
-        <span class="profile-placeholder__icon" aria-hidden="true">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
-        </span>
-        <h1 class="profile-placeholder__title">Profile pages are coming soon</h1>
-        <p class="profile-placeholder__text">
-          You'll be able to see all of a member's questions, answers, and
-          contributions here. Hang tight!
-        </p>
-        <a href="community.html" class="btn btn--primary">Back to Questions</a>
+    <section class="profile-page container">
+      <div class="profile-page__inner">
+
+        <!-- Profile-empty state — shown when no valid user id is in the URL
+             and the viewer isn't logged in. Hidden after loadProfile() runs. -->
+        <div id="profileEmpty" class="profile-empty" hidden>
+          <div class="profile-empty__card">
+            <span class="profile-empty__icon" aria-hidden="true">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+            </span>
+            <h1 class="profile-empty__title">No profile to show</h1>
+            <p class="profile-empty__text">Open a profile from the Q&amp;A page or sign in to view your own.</p>
+            <a href="community.html" class="btn btn--primary">Browse Questions</a>
+          </div>
+        </div>
+
+        <!-- Real profile shell — hidden until loadProfile finishes. -->
+        <div id="profileShell" hidden>
+
+          <!-- Hero -->
+          <section class="profile-hero">
+            <div class="profile-hero__bg" aria-hidden="true">
+              <div class="profile-hero__bg__gradient"></div>
+            </div>
+            <div class="profile-hero__overlay"></div>
+
+            <div class="profile-hero__content">
+              <div class="profile-hero__avatar" id="profileAvatar" aria-hidden="true">?</div>
+
+              <div class="profile-hero__info">
+                <div class="profile-hero__name-row">
+                  <h1 id="profileName">Loading…</h1>
+                  <span class="profile-badge" id="profileBadge">Member</span>
+                </div>
+                <p class="profile-hero__handle" id="profileHandle">@…</p>
+                <p class="profile-hero__bio" id="profileBio">Loading profile…</p>
+
+                <div class="profile-hero__meta">
+                  <span id="profileCity"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.35-7-10a7 7 0 0 1 14 0c0 5.65-7 10-7 10Z"/><circle cx="12" cy="11" r="2.5"/></svg> <em>—</em></span>
+                  <span id="profileSchool"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg> <em>—</em></span>
+                  <span id="profileGrade"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg> <em>—</em></span>
+                </div>
+
+                <div class="profile-hero__stats">
+                  <div><strong id="statUploads">0</strong><span>Uploads</span></div>
+                  <div><strong id="statDownloads">0</strong><span>Downloads</span></div>
+                  <div><strong id="statLikes">0</strong><span>Likes</span></div>
+                  <div><strong id="statBookmarks">0</strong><span>Bookmarks</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tabs -->
+          <nav class="profile-tabs" aria-label="Profile sections">
+            <button class="profile-tab is-active" type="button" data-tab="overview">Overview</button>
+            <button class="profile-tab" type="button" data-tab="notes">My Notes</button>
+            <button class="profile-tab" type="button" data-tab="bookmarks">Bookmarks</button>
+            <button class="profile-tab" type="button" data-tab="activity">Activity</button>
+            <button class="profile-tab" type="button" data-tab="settings" id="settingsTabBtn">Settings</button>
+          </nav>
+
+          <!-- Body -->
+          <section class="profile-body">
+
+            <!-- OVERVIEW -->
+            <div class="profile-panel" data-panel="overview">
+              <div class="profile-col-main" style="max-width:760px;">
+                <div class="profile-card">
+                  <h2 class="profile-card__title">About Me</h2>
+                  <p class="profile-card__text" id="overviewBio">Loading bio…</p>
+
+                  <ul class="profile-details">
+                    <li>
+                      <span class="profile-details__label">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
+                        Member since
+                      </span>
+                      <span class="profile-details__value" id="overviewJoined">—</span>
+                    </li>
+                    <li>
+                      <span class="profile-details__label">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m4.5 6.5 7.5 6 7.5-6"/></svg>
+                        Email
+                      </span>
+                      <span class="profile-details__value" id="overviewEmail">—</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="profile-card">
+                  <h2 class="profile-card__title">Recent Activity</h2>
+                  <p class="profile-card__empty">Recent activity will appear here once the activity feed phase ships.</p>
+                </div>
+
+                <div class="profile-card">
+                  <h2 class="profile-card__title">Achievements</h2>
+                  <p class="profile-card__empty">Badges and milestones will appear here as contributions grow.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- MY NOTES -->
+            <div class="profile-panel" data-panel="notes" hidden>
+              <div class="notes-toolbar">
+                <div class="notes-toolbar__heading">
+                  <h2 id="notesHeading">My Notes</h2>
+                  <p id="notesSubheading">Loading…</p>
+                </div>
+                <div class="notes-toolbar__actions">
+                  <label class="search-field">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input type="search" placeholder="Search notes..." aria-label="Search notes" id="notesSearch" />
+                  </label>
+                  <a class="btn btn--primary btn--sm" href="index.html#upload">+ New Note</a>
+                </div>
+              </div>
+
+              <div class="notes-layout">
+                <div class="notes-list" id="notesList">
+                  <p class="profile-card__empty">Loading notes…</p>
+                </div>
+                <div class="notes-sidebar" id="notesSidebar"></div>
+              </div>
+            </div>
+
+            <!-- BOOKMARKS -->
+            <div class="profile-panel" data-panel="bookmarks" hidden>
+              <label class="search-field search-field--wide">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input type="search" placeholder="Search bookmarks..." aria-label="Search bookmarks" disabled />
+              </label>
+
+              <div class="profile-card">
+                <h2 class="profile-card__title">Bookmarks</h2>
+                <p class="profile-card__empty">Bookmarks will appear here once the bookmarks API ships (Phase 6.2).</p>
+              </div>
+            </div>
+
+            <!-- ACTIVITY -->
+            <div class="profile-panel" data-panel="activity" hidden>
+              <div class="notes-layout">
+                <div class="notes-list" id="activityList">
+                  <p class="profile-card__empty">Loading activity…</p>
+                </div>
+                <div class="notes-sidebar" id="activitySidebar"></div>
+              </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div class="profile-panel" data-panel="settings" hidden>
+              <div class="settings-layout">
+                <div class="profile-card settings-nav-card">
+                  <ul class="settings-nav">
+                    <li><a href="#" class="is-active" data-settings-nav="profile">Profile Settings</a></li>
+                    <li><a href="#" data-settings-nav="privacy">Privacy</a></li>
+                    <li><a href="#" data-settings-nav="notifications">Notifications</a></li>
+                    <li><a href="#" data-settings-nav="security">Security</a></li>
+                  </ul>
+                </div>
+
+                <div class="profile-card">
+                  <h2 class="profile-card__title">Profile Settings</h2>
+                  <p class="settings-subtitle">Manage your personal information. Saved changes update your profile instantly.</p>
+
+                  <div id="settingsMessage" class="settings-message" hidden></div>
+
+                  <form class="settings-form" id="settingsForm" autocomplete="off">
+                    <div class="settings-field">
+                      <label for="settingsUsername">Username</label>
+                      <input type="text" id="settingsUsername" name="username" maxlength="20" />
+                    </div>
+
+                    <div class="settings-field">
+                      <label for="settingsBio">Bio</label>
+                      <textarea id="settingsBio" name="bio" rows="3" maxlength="500"></textarea>
+                      <span class="settings-field__hint" id="settingsBioCount">0 / 500</span>
+                    </div>
+
+                    <div class="settings-field">
+                      <label for="settingsLocation">Location</label>
+                      <input type="text" id="settingsLocation" name="location" maxlength="120" placeholder="City, Country" />
+                    </div>
+
+                    <div class="settings-field">
+                      <label for="settingsStrand">Strand</label>
+                      <input type="text" id="settingsStrand" name="strand" maxlength="80" placeholder="STEM, ABM, HUMSS, …" />
+                    </div>
+
+                    <div class="settings-field">
+                      <label for="settingsSchool">School</label>
+                      <select id="settingsSchool" name="school_id">
+                        <option value="">No school</option>
+                      </select>
+                    </div>
+
+                    <div class="settings-field">
+                      <label for="settingsGrade">Grade Level</label>
+                      <select id="settingsGrade" name="grade_level">
+                        <option value="">Select a grade level</option>
+                        <option value="Grade 7">Grade 7</option>
+                        <option value="Grade 8">Grade 8</option>
+                        <option value="Grade 9">Grade 9</option>
+                        <option value="Grade 10">Grade 10</option>
+                        <option value="Grade 11">Grade 11</option>
+                        <option value="Grade 12">Grade 12</option>
+                        <option value="College">College</option>
+                      </select>
+                    </div>
+                  </form>
+                </div>
+
+                <div class="settings-side">
+                  <div class="profile-card">
+                    <h2 class="profile-card__title">Account Overview</h2>
+                    <ul class="stat-list">
+                      <li><span>Member Since</span><span id="overviewJoinedSettings">—</span></li>
+                      <li><span>Account Type</span><span id="overviewRoleSettings">—</span></li>
+                    </ul>
+                  </div>
+
+                  <div class="settings-actions">
+                    <button class="btn btn--primary" type="button" id="settingsSaveBtn">Save Changes</button>
+                    <button class="btn btn--outline btn--danger" type="button" id="settingsLogoutBtn">Log Out</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </section>
+        </div>
+
       </div>
     </section>
   </main>
 
+  <!-- ===================== FOOTER ===================== -->
   <footer class="footer" id="about">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__brand navbar__brand--footer">
+          <span class="navbar__logo" aria-hidden="true">
+            <img src="img/olongnotes.png" alt="OlongNotes logo" />
+          </span>
+          <span class="navbar__title-group">
+            <span class="navbar__title navbar__title--light">OlongNotes</span>
+            <span class="navbar__tagline navbar__tagline--light">Knowledge shared, Future shared</span>
+          </span>
+        </a>
+        <p class="footer__desc">A free notes repository for students in Olongapo City.</p>
+      </div>
+
+      <div class="footer__col">
+        <h4>Explore</h4>
+        <a href="community.html">Q&amp;A</a>
+        <a href="schools.html">Schools</a>
+        <a href="subjects.html">Subjects</a>
+        <a href="index.html#about">About Us</a>
+      </div>
+
+      <div class="footer__col">
+        <h4>Support</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Guidelines</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+
+      <div class="footer__col footer__col--connect">
+        <h4>Stay Connected</h4>
+        <p>Follow us for updates and announcements.</p>
+        <div class="footer__socials">
+          <a href="#" aria-label="Facebook"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 8.5h2.5V5.3S15 5 13.4 5C10.9 5 9.2 6.5 9.2 9.2v2.3H6.5V15h2.7v6h3.1v-6h2.6l.4-3.5h-3v-1.9c0-.9.3-1.1 1.2-1.1Z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17.2" cy="6.8" r="1"/></svg></a>
+          <a href="#" aria-label="Discord"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7.5 16.5c3 1.4 6 1.4 9 0M8.3 8.3c-2.4.6-3.6 2-4 4.3-.4 2.7 0 4.6 1.7 6 1 .8 2.1 1.2 2.1 1.2l.8-1.3M15.7 8.3c2.4.6 3.6 2 4 4.3.4 2.7 0 4.6-1.7 6-1 .8-2.1 1.2-2.1 1.2l-.8-1.3"/><circle cx="9.3" cy="13.2" r="1.1"/><circle cx="14.7" cy="13.2" r="1.1"/></svg></a>
+          <a href="#" aria-label="Email"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m4.5 6.5 7.5 6 7.5-6"/></svg></a>
+        </div>
+      </div>
+    </div>
+
     <div class="footer__bottom">
       <p>© 2026 OlongNotes. All rights reserved.</p>
     </div>
@@ -73,7 +384,6 @@
   <script src="js/api.js"></script>
   <script src="js/auth-drawer.js"></script>
   <script src="js/script.js"></script>
+  <script src="js/profile-page.js"></script>
 </body>
 </html>
-</content>
-

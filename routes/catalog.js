@@ -60,12 +60,13 @@ router.get('/schools', async (req, res) => {
 // GET /api/subjects — public
 // Supports ?education_level=k10|senior_high|college
 // Supports ?program_id=X (college subjects under a program/major)
+// Supports ?category_id=X (college subjects under a department/category)
 // Supports ?id=X (single subject lookup)
 // Supports ?letter=X and ?limit=X&offset=X for filtering and pagination
 // No params = all subjects (backward compat for current frontend callers)
 // ─────────────────────────────────────────────
 router.get('/subjects', async (req, res) => {
-  const { education_level, program_id, id, letter, limit, offset } = req.query
+  const { education_level, program_id, category_id, id, letter, limit, offset } = req.query
 
 try {
     let query = supabase
@@ -86,6 +87,14 @@ try {
 
     if (program_id) {
       query = query.eq('program_id', parseInt(program_id))
+    }
+
+    // Phase 4.0 ask modal: when the user picks a Department (and stays
+    // on College) we want every subject tagged with that category, not
+    // just the ones bound to a specific program. Category-scoped listing
+    // mirrors the upload flow's category_id -> programs listing.
+    if (category_id) {
+      query = query.eq('category_id', parseInt(category_id))
     }
 
     if (id) {

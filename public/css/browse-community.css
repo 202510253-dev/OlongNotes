@@ -801,25 +801,15 @@
   gap: 16px;
 }
 
-/* Inline filter row: Subjects + Grade Level side-by-side */
+/* Inline filter row: Subjects + Grade Level (+ Department in College
+   mode) all sit in this grid. The Department field is hidden in K-10/SHS
+   and shown only when Grade Level = College — JS toggles its display.
+   Because they share one grid, Department lands immediately next to Grade
+   Level with no awkward gap row in between. */
 .ask-filters {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-}
-
-/* College-only cascade (Department → Program), same two-column layout
-   as .ask-filters. Shown only when Grade Level = College. */
-.ask-college {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-@media (max-width: 640px) {
-  .ask-college {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* When a native <select> inside .ask-select is upgraded to the shared

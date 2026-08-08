@@ -396,13 +396,13 @@
     const postBtn = document.getElementById('askPostBtn');
     const errorMsg = document.getElementById('askModalError');
     const subjectSelect = document.getElementById('askSubjectSelect');
+    const subjectField = document.getElementById('askSubjectField');
     const levelSelect = document.getElementById('askLevelSelect');
     const descTextarea = document.getElementById('askDescTextarea');
     const askerNameEl = document.getElementById('askModalAsker');
     const askerAvatarEl = document.getElementById('askModalAvatar');
     const collegeFields = document.getElementById('askCollegeFields');
     const deptSelect = document.getElementById('askDeptSelect');
-    const programSelect = document.getElementById('askProgramSelect');
 
     if (!modal) return;
 
@@ -411,14 +411,15 @@
     // the renderer/MutationObserver logic).
     const shared = (window.OlongNotes && window.OlongNotes.shared) || {};
     const initCustomSelect = shared.initCustomSelect || (() => {});
-    [subjectSelect, levelSelect, deptSelect, programSelect].forEach((el) => el && initCustomSelect(el));
+    [subjectSelect, levelSelect, deptSelect].forEach((el) => el && initCustomSelect(el));
 
-    // College Department → Program cascade, shared with the upload flow.
-    // No major tier in the ask modal (questions are coarser than notes).
+    // College Department dropdown is loaded via the shared cascade helper
+    // (kept around only for its populateDepartments() / reset() helpers —
+    // the ask modal no longer renders the Program/Major tier).
     const collegeCascade = shared.createCollegeCascade ? shared.createCollegeCascade({
       api: window.OlongNotes && window.OlongNotes.api,
       categorySelect: deptSelect,
-      programSelect: programSelect,
+      programSelect: null,
       majorSelect: null,
       onError: (msg) => showAskError(msg),
     }) : null;
@@ -480,52 +481,75 @@
       resetSubjectSelect('Select a grade level first', true);
       if (collegeFields) collegeFields.style.display = 'none';
       if (collegeCascade) collegeCascade.reset();
+      // Default: Subjects row visible (K-10/SHS). College hides it — the
+      // Department dropdown takes its place next to Grade Level in the
+      // same .ask-filters grid.
+      if (subjectField) subjectField.style.display = '';
 
       if (!gradeLevel) return;
       if (gradeLevel === 'College') {
-        if (collegeFields) collegeFields.style.display = 'grid';
+        // Department field is a grid child of .ask-filters, so we just
+        // clear `display` to let it occupy a cell beside Grade Level.
+        if (collegeFields) collegeFields.style.display = '';
+        if (subjectField) subjectField.style.display = 'none';
         if (collegeCascade) await collegeCascade.populateDepartments();
       } else {
         await loadSubjectsForGrade(gradeLevel);
       }
     }
 
+    // In College mode the visible Subjects row is hidden — the user only
+    // picks a Department. We still call loadSubjectsForDepartment() so
+    // #askSubjectSelect ends up holding the first real subject_id under
+    // that department. resolveSubjectId() reads subjectSelect.value, so
+    // the submit payload automatically carries a valid subject_id — no
+    // extra field for the user to touch. Mirrors the upload flow's
+    // /subjects?program_id= resolution, but keyed by category_id.
+    async function loadSubjectsForDepartment(departmentId) {
+      if (!subjectSelect || !departmentId) return;
+      resetSubjectSelect('Loading…', true);
+      clearAskError();
+      try {
+        const data = await window.OlongNotes.api.get(
+          `/subjects?education_level=college&category_id=${encodeURIComponent(departmentId)}&limit=100`
+        );
+        const subjects = Array.isArray(data) ? data : (data && data.subjects ? data.subjects : []);
+        if (!subjects.length) {
+          // No subjects under this department yet — leave the backing
+          // select empty so resolveSubjectId() returns '' and submit
+          // surfaces a clean "pick a department that has subjects" error.
+          resetSubjectSelect('No subjects in this department yet', true);
+          return;
+        }
+        if (shared.populateSelect) {
+          shared.populateSelect(subjectSelect, subjects, 'id', 'subject_name', 'Select a subject');
+        } else {
+          resetSubjectSelect('Select a subject', false);
+          subjects.forEach((s) => {
+            const o = document.createElement('option');
+            o.value = s.id;
+            o.textContent = s.subject_name;
+            subjectSelect.appendChild(o);
+          });
+          subjectSelect.disabled = false;
+        }
+        // Auto-pick the first subject so the submit payload has a real
+        // subject_id without the user ever touching the (hidden) Subjects
+        // row. valueEl (the visible label) doesn't matter — the row is
+        // hidden — but we still refresh in case the layout reflows.
+        subjectSelect.value = subjects[0].id;
+        if (subjectSelect.refreshCselect) subjectSelect.refreshCselect();
+      } catch (err) {
+        console.warn('[community] could not load subjects for department', departmentId, err);
+        resetSubjectSelect('Could not load subjects', true);
+      }
+    }
+
     if (levelSelect) levelSelect.addEventListener('change', () => onGradeChange(levelSelect.value));
     if (deptSelect) deptSelect.addEventListener('change', () => {
-      // Changing the department invalidates any previously chosen program →
-      // reset the subject field too so a stale program value can't leak into
-      // validation/payload.
-      resetSubjectSelect('Select a grade level first', true);
-      if (collegeCascade) collegeCascade.loadProgramsForCategory(deptSelect.value);
-    });
-
-    // When a Program is chosen (College), feed the chosen Program's ID into
-    // the SAME #askSubjectSelect field that the plain K-10/SHS Subjects
-    // dropdown drives. That field is the single source of truth for the
-    // Subjects display label AND the submit-button validation/payload
-    // (resolveSubjectId reads #askSubjectSelect.value). We set the value to
-    // the Program's ID directly — no separate Department/Program state that
-    // never reaches the validated field.
-    if (programSelect) programSelect.addEventListener('change', () => {
-      const programId = collegeCascade ? collegeCascade.getProgramId() : '';
-      if (!programId) return;
-
-      // Label = the chosen program's name (same text the user just picked).
-      const selectedOpt = programSelect.options[programSelect.selectedIndex];
-      const programName = (selectedOpt && selectedOpt.textContent) || 'Selected program';
-
-      // Rebuild #askSubjectSelect with a single option carrying the Program's
-      // ID, then select it. This mirrors exactly what the K-10/SHS Subjects
-      // dropdown does when the user picks a subject: the select's value is
-      // what validation and the submit payload read.
-      resetSubjectSelect('Select a subject', false);
-      const o = document.createElement('option');
-      o.value = programId;
-      o.textContent = programName;
-      subjectSelect.appendChild(o);
-      subjectSelect.value = programId;
-      if (subjectSelect.refreshCselect) subjectSelect.refreshCselect();
-      clearAskError();
+      // In College mode the picked Department now feeds the Subjects row
+      // directly — no separate Program tier to maintain or wait on.
+      loadSubjectsForDepartment(deptSelect.value);
     });
 
     // Bold / Italic / List / Math formatting — shared toolbar.js module
@@ -637,12 +661,11 @@
       clearAskError();
 
       const subjectId = await resolveSubjectId();
-      if (!subjectId) {
-        showAskError(gradeLevel === 'College'
-          ? 'Please select a department and program. No matching subject is available yet.'
-          : 'Please select a subject before posting.');
-        return;
-      }
+      // subject_id is OPTIONAL — only include it in the payload when we
+      // have one. College mode may not have any subjects seeded for the
+      // chosen department yet; the user can still post, the row just
+      // won't be tagged with a subject. Same intent as the upload flow
+      // where a contributor can publish a note without a subject.
 
       const originalLabel = postBtn.textContent;
       postBtn.disabled = true;
@@ -650,9 +673,9 @@
 
       try {
         // Per spec: body required, subject_id/grade_level optional, never
-        // send a title. We send grade_level + a resolved subject_id (the
-        // college program is persisted indirectly via subject.program_id).
-        const payload = { body, grade_level: gradeLevel, subject_id: parseInt(subjectId, 10) };
+        // send a title. subject_id only goes in when we resolved one.
+        const payload = { body, grade_level: gradeLevel };
+        if (subjectId) payload.subject_id = parseInt(subjectId, 10);
 
         const res = await postQuestion(payload);
         onGradeChange(''); // reset
