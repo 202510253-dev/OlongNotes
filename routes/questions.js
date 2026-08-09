@@ -1060,3 +1060,9 @@ router.post('/:id/accept', auth, async (req, res) => {
 })
 
 module.exports = router
+// Export the shared toggle helper so routes/answers.js (which requires
+// this module to wire POST /api/answers/:id/like) can reuse it without
+// duplicating the question/answer like-toggle logic. Without this export,
+// `const { toggleQuestionInteraction } = require('./questions')` resolves
+// to undefined and calling it throws a TypeError → 500 on answer likes.
+module.exports.toggleQuestionInteraction = toggleQuestionInteraction

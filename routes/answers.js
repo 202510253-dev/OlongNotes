@@ -15,7 +15,19 @@ const express = require('express')
 const router = express.Router()
 const { supabase } = require('../supabase')
 const auth = require('../middleware/auth')
+const { writeActivity } = require('./activities')
 const { toggleQuestionInteraction } = require('./questions')
+
+// The fixed set of reasons accepted when reporting an answer. Mirrors the
+// approved 5-option list from the user (kept consistent with the
+// question-report flow so the UI/reason vocabulary is uniform).
+const ANSWER_REPORT_REASONS = [
+  'Inappropriate content',
+  'Copyrighted material',
+  'Incorrect information',
+  'Spam or misleading',
+  'Other',
+]
 
 // ---------- POST /api/answers/:id/like ----------
 router.post('/:id/like', auth, (req, res) =>
@@ -29,6 +41,71 @@ router.post('/:id/like', auth, (req, res) =>
     activityType: 'answer_liked',
   })
 )
+
+// ---------- POST /api/answers/:id/report ----------
+//
+// Auth required. Persists to the `reports` table (mirrors the question
+// report route in routes/questions.js) with target_type='answer' and a
+// reason validated against the fixed 5-option list. Emits a best-effort
+// answer_reported activity row (fire-and-forget, never throws).
+router.post('/:id/report', auth, async (req, res) => {
+  const answerId = parseInt(req.params.id)
+  const reason = (req.body || {}).reason
+
+  if (!answerId || Number.isNaN(answerId)) {
+    return res.status(400).json({ message: 'Invalid answer id.' })
+  }
+  if (!reason || typeof reason !== 'string' || reason.trim().length === 0) {
+    return res.status(400).json({ message: 'A reason is required to report an answer.' })
+  }
+  const trimmedReason = reason.trim()
+  if (!ANSWER_REPORT_REASONS.includes(trimmedReason)) {
+    return res.status(400).json({
+      message: `Reason must be one of: ${ANSWER_REPORT_REASONS.join(', ')}.`,
+    })
+  }
+
+  try {
+    const { data: exists } = await supabase
+      .from('answers')
+      .select('id')
+      .eq('id', answerId)
+      .maybeSingle()
+
+    if (!exists) {
+      return res.status(404).json({ message: 'Answer not found.' })
+    }
+
+    const { data: report, error } = await supabase
+      .from('reports')
+      .insert({
+        reporter_id: req.user.id,
+        target_type: 'answer',
+        target_id: answerId,
+        reason: trimmedReason,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('[answers] report insert error:', error)
+      return res.status(500).json({ message: 'Could not submit report.' })
+    }
+
+    // Best-effort activity log entry — does not affect the response.
+    writeActivity(req.user.id, 'answer_reported', answerId, trimmedReason)
+
+    return res.status(201).json({
+      message: 'Report submitted. Our team will review it.',
+      report_id: report.id,
+    })
+  } catch (err) {
+    console.error('[answers] report POST error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
 
 // ---------- DELETE /api/answers/:id ----------
 //

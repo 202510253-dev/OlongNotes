@@ -247,6 +247,152 @@
   color: #e0556f;
 }
 
+/* =========================================================
+   Report modal (styled, mirrors document-viewer's)
+========================================================= */
+.report-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-modal[hidden] {
+  display: none;
+}
+
+.report-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 26, 58, 0.45);
+}
+
+.report-modal__panel {
+  position: relative;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface, #ffffff);
+  border-radius: 16px;
+  padding: 22px 22px 20px;
+  box-shadow: 0 12px 32px rgba(11, 31, 77, 0.22);
+}
+
+.report-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: none;
+  background: var(--navy-100, #f2f4f8);
+  color: var(--gray-600, #5b6472);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.report-modal__close:hover {
+  background: var(--navy-150, #e6eaf2);
+  color: var(--navy-900, #17203a);
+}
+
+.report-modal__title {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy-900, #17203a);
+  margin: 0 26px 4px 0;
+}
+
+.report-modal__subtitle {
+  font-size: 0.82rem;
+  color: var(--gray-600, #8891a0);
+  margin: 0 0 16px;
+}
+
+.report-modal__options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.report-option {
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--navy-900, #17203a);
+  background: var(--navy-100, #f2f4f8);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.report-option:hover {
+  border-color: #e0b23c;
+  background: rgba(224, 178, 60, 0.12);
+}
+
+.report-option.is-selected {
+  background: rgba(224, 178, 60, 0.18);
+  border-color: #e0b23c;
+  color: var(--navy-900, #17203a);
+  font-weight: 600;
+}
+
+.report-modal__other {
+  margin-bottom: 14px;
+}
+
+.report-modal__other-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.86rem;
+  color: var(--navy-900, #17203a);
+  background: var(--navy-100, #f2f4f8);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.report-modal__other-input:focus {
+  border-color: #e0b23c;
+}
+
+.report-modal__done {
+  width: 100%;
+  height: 40px;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent-blue, #3d6bf0);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.report-modal__done:hover:not(:disabled) {
+  background: #2a55d0;
+}
+
+.report-modal__done:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Answers section */
 .modal-comments {
   margin-top: 24px;
@@ -354,14 +500,53 @@
   gap: 18px;
 }
 
-/* Answer like count (read-only on this page) */
+/* Answer like button (thumb-up) — interactive toggle that blends with
+   the Q&A page. Mirrors the accent-blue action chips used elsewhere. */
 .answer-like-count {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-family: inherit;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--gray-600, #8891a0);
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.answer-like-count:hover {
+  color: var(--accent-blue, #3d6bf0);
+  background: rgba(61, 107, 240, 0.08);
+}
+
+.answer-like-count:active {
+  transform: scale(0.94);
+}
+
+.answer-like-count:focus-visible {
+  outline: 2px solid var(--accent-blue, #3d6bf0);
+  outline-offset: 2px;
+}
+
+/* Liked state — filled thumb-up with the accent color */
+.answer-like-count.is-liked {
+  color: var(--accent-blue, #3d6bf0);
+  font-weight: 700;
+}
+
+.answer-like-count.is-liked svg {
+  fill: var(--accent-blue, #3d6bf0);
+}
+
+/* Count inside the like button */
+.answer-like-btn__count {
+  min-width: 10px;
+  text-align: center;
 }
 
 /* Answer sidebar: a small card prompting the user to answer */

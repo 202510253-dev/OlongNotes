@@ -343,6 +343,16 @@ router.get('/:id/answers', async (req, res) => {
 //   bookmarks    Bookmarks this user has placed on notes.
 //   answers      Total answers written.
 //   questions    Total questions asked.
+//   likes_received  Likes OTHERS have placed on this user's own
+//                contributions — the sum of the denormalized
+//                likes_count columns across the user's notes,
+//                questions, and answers. Mirrors how `downloads`
+//                sums notes.download_count (same safeSum pattern,
+//                no live-join counting). This is the "what people
+//                think of your contributions" number shown in the
+//                profile hero "Likes" stat; likes_given stays
+//                available as a secondary "how generous you've
+//                been" figure.
 router.get('/:id/stats', async (req, res) => {
   const userId = parseIdParam(req.params.id)
   if (!userId) {
@@ -359,6 +369,9 @@ router.get('/:id/stats', async (req, res) => {
       bookmarks,
       answers,
       questions,
+      receivedNoteLikes,
+      receivedQuestionLikes,
+      receivedAnswerLikes,
     ] = await Promise.all([
       safeCount('notes', 'user_id', userId),
       safeSum('notes', 'download_count', 'user_id', userId),
@@ -368,6 +381,12 @@ router.get('/:id/stats', async (req, res) => {
       safeCount('bookmarks', 'user_id', userId),
       safeCount('answers', 'user_id', userId),
       safeCount('questions', 'user_id', userId),
+      // Received-likes aggregation — same denormalized-column sum
+      // pattern as downloads, so likes_received never double-counts
+      // (each contribution contributes its own likes_count once).
+      safeSum('notes', 'likes_count', 'user_id', userId),
+      safeSum('questions', 'likes_count', 'user_id', userId),
+      safeSum('answers', 'likes_count', 'user_id', userId),
     ])
 
     return res.status(200).json({
@@ -375,6 +394,7 @@ router.get('/:id/stats', async (req, res) => {
         uploads,
         downloads,
         likes_given: likesNotes + likesQuestions + likesAnswers,
+        likes_received: receivedNoteLikes + receivedQuestionLikes + receivedAnswerLikes,
         bookmarks,
         answers,
         questions,
@@ -383,7 +403,7 @@ router.get('/:id/stats', async (req, res) => {
   } catch (err) {
     console.error('[users] GET /:id/stats exception:', err)
     return res.status(200).json({
-      stats: { uploads: 0, downloads: 0, likes_given: 0, bookmarks: 0, answers: 0, questions: 0 },
+      stats: { uploads: 0, downloads: 0, likes_given: 0, likes_received: 0, bookmarks: 0, answers: 0, questions: 0 },
     })
   }
 })
@@ -617,6 +637,154 @@ router.patch('/:id', auth, async (req, res) => {
     return res.status(200).json({ user: profile })
   } catch (err) {
     console.error('[users] PATCH /:id exception:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
+// ===================== BOOKMARKS & FOLDERS (Phase 6.2) =====================
+// Auth-scoped reads for the authenticated user's bookmarks and folders.
+//
+// Surface area (READ only — no POST/DELETE in this cut):
+//   GET  /api/users/me/bookmarks   (auth)  Notes the signed-in user bookmarked.
+//   GET  /api/users/me/folders     (auth)  The user's folders, each with a
+//                                          note_count (aggregate, no N+1).
+//   GET  /api/folders/:id          (auth)  Single folder + its notes — lives
+//                                          in routes/folders.js.
+//
+// These use `supabaseAdmin` (service role) + an explicit `.eq('user_id',
+// req.user.id)` filter, mirroring routes/activities.js. The backend's anon
+// `supabase` client carries no JWT, so the RLS policies on these tables
+// (which compare auth.uid() against the row's user_id) never match a
+// backend PostgREST request — the anon client would silently return zero
+// rows. With the service-role client RLS is bypassed entirely, so the
+// manual user_id filter IS the only backstop here — every query must apply
+// it. Do NOT leak the service-role key to the frontend.
+
+// ---------- GET /api/users/me/bookmarks ----------
+//
+// Auth required. Returns the notes the signed-in user has bookmarked,
+// newest bookmark first, shaped like the notes list endpoint
+// (routes/notes.js GET /) so the frontend reuses the same list markup.
+//
+// Returns { bookmarks: [...] }.
+router.get('/me/bookmarks', auth, async (req, res) => {
+  const pageLimit = Math.min(parseInt(req.query.limit) || 50, 100)
+  const pageOffset = parseInt(req.query.offset) || 0
+
+  try {
+    // Because RLS is bypassed (service role), scope manually to the
+    // authenticated user. Join bookmarks -> notes for the note detail.
+    const { data: rows, error, count } = await supabaseAdmin
+      .from('bookmarks')
+      .select(`
+        id,
+        note_id,
+        created_at,
+        notes (
+          id,
+          title,
+          annotation,
+          file_url,
+          file_type,
+          file_size,
+          grade_level,
+          group_id,
+          download_count,
+          view_count,
+          likes_count,
+          bookmarks_count,
+          created_at,
+          status,
+          users ( user_name ),
+          schools ( school_name ),
+          subjects ( subject_name )
+        )
+      `, { count: 'exact' })
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .range(pageOffset, pageOffset + pageLimit - 1)
+
+    if (error) {
+      console.error('[users] GET /me/bookmarks error:', error)
+      return res.status(500).json({ message: 'Could not fetch bookmarks.' })
+    }
+
+    // Flatten the embed so each bookmark carries the note fields directly
+    // (with the FOReach note's joined users/schools/subjects intact). The
+    // frontend iterates the list as notes.
+    const bookmarks = (rows || []).map((row) => ({
+      id: row.id,
+      bookmarked_at: row.created_at,
+      ...(row.notes || {}),
+    }))
+
+    return res.status(200).json({ bookmarks })
+  } catch (err) {
+    console.error('[users] GET /me/bookmarks exception:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
+// ---------- GET /api/users/me/folders ----------
+//
+// Auth required. Returns the signed-in user's folders with a per-folder
+// note_count. The count is computed with a single aggregate lookup over
+// folder_items (grouped by folder_id) — never an N+1 loop per folder.
+//
+// Returns { folders: [{ id, folder_name, created_at, note_count }] }.
+router.get('/me/folders', auth, async (req, res) => {
+  try {
+    // Step 1 — the user's folders (service role, so scope manually).
+    const { data: folders, error: foldersError } = await supabaseAdmin
+      .from('folders')
+      .select('id, folder_name, created_at')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+
+    if (foldersError) {
+      console.error('[users] GET /me/folders error:', foldersError)
+      return res.status(500).json({ message: 'Could not fetch folders.' })
+    }
+
+    const folderList = folders || []
+
+    // Step 2 — compute note_count for every folder in ONE query (no N+1).
+    // We fetch all folder_items rows whose folder_id is one of the user's
+    // folders, then tally per folder in JS. PostgREST in this setup rejects
+    // aggregate functions in `select` (PGRST123) and the client has no
+    // `.group()` helper, so a JS tally over a single filtered query is the
+    // reliable approach. Only query when the user has folders.
+    let countsByFolder = {}
+    if (folderList.length > 0) {
+      const folderIds = folderList.map((f) => f.id)
+      const { data: items, error: itemsError } = await supabaseAdmin
+        .from('folder_items')
+        .select('folder_id')
+        .in('folder_id', folderIds)
+
+      if (itemsError) {
+        console.error('[users] GET /me/folders counts error:', itemsError)
+        return res.status(500).json({ message: 'Could not fetch folder counts.' })
+      }
+
+      // Tally counts in JS — one pass, no per-folder round-trip.
+      for (const it of items || []) {
+        if (it.folder_id != null) {
+          countsByFolder[it.folder_id] = (countsByFolder[it.folder_id] || 0) + 1
+        }
+      }
+    }
+
+    const foldersWithCounts = folderList.map((f) => ({
+      id: f.id,
+      folder_name: f.folder_name,
+      created_at: f.created_at,
+      note_count: countsByFolder[f.id] || 0,
+    }))
+
+    return res.status(200).json({ folders: foldersWithCounts })
+  } catch (err) {
+    console.error('[users] GET /me/folders exception:', err)
     return res.status(500).json({ message: 'Server error.' })
   }
 })

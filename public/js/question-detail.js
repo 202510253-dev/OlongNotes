@@ -8,9 +8,10 @@
 //
 // Report buttons:
 //   - Question Report → wired to POST /api/questions/:id/report (exists).
-//   - Answer Report  → NO answers-report endpoint exists in
-//     routes/answers.js (verified) — left visually present but INERT
-//     with a TODO below. Do not fabricate an endpoint call.
+//   - Answer Report  → wired to POST /api/answers/:id/report (added in
+//     routes/answers.js). Clicking opens a fixed 5-reason selector
+//     (Inappropriate content / Copyrighted material / Incorrect
+//     information / Spam or misleading / Other) via reportAnswer().
 
 (function () {
   'use strict';
@@ -38,6 +39,17 @@
     if (day < 30) return `${day} day${day === 1 ? '' : 's'} ago`;
     return new Date(iso).toLocaleDateString();
   }
+
+  // Fixed set of reasons accepted when reporting an answer. Mirrors the
+  // backend's ANSWER_REPORT_REASONS in routes/answers.js exactly — the
+  // prompt() selector below indexes into this (1-based for users).
+  const ANSWER_REPORT_REASONS = [
+    'Inappropriate content',
+    'Copyrighted material',
+    'Incorrect information',
+    'Spam or misleading',
+    'Other',
+  ];
 
   const TINT_PALETTE = ['#3d6bf0', '#e7833b', '#8b5cf6', '#2e9e5b', '#e0556f', '#e0b23c', '#0ea5e9', '#a855f7'];
   function tintFor(name) {
@@ -74,24 +86,150 @@
     return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h3v-9h5l1.5 4H20l-2-7 2-7h-7L11.5 6H3Z"/></svg>';
   }
 
-  async function reportQuestion(questionId) {
-    // POST /api/questions/:id/report exists in routes/questions.js and
-    // requires a `reason`. We don't have a reason-prompt UI wired, so
-    // this is intentionally a lightweight hook — the button currently
-    // surfaces a confirmation banner. To fully wire it, collect a
-    // reason from the user and POST { reason }.
-    try {
-      if (!isAuthed()) {
-        showBanner('Log in to report a question.');
-        return;
-      }
-      const reason = prompt('Please tell us why you are reporting this question:');
-      if (!reason) return; // cancelled
-      await window.OlongNotes.api.post('/questions/' + questionId + '/report', { reason }, { auth: true });
-      showBanner('Report submitted. Our team will review it.', 'success');
-    } catch (err) {
-      showBanner((err && err.message) || 'Could not submit report.');
+// ---------- Shared report modal (styled, mirrors document-viewer) ----------
+  // Both Question Report and Answer Report open the same styled modal in
+  // question.html. The modal collects a fixed 5-reason option (or a custom
+  // "Other" reason), then POSTs to the relevant endpoint via submitFn.
+  const reportState = {
+    submitFn: null,   // async (reason) => posted once Done is clicked
+    initialized: false,
+    open: false,
+    selectedReason: null,
+  };
+
+  function getReportModalRefs() {
+    const m = document.getElementById('reportModal');
+    if (!m) return null;
+    return {
+      reportModal: m,
+      reportModalBackdrop: document.getElementById('reportModalBackdrop'),
+      reportModalClose: document.getElementById('reportModalClose'),
+      reportTitle: document.getElementById('reportModalTitle'),
+      reportSubtitle: document.getElementById('reportModalSubtitle'),
+      reportOptions: document.getElementById('reportOptions'),
+      reportOtherSection: document.getElementById('reportOtherSection'),
+      reportOtherInput: document.getElementById('reportOtherInput'),
+      reportModalDone: document.getElementById('reportModalDone'),
+    };
+  }
+
+  function updateReportDoneState(refs) {
+    if (!refs || !refs.reportModalDone) return;
+    if (!reportState.selectedReason) {
+      refs.reportModalDone.disabled = true;
+      return;
     }
+    if (reportState.selectedReason === 'Other') {
+      refs.reportModalDone.disabled = refs.reportOtherInput.value.trim() === '';
+      return;
+    }
+    refs.reportModalDone.disabled = false;
+  }
+
+  function resetReportModal(refs) {
+    reportState.selectedReason = null;
+    refs.reportOptions.querySelectorAll('.report-option').forEach((el) => el.classList.remove('is-selected'));
+    refs.reportOtherSection.hidden = true;
+    refs.reportOtherInput.value = '';
+    updateReportDoneState(refs);
+  }
+
+  function initReportModal(refs) {
+    if (reportState.initialized) return;
+    reportState.initialized = true;
+
+    refs.reportModalBackdrop.addEventListener('click', () => {
+      refs.reportModal.hidden = true;
+      reportState.open = false;
+    });
+    refs.reportModalClose.addEventListener('click', () => {
+      refs.reportModal.hidden = true;
+      reportState.open = false;
+    });
+    refs.reportOptions.addEventListener('click', (e) => {
+      const btn = e.target.closest('.report-option');
+      if (!btn) return;
+      refs.reportOptions.querySelectorAll('.report-option').forEach((el) => el.classList.remove('is-selected'));
+      btn.classList.add('is-selected');
+      reportState.selectedReason = btn.dataset.reason;
+      if (reportState.selectedReason === 'Other') {
+        refs.reportOtherSection.hidden = false;
+        refs.reportOtherInput.focus();
+      } else {
+        refs.reportOtherSection.hidden = true;
+      }
+      updateReportDoneState(refs);
+    });
+    refs.reportOtherInput.addEventListener('input', () => updateReportDoneState(refs));
+    refs.reportModalDone.addEventListener('click', async () => {
+      if (refs.reportModalDone.disabled || !reportState.submitFn) return;
+      const reason = reportState.selectedReason === 'Other'
+        ? refs.reportOtherInput.value.trim()
+        : reportState.selectedReason;
+      if (!reason) return;
+      refs.reportModalDone.disabled = true;
+      refs.reportModalDone.textContent = 'Submitting…';
+      try {
+        await reportState.submitFn(reason);
+        refs.reportModal.hidden = true;
+        reportState.open = false;
+        showBanner('Report submitted. Our team will review it.', 'success');
+      } catch (err) {
+        showBanner((err && err.message) || 'Could not submit report.');
+        refs.reportModalDone.disabled = false;
+        refs.reportModalDone.textContent = 'Done';
+      }
+    });
+  }
+
+  function openReportModal({ title, subtitle, submitFn }) {
+    if (!isAuthed()) {
+      showBanner('Log in to report.');
+      return;
+    }
+    const refs = getReportModalRefs();
+    if (!refs) {
+      showBanner('Reporting is not available on this page.');
+      return;
+    }
+    initReportModal(refs);
+    reportState.submitFn = submitFn;
+    refs.reportTitle.textContent = title;
+    refs.reportSubtitle.textContent = subtitle;
+    resetReportModal(refs);
+    refs.reportModalDone.disabled = true;
+    refs.reportModalDone.textContent = 'Done';
+    reportState.open = true;
+    refs.reportModal.hidden = false;
+  }
+
+  function reportQuestion(questionId) {
+    // POST /api/questions/:id/report — collect a fixed reason via the
+    // styled modal, then submit { reason }.
+    openReportModal({
+      title: 'Report this question',
+      subtitle: 'Let us know what\'s wrong. Your report is anonymous.',
+      submitFn: (reason) => {
+        return window.OlongNotes.api.post('/questions/' + questionId + '/report', { reason }, { auth: true });
+      },
+    });
+  }
+
+  // Report an answer. Mirrors reportQuestion()'s collection style (native
+  // prompt) but uses the fixed 5-option ANSWER_REPORT_REASONS list so the
+  // reason sent to POST /api/answers/:id/report is always one the backend
+  // accepts (it validates against the same list). Loops until the user
+  // picks a valid option (1..5) or cancels.
+  function reportAnswer(answerId) {
+    // POST /api/answers/:id/report — same styled modal; the reason is
+    // validated server-side against the fixed ANSWER_REPORT_REASONS list.
+    openReportModal({
+      title: 'Report this answer',
+      subtitle: 'Let us know what\'s wrong. Your report is anonymous.',
+      submitFn: (reason) => {
+        return window.OlongNotes.api.post('/answers/' + answerId + '/report', { reason }, { auth: true });
+      },
+    });
   }
 
   function isAuthed() {
@@ -300,12 +438,11 @@ function renderQuestionDetail(q) {
         '</div>'
       : '';
 
-    // REPORT (ANSWER): no endpoint exists for answers in the backend
-    // (routes/answers.js has like + delete only, verified). Left as a
-    // visual-only button. TODO: wire to POST /api/answers/:id/report
-    // once that endpoint exists — do not fabricate the call.
+    // REPORT (ANSWER): wired to POST /api/answers/:id/report (now exists
+    // in routes/answers.js). Clicking opens a fixed 5-reason selector via
+    // reportAnswer() — reason is validated server-side against the same list.
     const answerReport =
-      '<button class="report-btn" type="button" data-report-answer="' + esc(a.id) + '" title="Report (coming soon)">' +
+      '<button class="report-btn" type="button" data-report-answer="' + esc(a.id) + '" title="Report this answer">' +
         reportIcon() + ' Report' +
       '</button>';
 
@@ -321,12 +458,12 @@ function renderQuestionDetail(q) {
             '<span class="comment-item__time">' + esc(relativeTime(a.created_at)) + '</span>' +
             answerMenu +
           '</div>' +
-          '<div class="comment-item__text">' + esc(a.content || '') + '</div>' +
+'<div class="comment-item__text">' + esc(a.content || '') + '</div>' +
           '<div class="comment-item__footer">' +
-            '<span class="answer-like-count">' +
+            '<button class="answer-like-count" type="button" data-answer-like="' + esc(a.id) + '" data-count="' + esc(a.likes_count || 0) + '" aria-pressed="false">' +
               '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3Zm0 0 4.5-8a2 2 0 0 1 3.6 1.2L14.5 8H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 19H10a3 3 0 0 1-3-3v-5Z"/></svg>' +
               '<span class="answer-like-btn__count">' + esc(a.likes_count || 0) + '</span>' +
-            '</span>' +
+            '</button>' +
             answerReport +
           '</div>' +
         '</div>' +
@@ -344,7 +481,12 @@ function renderQuestionDetail(q) {
 
     showStatus('Loading question…');
     try {
-      const data = await window.OlongNotes.api.get('/questions/' + id);
+// auth:true attaches the JWT (if present) to the request. The
+      // backend uses it to compute viewer_is_asker / viewer_has_liked,
+      // which gate the asker-only controls (Edit/Delete/Right Answer!).
+      // For anonymous viewers no token exists, so nothing is attached and
+      // the request proceeds as a normal public read.
+      const data = await window.OlongNotes.api.get('/questions/' + id, { auth: true });
       const q = data && data.question;
       if (!q) {
         showStatus('Question not found.');
@@ -523,6 +665,59 @@ function renderQuestionDetail(q) {
     }
   }
 
+// ---------- Answer like (thumb-up) ----------
+  // Mirrors the document-viewer.js note-like pattern: optimistic toggle
+  // on click, then write back the server's authoritative likes_count once
+  // POST /api/answers/:id/like resolves. The endpoint returns
+  // { liked, likes_count } (toggleQuestionInteraction in routes/questions
+  // / answers). Strict null check so a genuine 0 isn't clobbered.
+  async function toggleAnswerLike(answerId, btn) {
+    if (!isAuthed()) {
+      showBanner('Log in to like answers.');
+      return;
+    }
+    const base = parseInt(btn.dataset.count, 10) || 0;
+    const wasLiked = btn.getAttribute('aria-pressed') === 'true';
+    const countEl = btn.querySelector('.answer-like-btn__count');
+
+    // Optimistic UI.
+    btn.setAttribute('aria-pressed', String(!wasLiked));
+    btn.classList.toggle('is-liked', !wasLiked);
+    const optimistic = wasLiked ? Math.max(0, base - 1) : base + 1;
+    if (countEl) countEl.textContent = String(optimistic);
+    btn.dataset.count = String(optimistic);
+
+    try {
+      const res = await window.OlongNotes.api.post('/answers/' + answerId + '/like', null, { auth: true });
+      // Server value is authoritative — don't fall back to the optimistic
+      // value, because removing the last like genuinely drops to 0.
+      const serverCount = (res && typeof res.likes_count === 'number')
+        ? res.likes_count
+        : null;
+      if (serverCount !== null) {
+        btn.dataset.count = String(serverCount);
+        if (countEl) countEl.textContent = String(serverCount);
+      }
+      // Keep aria-pressed in sync with the server's `liked` flag when
+      // present (source of truth for this click).
+      if (res && typeof res.liked === 'boolean') {
+        btn.setAttribute('aria-pressed', String(res.liked));
+        btn.classList.toggle('is-liked', res.liked);
+      }
+    } catch (err) {
+      // Roll back the optimistic update.
+      btn.setAttribute('aria-pressed', String(wasLiked));
+      btn.classList.toggle('is-liked', wasLiked);
+      btn.dataset.count = String(base);
+      if (countEl) countEl.textContent = String(base);
+      if (err && err.status === 401) {
+        showBanner('Your session expired. Please log in again.');
+      } else {
+        showBanner((err && err.message) || 'Could not update like. Please try again.');
+      }
+    }
+  }
+
   // ---------- BATCH B: accept answer ("Right Answer!") ----------
   async function acceptAnswer(answerId, questionId) {
     try {
@@ -585,11 +780,20 @@ function renderQuestionDetail(q) {
         reportQuestion(qBtn.getAttribute('data-report-question'));
         return;
       }
-      // Report answer (inert — no endpoint)
+      // Report answer — POST /api/answers/:id/report (fixed 5-reason list)
       const aBtn = e.target.closest('[data-report-answer]');
       if (aBtn) {
         e.preventDefault();
-        showBanner('Answer reporting is coming soon.', 'success');
+        reportAnswer(aBtn.getAttribute('data-report-answer'));
+        return;
+      }
+      // Answer like (thumb-up) — delegated; toggles POST /api/answers/:id/like
+      // and writes the server's count back into the DOM.
+      const likeBtn = e.target.closest('[data-answer-like]');
+      if (likeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleAnswerLike(likeBtn.getAttribute('data-answer-like'), likeBtn);
         return;
       }
       // Kebab toggle (question + answer) — stop propagation so a click on

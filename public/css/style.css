@@ -1187,6 +1187,36 @@ body.upload-modal-open .footer {
   color: var(--gray-400);
 }
 
+/* Theme toggle row inside the side drawer. The top-bar theme toggle is
+   hidden on mobile (it lives here now), so this is the single on-canvas
+   control for flipping dark/light mode while the drawer is open. */
+.side-drawer__theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 12px 4px;
+  padding: 12px 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+}
+.side-drawer__theme-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--gray-800);
+}
+.side-drawer__theme-label svg {
+  flex-shrink: 0;
+  color: var(--accent-blue);
+}
+.side-drawer__theme .theme-toggle {
+  padding: 4px 2px;
+}
+
 /* =========================================================
    HERO
    ========================================================= */
@@ -2360,6 +2390,24 @@ body.upload-modal-open .footer {
   .btn--sm { padding: 8px 14px; font-size: 0.82rem; }
   .navbar__profile-name { display: none; }
   .navbar__profile-chip { padding: 6px; gap: 0; }
+
+  /* Mobile top bar: the theme toggle moved into the side drawer, and
+     the desktop Log In / Sign Up buttons + guest-action group collapse
+     so only the profile affordance survives next to the hamburger + logo.
+     The drawer carries the full nav + theme toggle + auth CTA. Only the
+     TOP-BAR toggle is hidden — the drawer's own .theme-toggle stays. */
+  .navbar__actions .theme-toggle { display: none; }
+  .navbar__guest-actions { display: none; }
+  .navbar__actions .btn--sm { display: none; }
+}
+
+@media (max-width: 560px) {
+  /* Keep the brand compact so the bar never overflows at 360px. */
+  .navbar__brand { margin-right: 12px; }
+  .navbar__logo img { height: 52px; }
+  .navbar__inner { height: 64px; }
+  .navbar__burger { margin-right: 10px; width: 40px; height: 40px; }
+  .navbar__actions { gap: 6px; }
 }
 
 @media (max-width: 720px) {

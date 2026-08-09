@@ -129,6 +129,7 @@
     els.overviewActivityList = $('overviewActivityList');
     els.settingsTabBtn = $('settingsTabBtn');
     els.notesSearch = $('notesSearch');
+    els.newNoteBtn = $('newNoteBtn');
   }
 
   // ---------- Resolve target user ----------
@@ -256,7 +257,10 @@
 
     if (els.statUploads) els.statUploads.textContent = formatCount((stats && stats.uploads) || 0);
     if (els.statDownloads) els.statDownloads.textContent = formatCount((stats && stats.downloads) || 0);
-    if (els.statLikes) els.statLikes.textContent = formatCount((stats && stats.likes_given) || 0);
+    // Hero "Likes" reflects what OTHERS think of this user's
+    // contributions (likes_received), not how many likes they've given
+    // out. Falls back gracefully for older API responses that lack it.
+    if (els.statLikes) els.statLikes.textContent = formatCount((stats && stats.likes_received) || 0);
     if (els.statBookmarks) els.statBookmarks.textContent = formatCount((stats && stats.bookmarks) || 0);
   }
 
@@ -462,7 +466,7 @@
         || (fileType ? `Uploaded as ${escapeHtml(fileType.toUpperCase())}.` : 'Uploaded note.');
 
       return (
-        '<article class="note-card">' +
+        '<article class="note-card" data-note-id="' + escapeHtml(String(n.id)) + '">' +
           '<span class="note-card__icon" aria-hidden="true">' + NOTE_ICON_SVG + '</span>' +
           '<div class="note-card__body">' +
             '<div class="note-card__head">' +
@@ -505,6 +509,39 @@
   const NOTE_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 2H16l4 4v16H6.5A1.5 1.5 0 0 1 5 20.5v-17A1.5 1.5 0 0 1 6.5 2Z"/><path d="M16 2v4h4M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/></svg>';
 
+  // ---------- "+ New Note" button → Upload Notes modal ----------
+
+  // Wires the "+ New Note" button (top right of the notes list) to open
+  // the SAME Upload Notes modal used across the app (id="uploadModal",
+  // form + validation wired in js/script.js via window.OlongNotes).
+  // We reuse the existing openUploadModal exposed by script.js instead of
+  // building a new modal. Applies the same contributor role gate that the
+  // home-page upload buttons use; falls back to index.html#upload if the
+  // shared opener isn't available (e.g. script.js failed to load).
+  function bindNewNoteButton() {
+    if (!els.newNoteBtn) return;
+    els.newNoteBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      // Match script.js: uploads are restricted to contributors.
+      const cached = readJSON('olongnotes_user');
+      const allowed = cached && ['limited', 'verified', 'admin'].includes(cached.role);
+      if (!allowed) {
+        alert('You need to be a contributor (limited, verified, or admin) to upload. Contact an admin to upgrade your account.');
+        return;
+      }
+
+      const openUpload = (window.OlongNotes && window.OlongNotes.openUploadModal);
+      if (typeof openUpload === 'function') {
+        openUpload();
+        return;
+      }
+
+      // Graceful fallback: reuse the original link target.
+      window.location.href = els.newNoteBtn.getAttribute('href') || 'index.html#upload';
+    });
+  }
+
   // Client-side search filter for the notes list. Runs on the already-
   // fetched 50 rows — no backend round-trip. Title + subject + grade
   // are all searched, case-insensitive.
@@ -529,6 +566,39 @@
           els.notesSubheading.textContent = `${visible} match${visible === 1 ? '' : 'es'} for "${els.notesSearch.value}".`;
         }
       }
+    });
+  }
+
+// ---------- Note card click → document viewer ----------
+
+  // Makes each note card open the document viewer, matching the rest of
+  // the app's established routing (used by school-profile.js and
+  // subject-notes.js): document-viewer.html?id=<note_id>.
+  //
+  // The listener is delegated on the list container so it survives the
+  // node re-renders from renderNotes() and the search filter. Clicks on
+  // interactive elements are ignored so they keep their own behavior —
+  // this is a generic guard that stays a no-op today but automatically
+  // covers a future "..." menu/dropdown (or any .actions / button / link
+  // / input) without needing rework.
+  function bindNotesCardClick() {
+    if (!els.notesList) return;
+    els.notesList.addEventListener('click', (e) => {
+      // Ignore clicks on interactive/actionable elements so they don't
+      // also trigger navigation. This covers buttons, links, inputs,
+      // any element marked [data-no-navigate], and future action areas
+      // like a "..." menu (e.g. .note-card__actions / .actions).
+      const target = e.target;
+      if (target.closest('button, a, input, select, textarea, [data-no-navigate], .actions, .note-card__actions, .note-card__menu')) {
+        return;
+      }
+
+      const card = target.closest('.note-card');
+      if (!card) return;
+      const id = card.dataset.noteId;
+      if (!id) return;
+
+      window.location.href = `document-viewer.html?id=${encodeURIComponent(id)}`;
     });
   }
 
@@ -864,9 +934,12 @@
       tab.addEventListener('click', () => activate(tab.dataset.tab));
     });
 
-    // Settings sub-nav, search filter, save button, logout button.
+    // Settings sub-nav, search filter, note-card navigation, new-note
+    // button, save button, logout button.
     bindSettingsNav();
     bindNotesSearch();
+    bindNotesCardClick();
+    bindNewNoteButton();
     els.settingsSaveBtn?.addEventListener('click', saveSettings);
     els.settingsLogoutBtn?.addEventListener('click', logoutFromSettings);
     els.settingsBio?.addEventListener('input', updateBioCount);

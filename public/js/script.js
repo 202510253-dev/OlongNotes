@@ -265,7 +265,82 @@ function roleAllowedForUpload() {
   return u && ['limited', 'verified', 'admin'].includes(u.role);
 }
 
+/* =======================================================
+   APPLY ROLE
+   The one function that knows what each perspective looks
+   like. Everything else just wires up behavior; this wires
+   up *visibility*.
+
+   Defined at module scope and queries the DOM directly on
+   every call, so it is safe to invoke immediately on
+   DOMContentLoaded — even before the larger init blocks
+   that reference the same elements. This guarantees the
+   Log In / Sign Up buttons are hidden (and the profile
+   chip/icon shown) for signed-in users regardless of
+   whether any later init code throws.
+   ======================================================= */
+function applyRole(role) {
+  document.body.dataset.role = role;
+
+  const isUser = role === 'user';
+  const user = currentDisplayUser();
+
+  // Modern navbar (index.html): guest actions group + profile chip.
+  const navGuestActions = document.getElementById('navGuestActions');
+  const navProfileChip = document.getElementById('navProfileChip');
+  const navProfileName = document.getElementById('navProfileName');
+  const navProfileAvatar = document.getElementById('navProfileAvatar');
+
+  if (navGuestActions) navGuestActions.hidden = isUser;
+  if (navProfileChip) navProfileChip.hidden = !isUser;
+  if (isUser && user) {
+    if (navProfileName) navProfileName.textContent = user.name;
+    if (navProfileAvatar) navProfileAvatar.textContent = user.initials;
+  }
+
+  // Legacy navbar (most other pages): Log In + Sign Up + profile icon.
+  const legacyLoginBtn = document.getElementById('navLoginBtn');
+  const legacySignupBtn = document.getElementById('navSignupBtn');
+  const legacyProfileIcon = document.querySelector('.profile-icon');
+
+  if (legacyLoginBtn) legacyLoginBtn.hidden = isUser;
+  if (legacySignupBtn) legacySignupBtn.hidden = isUser;
+  if (legacyProfileIcon) legacyProfileIcon.hidden = !isUser;
+
+  const heroContribBtn = document.getElementById('heroContribBtn');
+  const heroUploadBtn = document.getElementById('heroUploadBtn');
+  const topContributorsSection = document.getElementById('topContributorsSection');
+
+  if (heroContribBtn) heroContribBtn.hidden = isUser;
+  if (heroUploadBtn) heroUploadBtn.hidden = !isUser;
+  if (topContributorsSection) topContributorsSection.hidden = !isUser;
+
+  // Auth modal shouldn't stay open for a signed-in user.
+  if (isUser) {
+    document.getElementById('authModal')?.classList.remove('is-open');
+    document.body.classList.remove('modal-open');
+  }
+
+  // Notify any auth-aware helpers (auth-drawer.js: hides the Recent
+  // Activities link for anonymous viewers). Fire it on every role
+  // change so login → the link appears without a page reload.
+  window.dispatchEvent(new CustomEvent('olongnotes:auth-changed', { detail: { role } }));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  /* =======================================================
+     APPLY ROLE — run FIRST
+     The one function that knows what each perspective looks
+     like. Resolved from the real session (JWT + cached user)
+     so on every page the Log In / Sign Up buttons are hidden
+     (and the profile chip/icon shown) as soon as the DOM is
+     ready. Running it here — before any potentially-fragile
+     init code below — guarantees the auth-state visibility is
+     always applied, even if a later init block throws and the
+     rest of DOMContentLoaded aborts.
+     ======================================================= */
+  applyRole(resolveRole());
+
   // Load featured notes from /api/notes?limit=4, then render.
   // fetchFeaturedNotes() never throws — on error it falls back to
   // FEATURED_NOTES so the page still renders.
@@ -736,17 +811,28 @@ const noteFileDropText = document.getElementById('noteFileDropText');
   // Q&A ask modal (community-shared.js → createCollegeCascade). We keep
   // the upload page's own wrappers so callers below don't change, but the
   // fetch/populate/disabled logic lives in ONE place.
-  const collegeCascade = (window.OlongNotes?.shared?.createCollegeCascade)({
-    api: window.OlongNotes?.api,
-    categorySelect: uploadCollegeCategorySelect,
-    programSelect: uploadCollegeProgramSelect,
-    majorSelect: uploadCollegeMajorSelect,
-    onError: showUploadError,
-  });
+// The college cascade lives in community-shared.js. script.js is also
+  // loaded on pages that do NOT include community-shared.js (e.g.
+  // subject-notes.html), so guard the whole block: only build the cascade
+  // when the shared helper AND the college <select> fields exist. Without
+  // this guard the call below would throw a TypeError and abort the
+  // DOMContentLoaded handler before applyRole() runs — leaving the
+  // Log In / Sign Up buttons visible for signed-in users.
+  const collegeCascade =
+    window.OlongNotes?.shared?.createCollegeCascade &&
+    uploadCollegeCategorySelect && uploadCollegeProgramSelect && uploadCollegeMajorSelect
+      ? window.OlongNotes.shared.createCollegeCascade({
+          api: window.OlongNotes?.api,
+          categorySelect: uploadCollegeCategorySelect,
+          programSelect: uploadCollegeProgramSelect,
+          majorSelect: uploadCollegeMajorSelect,
+          onError: showUploadError,
+        })
+      : null;
 
-  const loadCollegeCategories = () => collegeCascade.populateDepartments();
-  const loadProgramsForCategory = (categoryId) => collegeCascade.loadProgramsForCategory(categoryId);
-  const loadMajorsForProgram = (programId) => collegeCascade.loadMajorsForProgram(programId);
+  const loadCollegeCategories = () => collegeCascade?.populateDepartments();
+  const loadProgramsForCategory = (categoryId) => collegeCascade?.loadProgramsForCategory?.(categoryId);
+  const loadMajorsForProgram = (programId) => collegeCascade?.loadMajorsForProgram?.(programId);
 
   let uploadSchoolsLoaded = false;
   const loadSchoolsForUpload = async () => {
@@ -796,7 +882,7 @@ const noteFileDropText = document.getElementById('noteFileDropText');
     }
   };
 
-  const openUploadModal = async () => {
+const openUploadModal = async () => {
     if (uploadGradeLevel) {
       uploadGradeLevel.value = '';
       uploadGradeLevel.refreshCselect?.();
@@ -805,6 +891,15 @@ const noteFileDropText = document.getElementById('noteFileDropText');
     await loadSchoolsForUpload();
     uploadModal.open();
   };
+
+  // Expose the existing upload-modal opener so other pages (e.g. the
+  // profile page's "+ New Note" button) can reuse THIS modal + its form
+  // logic/validation instead of building a new one. Guarded so callers
+  // can gracefully fall back to index.html#upload if API/Auth is absent.
+  try {
+    window.OlongNotes = window.OlongNotes || {};
+    window.OlongNotes.openUploadModal = openUploadModal;
+  } catch (_) { /* best-effort */ }
 
   document.getElementById('heroUploadBtn')?.addEventListener('click', () => {
     if (!roleAllowedForUpload()) {
@@ -1044,47 +1139,14 @@ const remapped = new FormData();
   const legacySignupBtn = document.getElementById('navSignupBtn');
   const legacyProfileIcon = document.querySelector('.profile-icon');
 
-  const heroContribBtn = document.getElementById('heroContribBtn');
+const heroContribBtn = document.getElementById('heroContribBtn');
   const heroUploadBtn = document.getElementById('heroUploadBtn');
   const topContributorsSection = document.getElementById('topContributorsSection');
 
-  // EDIT 2: applyRole now reads from real user cache, drops MOCK_USER,
-  // drops the "auto-open auth modal on viewer" behavior (we don't auto-prompt).
-  function applyRole(role) {
-    document.body.dataset.role = role;
-
-    const isUser = role === 'user';
-    const user = currentDisplayUser();
-
-    // Modern navbar (index.html).
-    if (navGuestActions) navGuestActions.hidden = isUser;
-    if (navProfileChip) navProfileChip.hidden = !isUser;
-    if (isUser && user) {
-      if (navProfileName) navProfileName.textContent = user.name;
-      if (navProfileAvatar) navProfileAvatar.textContent = user.initials;
-    }
-
-    // Legacy navbar (other pages): hide Log In + Sign Up when signed in,
-    // show the profile icon. Reverse on logout.
-    if (legacyLoginBtn) legacyLoginBtn.hidden = isUser;
-    if (legacySignupBtn) legacySignupBtn.hidden = isUser;
-    if (legacyProfileIcon) legacyProfileIcon.hidden = !isUser;
-
-    if (heroContribBtn) heroContribBtn.hidden = isUser;
-    if (heroUploadBtn) heroUploadBtn.hidden = !isUser;
-
-    if (topContributorsSection) topContributorsSection.hidden = !isUser;
-
-    if (isUser && authCard) {
-      authCard.closest('.auth-modal')?.classList.remove('is-open');
-      document.body.classList.remove('modal-open');
-    }
-
-    // Notify any auth-aware helpers (auth-drawer.js: hides the Recent
-    // Activities link for anonymous viewers). Fire it on every role
-    // change so login → the link appears without a page reload.
-    window.dispatchEvent(new CustomEvent('olongnotes:auth-changed', { detail: { role } }));
-  }
+  /* NOTE: applyRole() is defined at module scope (above) and runs first
+     in this handler, so the auth-state visibility is always applied even
+     if a later init block throws. The `const` refs above are kept only
+     for the click listeners below. */
 
   // EDIT 11: navbar profile chip → navigate to own profile (logout lives
   // in the Settings tab on the profile page — clicking the avatar should
@@ -1111,8 +1173,9 @@ const remapped = new FormData();
     window.location.href = 'index.html?auth=signin';
   });
 
-  // EDIT 7: dev role switcher block — DELETED. Real session decides role.
-  applyRole(resolveRole());
+// EDIT 7: dev role switcher block — DELETED. Real session decides role.
+  // (applyRole(resolveRole()) already ran at the top of this handler, so
+  // the auth-state visibility is guaranteed even if a later block threw.)
 
   /* ---------------- ?auth= deep-link from other pages ----------------
    Other pages (recent-activities.html, etc.) don't carry the auth
