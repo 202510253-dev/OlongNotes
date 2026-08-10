@@ -42,7 +42,27 @@ function hexToSoftTint(hex, alpha = 0.12) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+// Generic document icon (SVG is reused for all file types — only the
+// icon background color changes per file type via --icon-bg below).
 const NOTE_ICON_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/></svg>`;
+
+// Featured-card icon background colors keyed by the note's MIME type:
+//   Word (.doc/.docx)        -> blue
+//   Image (image/*)          -> grey
+//   Everything else (incl. PPT, PDF) -> red
+// Falls back to the unified subject tint for notes with no fileType yet.
+const ICON_BG = {
+  'application/msword': '#2F6FED',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '#2F6FED',
+  'application/vnd.ms-powerpoint': '#E14B4B',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': '#E14B4B',
+  'application/pdf': '#E14B4B',
+};
+function iconBgFor(fileType, fallbackTint) {
+  if (!fileType) return fallbackTint;
+  if (fileType.startsWith('image/')) return '#6B7280';
+  return ICON_BG[fileType] || '#E14B4B';
+}
 const CROWN_ICON_SVG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8.5 7 11l5-6 5 6 4-2.5-1.8 9.5a1 1 0 0 1-1 .8H5.8a1 1 0 0 1-1-.8L3 8.5Z"/></svg>`;
 const HEART_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.4 8 2 1.8 4.5 1.8 6.6 1.3 8.6 2.2 9.8 3.9a1 1 0 0 0 1.6 0c1.2-1.7 3.2-2.6 5.3-2.1 3.4.9 4.8 4.4 3.2 7.6-2.5 4.7-10 9.3-10 9.3Z"/></svg>`;
 const DOWNLOAD_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>`;
@@ -131,6 +151,7 @@ function renderFeaturedNotes(notes = FEATURED_NOTES) {
     .map((note, index) => {
       const tint = UNIFIED_TINT;
       const tintSoft = hexToSoftTint(tint);
+      const iconBg = iconBgFor(note.fileType, tint);
       const rankBadge = index === 0 ? `<span class="featured-card__rank">${CROWN_ICON_SVG}Most Popular</span>` : '';
       // Multi-image uploads are collapsed into a single card (see
       // fetchFeaturedNotes). When that happens we show a small gallery
@@ -141,7 +162,7 @@ function renderFeaturedNotes(notes = FEATURED_NOTES) {
       // Note: `data-note-id` carries the backend ID for Step 4 wiring
       // (document viewer fetches by ?id=X).
       return `
-        <article class="featured-card" style="--tint:${tint}; --tint-soft:${tintSoft};" data-note-id="${esc(note.id || '')}">
+        <article class="featured-card" style="--tint:${tint}; --tint-soft:${tintSoft}; --icon-bg:${iconBg};" data-note-id="${esc(note.id || '')}">
           <div class="featured-card__top">
             <span class="featured-card__icon" aria-hidden="true">${NOTE_ICON_SVG}</span>
             ${galleryBadge}

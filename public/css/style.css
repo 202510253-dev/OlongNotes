@@ -1432,7 +1432,11 @@ body.upload-modal-open .footer {
   flex-shrink: 0;
   width: 40px; height: 40px;
   border-radius: var(--radius-sm);
-  background: var(--tint, var(--accent-blue));
+  /* --icon-bg is set per-card by script.js based on the note's MIME
+     type: blue for Word, grey for images, red for everything else
+     (incl. PPT/PDF). Falls back to the unified subject tint when a
+     note has no fileType yet (e.g. seeded data missing the column). */
+  background: var(--icon-bg, var(--tint, var(--accent-blue)));
   color: var(--white);
   box-shadow: var(--shadow-sm);
   display: flex;

@@ -235,6 +235,12 @@ router.get('/featured', async (req, res) => {
         school: (rep.schools && rep.schools.school_name) || 'Unknown school',
         grade: rep.grade_level || '',
         subject: (rep.subjects && rep.subjects.subject_name) || 'General',
+        // fileType is used by the homepage's featured-card icon to pick
+        // a per-file-type color (Word=blue, Image=grey, else=red).
+        // Prefer the rep's file_type; fall back to the first member
+        // that has one in case the rep is image and the user uploaded
+        // a non-image alongside it.
+        fileType: rep.file_type || (members.find((m) => m.file_type) || {}).file_type || '',
         likes: members.reduce((s, m) => s + (parseInt(m.likes_count) || 0), 0),
         downloads: members.reduce((s, m) => s + (parseInt(m.download_count) || 0), 0),
         group_id: rep.group_id || '',
