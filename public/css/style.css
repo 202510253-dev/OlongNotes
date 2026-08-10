@@ -1599,13 +1599,38 @@ body.upload-modal-open .footer {
   border-radius: var(--radius-md);
   padding: 30px 26px;
   backdrop-filter: blur(6px);
-  transition: transform 0.22s var(--ease), border-color 0.22s var(--ease), background 0.22s var(--ease), box-shadow 0.22s var(--ease);
+  transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  /* One-time page-load entrance — staggered fade + small translateY
+     settle. Fires once on initial page load only (NOT scroll-
+     triggered). Total sequence ≈530ms (4 cards × 60ms stagger +
+     350ms duration). animation-fill-mode: backwards keeps each card
+     invisible until its delay elapses. prefers-reduced-motion below
+     disables it entirely. */
+  animation: features-card-in 0.35s var(--ease) backwards;
 }
-.features-strip__card:hover {
-  transform: translateY(-4px);
+.features-strip__card:nth-child(1) { animation-delay: 0ms; }
+.features-strip__card:nth-child(2) { animation-delay: 60ms; }
+.features-strip__card:nth-child(3) { animation-delay: 120ms; }
+.features-strip__card:nth-child(4) { animation-delay: 180ms; }
+.features-strip__card:hover,
+.features-strip__card:active {
+  /* Card hover (per established polish spec): translateY(-2px) +
+     shadow deepens, 0.2s ease. The strip is a dark panel so the spec's
+     light-context shadow alphas (0.08 → 0.12) wouldn't read — adapted
+     to 0.18 → 0.32 here for visibility on the navy backdrop. The
+     border + background brightness shift adds the equivalent of a
+     light-context shadow deepening for a dark panel. The icon circle
+     gets a small scale(1.06) as a natural extension of the card lift.
+     :active mirrors hover so touch devices still get tactile feedback
+     on tap (hover sticks on touch otherwise). */
+  transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.24);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32);
+}
+.features-strip__card:hover .features-strip__icon,
+.features-strip__card:active .features-strip__icon {
+  transform: scale(1.06);
 }
 
 .features-strip__icon {
@@ -1617,12 +1642,29 @@ body.upload-modal-open .footer {
   align-items: center;
   justify-content: center;
   color: var(--white);
+  transition: transform 0.2s var(--ease);
 }
 .features-strip__icon--blue {
   background: var(--accent-blue);
 }
 .features-strip__icon--gold {
   background: var(--goldenrod);
+}
+
+/* One-time page-load entrance for the four cards — staggered fade +
+   small translateY settle. Fires once on initial page load only,
+   under the existing polish rule (NOT scroll-triggered). Total
+   sequence ≈530ms (4 cards × 60ms stagger + 350ms duration).
+   animation-fill-mode: backwards keeps each card invisible until its
+   delay elapses, so the first paint doesn't show all four at once.
+   prefers-reduced-motion disables it entirely. */
+@keyframes features-card-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .features-strip__card { animation: none; }
 }
 
 .features-strip__card h3 {
