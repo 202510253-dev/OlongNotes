@@ -1,1 +1,0 @@
-import{Mv3ContentControls}from"./content-control-mv3";export const contentControls=new Mv3ContentControls;
