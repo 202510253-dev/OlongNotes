@@ -683,6 +683,14 @@ const res = await api.patch(
 
   function renderNotes(notes) {
     if (!els.notesList) return;
+    // Per-file-type icon (PDF / PPTX / DOCX / XLSX / IMG) — shared by
+    // every page that renders document cards. Falls back to the generic
+    // NOTE_ICON_SVG below if file-type-icons.js failed to load. We pass
+    // "note-card__icon" as the parent class so profile.css continues
+    // to size / round the badge the same way (40×40, gray fallback),
+    // while the shared module drives color + inner glyph by MIME.
+    const fileIconHtml = (window.OlongNotes && window.OlongNotes.fileIconMarkup)
+      || ((ft) => '<span class="note-card__icon" aria-hidden="true">' + NOTE_ICON_SVG + '</span>');
     const cards = notes.map((n) => {
       const subject = (n.subjects && n.subjects.subject_name) || 'General';
       const school = (n.schools && n.schools.school_name) || '';
@@ -695,7 +703,7 @@ const res = await api.patch(
 
       return (
         '<article class="note-card" data-note-id="' + escapeHtml(String(n.id)) + '">' +
-          '<span class="note-card__icon" aria-hidden="true">' + NOTE_ICON_SVG + '</span>' +
+          fileIconHtml(n.file_type, 'note-card__icon') +
           '<div class="note-card__body">' +
             '<div class="note-card__head">' +
               '<h3>' + escapeHtml(n.title || 'Untitled') + '</h3>' +

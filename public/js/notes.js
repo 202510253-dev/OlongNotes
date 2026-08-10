@@ -25,6 +25,12 @@
   const esc = (window.OlongNotes && window.OlongNotes.escapeHtml)
     || ((s) => String(s));
   const api = (window.OlongNotes && window.OlongNotes.api) || null;
+  // Per-file-type icon — shared module drives bg + inner glyph by MIME.
+  // Kept inline as a fallback for the (rare) case file-type-icons.js
+  // fails to load; the notes page is the visual anchor so it always
+  // gets a sensible badge.
+  const sharedFileIcon = (window.OlongNotes && window.OlongNotes.fileIconMarkup);
+  const sharedFileBadge = (window.OlongNotes && window.OlongNotes.fileTypeBadge);
 
   // ---------- DOM refs ----------
   const docGrid = document.getElementById('docGrid');
@@ -58,6 +64,7 @@
   }
 
   function fileTypeBadge(fileType) {
+    if (sharedFileBadge) return sharedFileBadge(fileType);
     if (!fileType) return 'FILE';
     if (fileType === 'application/pdf') return 'PDF';
     if (fileType.includes('word')) return 'DOCX';
@@ -71,7 +78,10 @@
   // renderer (js/script.js) so both pages display the same visual.
   const heartIconMarkup = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 21s-7-4.5-9.5-9.2C.6 7.8 2.7 4 6.3 4c2 0 3.5 1 4.7 2.6C12.2 5 13.7 4 15.7 4c3.6 0 5.7 3.8 3.8 7.8C19 16.5 12 21 12 21z"/></svg>';
   const downloadIconMarkup = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>';
-  const fileIconMarkup = '<span class="doc-card__file-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span>';
+  // Per-file-type icon — shared with the rest of the site. Falls back to
+  // a generic document badge if file-type-icons.js didn't load.
+  const fileIconMarkup = (sharedFileIcon)
+    || ((ft) => '<span class="doc-card__file-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span>');
 
   function adaptNoteFromApi(row) {
     return {
@@ -137,13 +147,13 @@
       (a, b) => (b.likes + b.downloads) - (a.likes + a.downloads)
     );
 
-    docGrid.innerHTML = '';
+  docGrid.innerHTML = '';
     sorted.forEach((doc) => {
       const card = document.createElement('div');
       card.className = 'doc-card';
       card.innerHTML = `
         <div class="doc-card__top">
-          ${fileIconMarkup}
+          ${fileIconMarkup(doc.fileType)}
           <span class="doc-badge">${esc(fileTypeBadge(doc.fileType))}</span>
         </div>
         <p class="doc-card__title">${esc(doc.title)}</p>

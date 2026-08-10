@@ -45,6 +45,19 @@ function hexToSoftTint(hex, alpha = 0.12) {
 // Generic document icon (SVG is reused for all file types — only the
 // icon background color changes per file type via --icon-bg below).
 const NOTE_ICON_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/></svg>`;
+// Inner glyph per file type — drawn inside the colored icon badge so
+// each card shows the right shape (PDF / PPTX / DOCX / IMG). Extracted
+// from the shared file-type-icons module so the featured grid matches
+// the rest of the site's icon language. Falls back to the generic
+// NOTE_ICON_SVG when file-type-icons.js failed to load.
+function iconInnerFor(fileType) {
+  const shared = (window.OlongNotes && window.OlongNotes.fileTypeVisuals);
+  if (shared) {
+    const v = shared(fileType);
+    return v && v.svg ? v.svg : NOTE_ICON_SVG;
+  }
+  return NOTE_ICON_SVG;
+}
 
 // Featured-card icon background colors keyed by the note's MIME type:
 //   Word (.doc/.docx)        -> blue
@@ -164,7 +177,7 @@ function renderFeaturedNotes(notes = FEATURED_NOTES) {
       return `
         <article class="featured-card" style="--tint:${tint}; --tint-soft:${tintSoft}; --icon-bg:${iconBg};" data-note-id="${esc(note.id || '')}">
           <div class="featured-card__top">
-            <span class="featured-card__icon" aria-hidden="true">${NOTE_ICON_SVG}</span>
+            <span class="featured-card__icon" aria-hidden="true">${iconInnerFor(note.fileType)}</span>
             ${galleryBadge}
             ${rankBadge}
           </div>

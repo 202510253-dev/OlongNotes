@@ -15,6 +15,13 @@
   const esc = (window.OlongNotes && window.OlongNotes.escapeHtml)
     || ((s) => String(s));
   const api = (window.OlongNotes && window.OlongNotes.api) || null;
+  // Per-file-type icon (PDF / PPTX / DOCX / XLSX / IMG) — shared by
+  // every page that renders document cards.
+  const fileIconHtml = (window.OlongNotes && window.OlongNotes.fileIconMarkup)
+    || ((ft) => {
+        const generic = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M9 12h6M9 15.5h6M9 8.8h2.5"/></svg>';
+        return `<span class="doc-card__file-icon" aria-hidden="true">${generic}</span>`;
+      });
 
   // ---------- DOM refs ----------
   const heroTitle = document.getElementById('subjectNotesHeroTitle');
@@ -59,12 +66,14 @@
   }
 
   function fileTypeBadge(fileType) {
-    if (!fileType) return 'FILE';
-    if (fileType === 'application/pdf') return 'PDF';
-    if (fileType.includes('word')) return 'DOCX';
-    if (fileType.includes('sheet')) return 'XLSX';
-    if (fileType.includes('image/')) return 'IMG';
-    return 'FILE';
+    return (window.OlongNotes && window.OlongNotes.fileTypeBadge)
+      ? window.OlongNotes.fileTypeBadge(fileType)
+      : ((!fileType) ? 'FILE'
+         : (fileType === 'application/pdf') ? 'PDF'
+         : fileType.includes('word') ? 'DOCX'
+         : fileType.includes('sheet') ? 'XLSX'
+         : fileType.includes('image/') ? 'IMG'
+         : 'FILE');
   }
 
   function adaptNoteFromApi(row) {
@@ -131,15 +140,6 @@
   }
 
   // ---------- Render ----------
-  const fileIconMarkup = `
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
-         class="doc-card__file-icon">
-      <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/>
-      <path d="M14 3v5h5"/>
-      <path d="M9 12h6M9 15.5h6M9 8.8h2.5"/>
-    </svg>`;
-
   const heartIconMarkup = `
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -166,7 +166,7 @@
       card.className = 'doc-card';
       card.innerHTML = `
         <div class="doc-card__top">
-          ${fileIconMarkup}
+          ${fileIconHtml(doc.fileType)}
           <span class="doc-badge">${esc(fileTypeBadge(doc.fileType))}</span>
         </div>
         <p class="doc-card__title">${esc(doc.title)}</p>
