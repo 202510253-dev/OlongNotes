@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+  <script>(function(){try{var s=localStorage.getItem("olongnotes-theme");var d=s?s==="dark":window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;var src=d?"img/olongnotesW.png":"img/olongnotes.png";var reveal=function(){var n=document.querySelectorAll("img.site-logo");for(var i=0;i<n.length;i++){n[i].src=src}document.documentElement.setAttribute("data-logo-swapped","1")};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",reveal)}else{reveal()}}catch(e){}})();</script>
 </head>
 <!--
   data-role starts as "viewer" here just so the page still looks right
@@ -226,7 +227,7 @@
     <nav class="side-drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
       <div class="side-drawer__head">
         <a href="index.html" class="side-drawer__brand">
-          <img src="img/olongnotes.png" alt="" />
+          <img class="site-logo" src="img/olongnotes.png" alt="" />
           <span class="side-drawer__brand-title">OlongNotes</span>
         </a>
         <button class="side-drawer__close" id="sideDrawerClose" type="button" aria-label="Close menu">
@@ -286,7 +287,7 @@
 
       <a href="#" class="navbar__brand">
         <span class="navbar__logo" aria-hidden="true">
-          <img src="img/olongnotes.png" alt="OlongNotes logo" />
+          <img class="site-logo" src="img/olongnotes.png" alt="OlongNotes logo" />
         </span>
         <span class="navbar__title-group">
           <span class="navbar__title">OlongNotes</span>
@@ -740,7 +741,7 @@
       <div class="footer__brand">
         <a href="#" class="navbar__brand navbar__brand--footer">
           <span class="navbar__logo" aria-hidden="true">
-            <img src="img/olongnotes.png" alt="OlongNotes logo" />
+            <img class="site-logo" src="img/olongnotes.png" alt="OlongNotes logo" />
           </span>
           <span class="navbar__title-group">
             <span class="navbar__title navbar__title--light">OlongNotes</span>

@@ -72,6 +72,12 @@ html {
   overflow-x: hidden;
   overflow-y: auto;
 }
+/* Defensive visibility gate: the inline head-blocker (in <head> of every
+   page) stamps data-logo-swapped="1" on <html> once it has swapped the
+   logo src to the correct variant for the active theme. Until that
+   stamp is set, hide .site-logo so users don't see a flash of the
+   wrong-theme logo between paint and JS execution. */
+html:not([data-logo-swapped]) img.site-logo { visibility: hidden; }
 /* Overlay-style scrollbar — when content does overflow, the scrollbar
    appears as a thin 6px pill instead of the chunky 17px default. With
    overflow-y: auto (not scroll) + no scrollbar-gutter, the bar is also
