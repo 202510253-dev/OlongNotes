@@ -333,14 +333,21 @@
         <div class="hero__overlay"></div>
       </div>
 
-      <div class="hero__content container">
-        <h1 class="hero__title">A Local, Free Notes Repository for the Students of Olongapo City</h1>
+      <div class="hero__content">
+        <span class="hero__eyebrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
+          For Students. By Students.
+        </span>
+        <h1 class="hero__title">A Local, Free Notes Repository for the Students of <span class="hero__title-accent">Olongapo City</span></h1>
         <p class="hero__subtitle">Knowledge shared today becomes success for tomorrow.</p>
         <div class="hero__actions">
-          <a class="btn btn--goldenrod btn--lg" href="community.html">Browse Questions</a>
+          <a class="btn btn--accent-blue btn--lg" href="community.html">Browse Notes</a>
 
           <!-- VIEWER: prompts the contributor application. -->
-          <button class="btn btn--ghost btn--lg" type="button" id="heroContribBtn">Become a Contributor</button>
+          <button class="btn btn--ghost btn--lg" type="button" id="heroContribBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 19h16"/></svg>
+            Upload Notes
+          </button>
 
           <!-- USER: already verified, so this opens the Upload Notes modal instead. -->
           <button class="btn btn--ghost btn--lg" type="button" id="heroUploadBtn" hidden>

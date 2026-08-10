@@ -1223,7 +1223,7 @@ body.upload-modal-open .footer {
 .hero {
   position: relative;
   padding-top: 110px;
-  padding-bottom: 60px; 
+  padding-bottom: 60px;
   color: var(--white);
   overflow: hidden;
 }
@@ -1246,10 +1246,31 @@ body.upload-modal-open .footer {
   z-index: 1;
   width: 100%;
   max-width: 640px;
-  margin-left: 100px;
+  margin-left: 24px;
   margin-right: auto;
   text-align: left;
 }
+/* Eyebrow pill above the title — matches the "For Students. By Students."
+   cap badge from the design reference. Tucks the title down with breathing
+   room above it. */
+.hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px 7px 12px;
+  margin-bottom: 22px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 999px;
+  color: rgba(255,255,255,0.92);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.hero__eyebrow svg { color: var(--goldenrod); flex-shrink: 0; }
+
 .hero__title {
   font-size: clamp(2rem, 4vw, 2.9rem);
   font-weight: 700;
@@ -1259,6 +1280,12 @@ body.upload-modal-open .footer {
   max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+/* Highlight the city name in goldenrod so the title matches the design
+   reference's accent treatment. */
+.hero__title-accent {
+  color: var(--goldenrod);
+  white-space: nowrap;
 }
 .hero__subtitle {
   font-size: 1.05rem;
@@ -1278,10 +1305,13 @@ body.upload-modal-open .footer {
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  padding: 20px 24px;
+  padding: 22px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* Stronger navy border ring so the card reads as 'floating outlined
+     panel' against the dark hero (matches the design reference). */
+  border: 1.5px solid rgba(11, 31, 77, 0.10);
 }
 .search-card__input {
   display: flex;
@@ -2497,6 +2527,7 @@ body.upload-modal-open .footer {
     margin-right: 0;
     max-width: 100%;
     width: 100%;
+    padding: 0 16px;
   }
   .hero__actions { flex-direction: column; align-self: stretch; }
   .hero__actions .btn { width: 100%; }
