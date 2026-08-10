@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/motion.css" />
   <link rel="stylesheet" href="css/school-profile.css" />
 </head>
 <body data-role="viewer">
@@ -136,7 +137,7 @@
              appends the next page of 20 notes — backend already returns
              has_more + total, so the button hides when the list is
              exhausted. -->
-        <div class="doc-grid" id="docGrid"></div>
+        <div class="doc-grid motion-enter-stagger" id="docGrid"></div>
         <p class="doc-empty" id="docEmpty" hidden>No notes yet.</p>
 
         <div class="notes-page__more">

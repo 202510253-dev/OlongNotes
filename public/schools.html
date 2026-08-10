@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/motion.css" />
   <link rel="stylesheet" href="css/schools.css" />
 </head>
 <body>
@@ -153,12 +154,9 @@
             <h2 class="sidebar-block__title">School Category</h2>
             <ul class="category-list" id="categoryList">
               <li><button class="category-list__item is-active" type="button" data-category="all">All Schools</button></li>
-              <li><button class="category-list__item" type="button" data-category="universities" disabled title="Coming soon">Universities</button></li>
-              <li><button class="category-list__item" type="button" data-category="colleges" disabled title="Coming soon">Colleges</button></li>
-              <li><button class="category-list__item" type="button" data-category="state-universities" disabled title="Coming soon">State Universities</button></li>
-              <li><button class="category-list__item" type="button" data-category="private" disabled title="Coming soon">Private Schools</button></li>
-              <li><button class="category-list__item" type="button" data-category="public" disabled title="Coming soon">Public Schools</button></li>
-              <li><button class="category-list__item" type="button" data-category="international" disabled title="Coming soon">International</button></li>
+              <li><button class="category-list__item" type="button" data-category="colleges">Colleges</button></li>
+              <li><button class="category-list__item" type="button" data-category="private">Private Schools</button></li>
+              <li><button class="category-list__item" type="button" data-category="public">Public Schools</button></li>
             </ul>
           </div>
 
@@ -199,6 +197,7 @@
         <div class="schools-results">
           <ul class="schools-list" id="schoolsList"></ul>
           <p class="schools-empty" id="schoolsEmpty" hidden>No schools match your filters. Try a different category or letter.</p>
+          <p class="schools-empty" id="categoryEmpty" hidden>No schools tagged under this category yet — check back soon.</p>
           <button class="btn btn--primary schools-viewall" type="button" id="viewAllBtn">View all Schools</button>
         </div>
       </div>

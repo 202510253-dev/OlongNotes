@@ -28,6 +28,7 @@
   // ---------- DOM refs ----------
   const schoolsList = document.getElementById('schoolsList');
   const schoolsEmpty = document.getElementById('schoolsEmpty');
+  const categoryEmpty = document.getElementById('categoryEmpty');
   const searchInput = document.getElementById('schoolSearchInput');
   const categoryList = document.getElementById('categoryList');
   const letterGrid = document.getElementById('letterGrid');
@@ -127,9 +128,23 @@
     schoolsList.classList.toggle('is-grid', state.view === 'grid');
 
     if (results.length === 0) {
-      schoolsEmpty.hidden = false;
+      // Category-specific empty state: when a non-"all" category is
+      // selected, the seeded data has no schools tagged under it yet
+      // (every school's category is hardcoded to 'all'). Show a soft
+      // "check back soon" message rather than the generic "filters
+      // excluded everything" message — those are different user
+      // intents. Keep both messages in the DOM so the layout doesn't
+      // jump on toggle.
+      if (state.category !== 'all') {
+        categoryEmpty.hidden = false;
+        schoolsEmpty.hidden = true;
+      } else {
+        categoryEmpty.hidden = true;
+        schoolsEmpty.hidden = false;
+      }
       return;
     }
+    categoryEmpty.hidden = true;
     schoolsEmpty.hidden = true;
 
     displayed.forEach((school) => {

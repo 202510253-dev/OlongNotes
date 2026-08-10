@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/motion.css" />
   <script>(function(){try{var s=localStorage.getItem("olongnotes-theme");var d=s?s==="dark":window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;var src=d?"img/olongnotesW.png":"img/olongnotes.png";var reveal=function(){var n=document.querySelectorAll("img.site-logo");for(var i=0;i<n.length;i++){n[i].src=src}document.documentElement.setAttribute("data-logo-swapped","1")};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",reveal)}else{reveal()}}catch(e){}})();</script>
 </head>
 <!--
@@ -401,7 +402,7 @@
         </div>
         <p class="featured-notes__subtitle">The most liked and downloaded notes from students across Olongapo City.</p>
 
-        <div class="featured-grid" id="featuredNotesGrid">
+        <div class="featured-grid motion-enter-stagger" id="featuredNotesGrid">
           <!-- Cards injected by js/script.js -->
         </div>
       </div>

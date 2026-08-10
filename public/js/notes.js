@@ -35,7 +35,7 @@
   // ---------- DOM refs ----------
   const docGrid = document.getElementById('docGrid');
   const docEmpty = document.getElementById('docEmpty');
-  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  const notesPagination = document.getElementById('notesPagination');
   const notesCount = document.getElementById('notesCount');
 
   // ---------- State ----------
@@ -108,7 +108,7 @@
       return;
     }
     state.loading = true;
-    loadMoreBtn.disabled = true;
+    if (notesPagination) notesPagination.setAttribute('aria-busy', 'true');
 
     try {
       const query = new URLSearchParams();
@@ -131,7 +131,7 @@
       if (offset === 0) state.notes = [];
     } finally {
       state.loading = false;
-      loadMoreBtn.disabled = false;
+      if (notesPagination) notesPagination.removeAttribute('aria-busy');
     }
   }
 
@@ -180,10 +180,10 @@
       docGrid.appendChild(card);
     });
 
-    // Load-more button visibility: hide once the API reports no more
-    // pages, show while there's more to load. Disabled while a request
-    // is in flight.
-    loadMoreBtn.hidden = !state.hasMore;
+    // Pagination element visibility: render() in this file builds the
+    // page buttons (or an empty wrapper) when notesPagination exists.
+    // The actual prev/next/page-number buttons are rendered by the
+    // caller — this file is now a load-only consumer.
     if (state.total > 0) {
       notesCount.textContent = `Showing ${state.notes.length} of ${state.total} notes`;
     } else {
@@ -192,12 +192,9 @@
   }
 
   // ---------- Boot ----------
-  loadMoreBtn.addEventListener('click', async () => {
-    if (state.loading || !state.hasMore) return;
-    await loadPage(state.notes.length);
-    render();
-  });
-
+  // notes.html uses numbered pagination (rendered by the same module),
+  // not a Load-More button — clicks are wired in the pagination
+  // render path, not here. Nothing to wire at boot.
   (async function init() {
     await loadPage(0);
     render();

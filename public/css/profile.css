@@ -490,8 +490,8 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--gray-50);
-  color: var(--accent-blue);
+  background: var(--icon-bg, var(--gray-50));
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -880,7 +880,7 @@
   background: var(--gray-100);
   border-color: var(--gray-200);
 }
-[data-theme="dark"] .note-card__icon { background: var(--gray-100); }
+[data-theme="dark"] .note-card__icon { background: var(--icon-bg, var(--gray-100)); }
 [data-theme="dark"] .note-card__head h3 { color: var(--text-heading); }
 [data-theme="dark"] .note-card__updated,
 [data-theme="dark"] .note-card__meta,

@@ -1,0 +1,139 @@
+/* =========================================================
+   Motion polish foundation — OlongNotes
+   Reusable entrance + open/close transitions. Pure CSS, no JS
+   hooks. Inherits --ease (style.css:32) and the global
+   prefers-reduced-motion override (style.css:144).
+   ========================================================= */
+
+/* ---- Entrance utility classes ----
+   Apply .motion-enter to a single element or .motion-enter-stagger
+   to a container to fade+rise its first 12 children with a 30ms
+   per-child stagger. DOM clear-and-reappend naturally re-fires
+   the animation because each render creates fresh nodes — no JS
+   toggle hack required. */
+@keyframes motion-fade-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.motion-enter {
+  animation: motion-fade-rise 180ms var(--ease) backwards;
+}
+
+.motion-enter-stagger > * {
+  animation: motion-fade-rise 180ms var(--ease) backwards;
+}
+/* First 12 children get progressive delay; rest snap to last value. */
+.motion-enter-stagger > *:nth-child(1)  { animation-delay:   0ms; }
+.motion-enter-stagger > *:nth-child(2)  { animation-delay:  30ms; }
+.motion-enter-stagger > *:nth-child(3)  { animation-delay:  60ms; }
+.motion-enter-stagger > *:nth-child(4)  { animation-delay:  90ms; }
+.motion-enter-stagger > *:nth-child(5)  { animation-delay: 120ms; }
+.motion-enter-stagger > *:nth-child(6)  { animation-delay: 150ms; }
+.motion-enter-stagger > *:nth-child(7)  { animation-delay: 180ms; }
+.motion-enter-stagger > *:nth-child(8)  { animation-delay: 210ms; }
+.motion-enter-stagger > *:nth-child(9)  { animation-delay: 240ms; }
+.motion-enter-stagger > *:nth-child(10) { animation-delay: 270ms; }
+.motion-enter-stagger > *:nth-child(11) { animation-delay: 300ms; }
+.motion-enter-stagger > *:nth-child(12) { animation-delay: 330ms; }
+.motion-enter-stagger > *:nth-child(n+13) { animation-delay: 330ms; }
+
+/* ---- ask-modal + edit-modal open/close ----
+   Override the per-page display:none/flex rules in
+   browse-community.css:697-708 and question-detail.css:702-748 so
+   the transition has a chance to fire. display: flex !important is
+   needed to beat style.css:142 [hidden] { display: none !important }.
+   Visibility/opacity handle the "shown or not" state so the
+   transition actually has a from→to pair to interpolate. */
+.ask-modal {
+  display: flex !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms var(--ease),
+              visibility 0s linear 150ms;
+}
+.ask-modal.is-open {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 200ms var(--ease),
+              visibility 0s linear 0s;
+}
+.ask-modal__backdrop {
+  opacity: 0;
+  transition: opacity 150ms var(--ease);
+}
+.ask-modal.is-open .ask-modal__backdrop { opacity: 1; }
+.ask-modal__dialog {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transform-origin: top center;
+  transition: opacity 200ms var(--ease),
+              transform 200ms var(--ease);
+}
+.ask-modal.is-open .ask-modal__dialog {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ---- kebab + dropdown-filter menus ----
+   Same display:!important trick to override style.css:142
+   [hidden] { display: none !important }. JS toggles menu.hidden
+   (HTML attribute); CSS keys off the attribute via [hidden] /
+   :not([hidden]) so the existing JS keeps working unchanged. */
+.kebab__menu[hidden],
+.dropdown-filter__menu[hidden] {
+  display: flex !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px) scale(0.98);
+  transition: opacity 120ms var(--ease),
+              transform 120ms var(--ease),
+              visibility 0s linear 120ms;
+}
+.kebab__menu:not([hidden]) {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+  transform-origin: top right;
+  transition: opacity 140ms var(--ease),
+              transform 140ms var(--ease),
+              visibility 0s linear 0s;
+}
+.dropdown-filter__menu:not([hidden]) {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+  transform-origin: top left;
+  transition: opacity 140ms var(--ease),
+              transform 140ms var(--ease),
+              visibility 0s linear 0s;
+}
+
+/* ---- Reduced-motion safety (extends style.css:144) ----
+   Two cases the global 0.01ms override doesn't handle:
+   (1) animation-delay is not zeroed, so staggered items would be
+       invisible for the delay window under reduced motion.
+   (2) transition visibility-delay is not zeroed, so a closing
+       modal stays interactive for ~150ms after the fade starts.
+   Cancel both explicitly. */
+@media (prefers-reduced-motion: reduce) {
+  .motion-enter,
+  .motion-enter-stagger > * {
+    animation: none !important;
+  }
+  .ask-modal,
+  .ask-modal.is-open,
+  .kebab__menu,
+  .kebab__menu[hidden],
+  .kebab__menu:not([hidden]),
+  .dropdown-filter__menu,
+  .dropdown-filter__menu[hidden],
+  .dropdown-filter__menu:not([hidden]) {
+    transition: none !important;
+  }
+}

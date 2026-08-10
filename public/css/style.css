@@ -1384,7 +1384,18 @@ body.upload-modal-open .footer {
    FEATURED NOTES
    ========================================================= */
 .featured-notes {
-  padding-top: 72px;
+  /* background-color was added so the 30px overlap region (where
+     .search-card's margin-bottom:-70px pulls featured-notes up onto
+     hero's bottom edge) no longer shows hero's dark navy through
+     transparency. Without a bg, the visible seam is: hero navy →
+     white search card → 30px navy band (bleed-through) → white body
+     → h2 on white — which looks like the search card overlaps
+     Featured Notes. With this bg, the seam is: hero navy → search
+     card → clean white → h2 on white. The overlap-composition
+     design is preserved (search card still floats over hero's bottom
+     edge); only the bleed-through is eliminated. */
+  background-color: var(--surface);
+  padding-top: 60px;
   padding-bottom: 30px;
 }
 
