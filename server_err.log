@@ -10,3 +10,21 @@ Fetch schools error: {
   hint: null,
   message: 'JWT issued at future'
 }
+[questions] points read error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column users.points does not exist'
+}
+[questions] points read error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column users.points does not exist'
+}
+[questions] points read error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column users.points does not exist'
+}

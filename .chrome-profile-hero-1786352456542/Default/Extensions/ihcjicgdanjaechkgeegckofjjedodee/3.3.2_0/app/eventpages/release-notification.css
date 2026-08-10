@@ -1,0 +1,374 @@
+body {
+    background: transparent;
+}
+
+a {
+    color: #0059FF;
+    text-decoration: none;
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+li div {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+li div img {
+    width: 24px;
+    height: 24px;
+}
+
+li div span {
+    margin-block: 2px;
+}
+
+#mb-close {
+    cursor: pointer;
+}
+
+.mb-release-notification-box {
+    /* Release_notification_light */
+
+    /* Auto layout */
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+
+    position: relative;
+    width: 480px;
+
+    /* Backgrounds/Light Mode / Primary */
+
+    background: #ffffff;
+    /* Elevation/Light/Elevation 3
+    
+    Dialogs and cards
+    */
+    box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.08),
+        0px 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+
+.mb-box-header-content {
+    /* _content */
+
+    /* Auto layout */
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    isolation: isolate;
+
+    width: 100%;
+    height: 33px;
+    border-radius: 16px;
+
+    /* Inside auto layout */
+
+    order: 0;
+    flex-grow: 0;
+    background: #F2F4FF;
+}
+
+.mb-top {
+    /* top */
+
+    /* Auto layout */
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px 0px;
+
+    width: 100%;
+    height: 32px;
+
+    /* Backgrounds/Light Mode/Secondary */
+
+    background: #f2f4ff;
+    border-radius: 16px 16px 0px 0px;
+
+    /* Inside auto layout */
+
+    flex: 0 0 auto;
+    order: 0;
+    flex-grow: 0;
+    z-index: 0;
+}
+
+.mb-rightdiv {
+    margin: 9px 9px 9px 7px;
+}
+
+.mb-topleft {
+    display: flex;
+}
+
+.mb-dividers {
+    /* Divider */
+
+    width: 100%;
+    height: 1px;
+
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+    z-index: 1;
+
+    /* ➖Divider */
+
+    /* Shades/Neutral/10
+    
+    Dark
+    */
+    background: #1F222D;
+    mix-blend-mode: normal;
+    opacity: 0.1;
+}
+
+.mb-divider {
+    /* ➖Divider */
+
+    /* Shades/Neutral/10
+    
+    Dark
+    */
+    background: #1F222D;
+    mix-blend-mode: normal;
+    opacity: 0.1;
+}
+
+.mb-card {
+    /* card */
+
+    /* Auto layout */
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0px;
+
+    width: 100%;
+    /* Inside auto layout */
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+}
+
+.mb-card-content {
+    /* _content */
+
+    /* Auto layout */
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 24px;
+    gap: 0;
+
+    width: 90%;
+
+    /* Inside auto layout */
+
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+.mb-card-text-title {
+    /* _title */
+
+    /* Auto layout */
+
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 8px;
+
+    /* width: 376px; */
+    height: 24px;
+
+    font-family: "Roboto", sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: black;
+    /* identical to box height, or 150% */
+
+    letter-spacing: 0.15px;
+}
+
+.mb-card-text-item-header {
+    min-height: 2.5em;
+}
+
+.mb-card-text-footer {
+    /* Body/Medium */
+    display: flex;
+    font-family: "Roboto", sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    /* or 143% */
+
+    letter-spacing: 0.25px;
+    justify-content: end;
+
+    position: absolute;
+    bottom: 0;
+    right: 24px;
+}
+
+.mb-card-text {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.mb-card-text-body {
+    display: flex;
+    flex-direction: row;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.25px;
+    text-align: left;
+    color: black;
+    position: relative;
+}
+
+.mb-card-text-item {
+    /* Auto layout */
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0px;
+    gap: 16px;
+    margin: 20px 0px;
+    width: 25%;
+    height: 60px;
+
+    font-family: "Roboto", sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+    /* identical to box height, or 133% */
+
+    letter-spacing: 0.5px;
+}
+
+.mb-card-text-divider {
+    width: 1px;
+    height: 50px;
+    margin: 5px;
+}
+
+.mb-card-text-item-body {
+    font-family: "Roboto", sans-serif;
+    font-style: normal;
+    font-weight: 900;
+    font-size: 26px;
+    line-height: 28px;
+    /* identical to box height, or 108% */
+
+    text-align: center;
+}
+
+.mb-card-icon img {
+    width: 85px;
+    height: 71px;
+}
+
+svg {
+    fill: #605F62;
+}
+
+svg.round-icon {
+    fill: #E3F5E1;
+}
+
+#main-icon {
+    fill: #43BC38;
+}
+
+.mb-top-banner {
+    fill: #F2F4FF;
+}
+
+.mb-top-banner-text {
+    fill: #0059FF;
+}
+
+.url-permission-bar {
+    display: flex;
+    background-color: #FFF89D;
+    padding: 7px 10px;
+    border-radius: 16px;
+    gap: 9px;
+    align-items: center;
+    border: #FFDDB3 solid 1px;
+    margin-top: 1.25rem;
+    margin-bottom: -0.25rem;
+}
+
+.url-permission-bar #permission-req-bar-desc {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    margin: 0;
+    line-height: 17px;
+    color: #000000 ;
+}
+.url-permission-bar img {
+    width: 16px;
+    height: 16px;
+}
+.url-permission-bar .primary-button {
+    font-family: 'Roboto', sans-serif;
+    padding: 7px;
+    border-radius: 50px;
+    min-width: 8rem;
+    background: #0059FF;
+    color: white;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.5s;
+    font-size: 12px;
+    text-align: center;
+    line-height: 14px;
+}

@@ -1,0 +1,70 @@
+body {
+    background: transparent;
+}
+
+a {
+    color: #9EB2EB;
+}
+
+li div img {
+    width: 24px;
+    height: 24px;
+}
+
+.mb-release-notification-box {
+    background: #1F222D;
+}
+
+.mb-text {
+    color: white;
+}
+
+.mb-box-header-content {
+    background: #15151C;
+}
+
+.mb-card-text-body {
+    color: white;
+}
+
+.mb-card-text-title {
+    color: white;
+}
+
+.mb-top {
+    background: #15151C;
+}
+
+svg {
+    fill: #BBBBBC;
+}
+
+svg.round-icon {
+    fill: #2D372F;
+}
+
+#main-icon {
+    fill: #8ED788;
+}
+
+.mb-top-banner {
+    fill: #15151C;
+}
+
+.mb-top-banner-text {
+    fill: #fff;
+}
+
+
+.url-permission-bar #permission-req-bar-desc {
+    color: white;
+}
+.url-permission-bar {
+    background-color: #15151C;
+    border: #1e2026 solid 1px;
+}
+
+.url-permission-bar .primary-button {
+    background: #3B8DFF;
+    color: white;
+}

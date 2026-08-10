@@ -446,7 +446,7 @@ router.get('/', async (req, res) => {
       .select(`
         id,
         user_id,
-        subject_id,
+subject_id,
         school_id,
         grade_level,
         title,
@@ -456,7 +456,7 @@ router.get('/', async (req, res) => {
         likes_count,
         answers_count,
         created_at,
-        users:user_id ( user_name, role ),
+        users:user_id ( user_name, role, avatar_url ),
         subjects:subject_id ( subject_name )
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
@@ -591,7 +591,7 @@ router.get('/:id', async (req, res) => {
         likes_count,
         answers_count,
         created_at,
-        users:user_id ( user_name, role ),
+        users:user_id ( user_name, role, avatar_url ),
         subjects:subject_id ( subject_name )
       `)
       .eq('id', questionId)
@@ -618,7 +618,7 @@ router.get('/:id', async (req, res) => {
           likes_count,
           is_accepted,
           created_at,
-          users:user_id ( user_name, role )
+          users:user_id ( user_name, role, avatar_url )
         `)
         .eq('question_id', questionId)
         .order('is_accepted', { ascending: false })

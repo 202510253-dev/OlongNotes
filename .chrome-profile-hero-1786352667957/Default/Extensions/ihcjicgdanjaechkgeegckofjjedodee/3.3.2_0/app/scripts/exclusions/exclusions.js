@@ -1,0 +1,1 @@
+import{MV3ExclusionHandler}from"./exclusions-mv3";export const exclusionHandler=new MV3ExclusionHandler;

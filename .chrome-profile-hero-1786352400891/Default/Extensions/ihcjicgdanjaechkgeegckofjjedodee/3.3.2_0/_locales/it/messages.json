@@ -1,0 +1,4175 @@
+{
+   "AccessControlDescription": {
+      "description": "Description for the Access Control feature",
+      "message": "Controlla quali siti web possono utilizzare la tua fotocamera, il microfono, la posizione o inviare notifiche."
+   },
+   "AccessControlDescriptionGetPremium": {
+      "description": "Description for Access Control upsell to get premium",
+      "message": "I siti web possono richiedere l'accesso anche quando non ne hanno realmente bisogno. Controlla cosa è consentito, blocca ciò che non lo è ed evita pop-up indesiderati, tracciamenti o sorprese."
+   },
+   "AccessControlTitle": {
+      "description": "Access Control feature name",
+      "message": "Controllo degli accessi"
+   },
+   "AccessControlTitleGetPremium": {
+      "description": "Title for Access Control upsell to get premium",
+      "message": "Chi può accedere al tuo dispositivo"
+   },
+   "AddToList": {
+      "description": "Label for the add to list button",
+      "message": "Aggiungi all'elenco"
+   },
+   "AddWebsiteButton": {
+      "description": "Label for the add website button",
+      "message": "Aggiungi sito web"
+   },
+   "Adding": {
+      "description": "Label for the adding state",
+      "message": "Aggiunta di"
+   },
+   "AllowListDescription": {
+      "description": "Description for the allow list section",
+      "message": "Aggiungete un sito web di cui vi fidate, quindi scegliete quali protezioni disattivare per esso."
+   },
+   "AllowListTitle": {
+      "description": "Title for the allow list section",
+      "message": "Elenco dei permessi"
+   },
+   "AllowedProtectionsHeader": {
+      "description": "Label for the allowed protections section",
+      "message": "Protezioni consentite"
+   },
+   "BackToPreviousPageBtn": {
+      "description": "Label for the back to previous page button",
+      "message": "Torna alla pagina precedente"
+   },
+   "Cancel": {
+      "description": "Label for the cancel button",
+      "message": "Annullamento"
+   },
+   "CheckingStatus": {
+      "description": "Message displayed when checking the status",
+      "message": "Verifica dello stato"
+   },
+   "ContentControlDescriptionGetPremium": {
+      "description": "Description for the content control feature",
+      "message": "Volete un maggiore controllo sulla vostra navigazione? Il controllo dei contenuti vi consente di bloccare l'accesso a qualsiasi sito web, dominio o indirizzo IP, secondo le vostre condizioni. Questa funzione è disponibile con Malwarebytes Premium, insieme alla protezione in tempo reale contro malware, truffe e altre minacce online."
+   },
+   "ContentControlTitleGetPremium": {
+      "description": "Title for the content control feature",
+      "message": "Bloccare l'accesso a qualsiasi sito scelto dall'utente"
+   },
+   "DashboardNavItem": {
+      "description": "Label for the dashboard navigation item",
+      "message": "Cruscotto"
+   },
+   "Date": {
+      "description": "Label for the date column",
+      "message": "Data"
+   },
+   "Delete": {
+      "description": "Label for the delete button",
+      "message": "Cancellare"
+   },
+   "DeleteAll": {
+      "description": "Label for the delete all button",
+      "message": "Cancellare tutti"
+   },
+   "DetectionHistoryDescription": {
+      "description": "Description for the detection history section",
+      "message": "Scegliete una categoria per vedere e gestire la cronologia dei rilevamenti. Gli annunci e i tracker non sono inclusi."
+   },
+   "DetectionHistoryDescriptionGetPremium": {
+      "description": "Description for the get premium section",
+      "message": "La cronologia dei rilevamenti consente di visualizzare ciò che $name$ ha bloccato. Ordinate per categoria, sito o data e decidete cosa conservare o eliminare.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "DetectionHistoryTitle": {
+      "description": "Label for the detection history section",
+      "message": "Cronologia rilevamenti"
+   },
+   "DetectionHistoryTitleGetPremium": {
+      "description": "Title for the get premium section",
+      "message": "Tenere sotto controllo la cronologia dei rilevamenti"
+   },
+   "DragAndDropDescription": {
+      "description": "Drag and drop option text.",
+      "message": "o trascinalo qui"
+   },
+   "DragAndDropTitle": {
+      "description": "Import page iniital status.",
+      "message": "Seleziona il file da importare"
+   },
+   "FreeVersionInstalled": {
+      "description": "Message displayed when the free version is installed",
+      "message": "Versione gratuita installata"
+   },
+   "GetPremiumButton": {
+      "description": "Label for the get premium button",
+      "message": "Ottenere il Premium"
+   },
+   "GetProtection": {
+      "description": "Button text for getting protection",
+      "message": "Ottenere protezione"
+   },
+   "HiThere": {
+      "description": "Friendly greeting",
+      "message": "Ciao a tutti"
+   },
+   "ImportBtnText": {
+      "description": "Import button text.",
+      "message": "Seleziona file"
+   },
+   "ImportStatusDescription": {
+      "description": "Initial status description.",
+      "message": "Importare le impostazioni $name$ precedentemente esportate dal file di esportazione",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "ImportStatusDescriptionComplete": {
+      "description": "Description status upload completed.",
+      "message": "Le impostazioni $name$ sono state importate con successo!",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "ImportStatusDescriptionError": {
+      "description": "Descrption status on error while uploading the file.",
+      "message": "Ops, qualcosa è andato storto. Riprova o contatta l’assistenza"
+   },
+   "ImportStatusDescriptionOnLoad": {
+      "description": "Description of the status during file upload",
+      "message": "Importare le impostazioni $name$ esportate in precedenza dal file di esportazione al nuovo dispositivo",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "ImportStatusDescriptionUnauthorized": {
+      "description": "Blocked feature text due to no premium user licence.",
+      "message": "Per sbloccare questa funzione, passa a"
+   },
+   "ImportSupportBtn": {
+      "description": "Contact support text.",
+      "message": "Contatta l’assistenza"
+   },
+   "ImportTryAgainBtn": {
+      "description": "Try again button text.",
+      "message": "Riprova"
+   },
+   "ImportingTxt": {
+      "description": "Import text.",
+      "message": "importazione in corso"
+   },
+   "InstallFreeProtection": {
+      "description": "Button text for installing free protection",
+      "message": "Installare la protezione gratuita"
+   },
+   "InstallVPN": {
+      "description": "Button text for installing the VPN",
+      "message": "Installare la VPN"
+   },
+   "LearnMoreLink": {
+      "description": "Label for the learn more link",
+      "message": "Maggiori informazioni"
+   },
+   "LearnMoreText": {
+      "description": "Text for link to learn more pages on Malwarebytes blog",
+      "message": "Maggiori informazioni"
+   },
+   "Loading": {
+      "description": "The word \"Loading\"",
+      "message": "Caricamento"
+   },
+   "NoBlockedWebsites": {
+      "description": "Message displayed when there are no blocked websites",
+      "message": "Nessun sito web bloccato"
+   },
+   "NoBlockedWebsitesDesc": {
+      "description": "Description displayed when there are no blocked websites",
+      "message": "Aggiungere siti web, domini o indirizzi IP all'elenco di controllo dei contenuti per impedire l'accesso e personalizzare l'esperienza di navigazione."
+   },
+   "NoDetectionsFoundDescription": {
+      "description": "Description displayed when no detections are found",
+      "message": "Ottime notizie! Non abbiamo rilevato alcuna minaccia in questa categoria di recente. La vostra navigazione è stata sicura e protetta."
+   },
+   "NoDetectionsFoundTitle": {
+      "description": "Message displayed when no detections are found",
+      "message": "Nessun rilevamento trovato"
+   },
+   "NoItemsAdded": {
+      "description": "Message displayed when no items have been added to the allow list",
+      "message": "Nessun elemento aggiunto"
+   },
+   "NoItemsAddedDescription": {
+      "description": "Description for the no items added state",
+      "message": "I siti aggiunti qui non saranno bloccati da $name$, anche se corrispondono a una regola di protezione. Utilizzare questa opzione per consentire l'accesso completo ai siti Web affidabili.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "NoStatsYetDesc": {
+      "description": "Description shown when there is no data to display in reports",
+      "message": "Una volta esplorato, $name$ vi mostrerà tutto ciò che sta proteggendo.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "NoStatsYetHeader": {
+      "description": "Message shown when there is no data to display in reports",
+      "message": "Non c'è ancora nulla da vedere qui"
+   },
+   "NotFoundDesc": {
+      "description": "Message displayed when a user navigates to a non-existent page",
+      "message": "Potrebbe essere stata spostata, cancellata o semplicemente non esistere."
+   },
+   "NotFoundHeader": {
+      "description": "Message displayed when a user navigates to a non-existent page",
+      "message": "La pagina che stai cercando non è qui."
+   },
+   "NotIncludedInYourSubscription": {
+      "description": "Message displayed when a feature is not included in the user's subscription",
+      "message": "Non incluso nell'abbonamento"
+   },
+   "NotInstalled": {
+      "description": "Message displayed when the software is not installed",
+      "message": "Non installato"
+   },
+   "OAPActionNoticeDescription": {
+      "description": "OAP action notice modal description",
+      "message": "Potreste vedere alcune windows aprirsi e chiudersi. Non preoccupatevi, siamo noi a gestire la disconnessione per voi. Al termine, verrete reindirizzati alle impostazioni."
+   },
+   "OAPActionNoticeDontShowAgain": {
+      "description": "OAP action notice don't show again checkbox label",
+      "message": "Non mostrarlo più"
+   },
+   "OAPActionNoticeLetsGo": {
+      "description": "OAP action notice let's go button text",
+      "message": "Andiamo"
+   },
+   "OAPActionNoticeTitleDeleteApp": {
+      "description": "OAP action notice modal title for deleting an app connection",
+      "message": "Stiamo disconnettendo l'app in modo sicuro"
+   },
+   "OAPActionNoticeTitleDeleteDevice": {
+      "description": "OAP action notice modal title for deleting a device session",
+      "message": "Stiamo scollegando il dispositivo in modo sicuro"
+   },
+   "OAPActionNoticeTitleScan": {
+      "description": "OAP action notice modal title",
+      "message": "Avvio della scansione..."
+   },
+   "OAPAuthLoaderDescription": {
+      "description": "OAP auth loader description",
+      "message": "Accedere con il proprio account Google per completare la scansione del profilo."
+   },
+   "OAPAuthLoaderTitle": {
+      "description": "OAP auth loader title",
+      "message": "Accedi per continuare"
+   },
+   "OAPBasicAccountAccess": {
+      "description": "OAP basic account access message",
+      "message": "Accesso al conto Basic "
+   },
+   "OAPBringThisBack": {
+      "description": "OAP bring this back button text",
+      "message": "Riportate questo"
+   },
+   "OAPChecklistTitle": {
+      "description": "Label for the OAP checklist title",
+      "message": "La vostra lista di controllo"
+   },
+   "OAPConnectedDevicesPageTitle": {
+      "description": "OAP connected devices page title",
+      "message": "Dispositivi connessi"
+   },
+   "OAPDefaultWhatToDoTitle": {
+      "description": "OAP default what to do title",
+      "message": "Intervenite per aggiornare il vostro account:"
+   },
+   "OAPDeleteConnection": {
+      "description": "OAP delete connection button text",
+      "message": "Cancellare la connessione"
+   },
+   "OAPDeleting": {
+      "description": "OAP deleting message",
+      "message": "Eliminazione..."
+   },
+   "OAPDescription": {
+      "description": "Description for the OAP page",
+      "message": "Scansionate e proteggete i vostri profili online con controlli in tempo reale per garantire che siano completamente ottimizzati e protetti dalle violazioni."
+   },
+   "OAPErrorItemDescription": {
+      "description": "OAP error item description",
+      "message": "Non è stato possibile caricare questa raccomandazione. Riprovare più tardi."
+   },
+   "OAPFailedToDeleteAppConnection": {
+      "description": "OAP failed to delete app connection message",
+      "message": "Cancellazione fallita della connessione all'app"
+   },
+   "OAPFailedToDeleteDeviceSession": {
+      "description": "OAP failed to delete device session message",
+      "message": "Cancellazione fallita della sessione del dispositivo"
+   },
+   "OAPGoogleScanDescription": {
+      "description": "Description for the OAP google scan title",
+      "message": "Esaminate la visibilità del vostro account, le app connesse e le impostazioni di sicurezza."
+   },
+   "OAPGoogleScanTitle": {
+      "description": "Label for the OAP google scan title",
+      "message": "Controllare le impostazioni dell'account Google"
+   },
+   "OAPLoaderAlertMessage": {
+      "description": "OAP loader alert message",
+      "message": "Sarete avvisati immediatamente nel momento in cui le vostre raccomandazioni saranno pronte."
+   },
+   "OAPLoaderCancel": {
+      "description": "OAP loader cancel button text",
+      "message": "Annullamento"
+   },
+   "OAPLoaderKeepTabOpen": {
+      "description": "OAP loader keep tab open message",
+      "message": "Tenere aperta questa scheda"
+   },
+   "OAPLoaderPause": {
+      "description": "OAP loader pause button text",
+      "message": "Pausa"
+   },
+   "OAPLoaderTitle": {
+      "description": "OAP loader modal title",
+      "message": "$name$ sta controllando le impostazioni attuali...",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "OAPLoading": {
+      "description": "OAP loading message",
+      "message": "Caricamento..."
+   },
+   "OAPMarkAsDone": {
+      "description": "OAP mark as done button text",
+      "message": "Contrassegnare come fatto"
+   },
+   "OAPMarkedAsDone": {
+      "description": "Label for the OAP marked as done title",
+      "message": "Contrassegnato come fatto"
+   },
+   "OAPNotInterested": {
+      "description": "OAP notification not interested button text",
+      "message": "Non mi interessa"
+   },
+   "OAPNotificationDescription": {
+      "description": "OAP notification description",
+      "message": "Verificheremo che le vostre impostazioni non presentino rischi senza modificare nulla: è veloce, sicuro e aiuta a proteggere il vostro account."
+   },
+   "OAPNotificationTitle": {
+      "description": "OAP notification title",
+      "message": "Scansione della privacy del profilo di Malwarebytes "
+   },
+   "OAPProfileScanSummaryTitle": {
+      "description": "OAP recommendation page title for profile scan summary",
+      "message": "Riepilogo della scansione del profilo"
+   },
+   "OAPRecentActivityDescription": {
+      "description": "Description for the OAP recent activity title",
+      "message": "Visualizza le ultime scansioni e le raccomandazioni sulla privacy."
+   },
+   "OAPRecentActivityEmptyTableTitle": {
+      "description": "Label for the OAP recent activity table title when there are no scans",
+      "message": "Non ci sono ancora scansioni."
+   },
+   "OAPRecentActivityTableTitle": {
+      "description": "Label for the OAP recent activity table title",
+      "message": "Eventi"
+   },
+   "OAPRecentActivityTitle": {
+      "description": "Label for the OAP recent activity title",
+      "message": "Attività recenti"
+   },
+   "OAPRecommendations": {
+      "description": "Label for the OAP recommendations title",
+      "message": "raccomandazioni"
+   },
+   "OAPScanErrorDescription": {
+      "description": "OAP scan error description",
+      "message": "Questa volta non siamo riusciti a completare la scansione. Riprovare più tardi o riavviare il dispositivo prima di eseguire una nuova scansione."
+   },
+   "OAPScanErrorLater": {
+      "description": "OAP scan error later button text",
+      "message": "Lo farò più tardi"
+   },
+   "OAPScanErrorTitle": {
+      "description": "OAP scan error title",
+      "message": "Non è stato possibile completare la scansione"
+   },
+   "OAPScanErrorTryAgain": {
+      "description": "OAP scan error try again button text",
+      "message": "Riprova"
+   },
+   "OAPScanNow": {
+      "description": "Button text for the OAP scan now button",
+      "message": "Scansione ora"
+   },
+   "OAPScanSettings": {
+      "description": "Label for the OAP scan settings button",
+      "message": "Controllate le impostazioni dei vostri account"
+   },
+   "OAPScanSettingsDescription": {
+      "description": "Description for the OAP scan settings button",
+      "message": "Esaminate i vostri profili online per garantire la sicurezza, la privacy e le impostazioni di protezione ottimali."
+   },
+   "OAPSeeDetails": {
+      "description": "OAP see details button text",
+      "message": "Vedi dettagli"
+   },
+   "OAPSignOut": {
+      "description": "OAP sign out button text",
+      "message": "Esci"
+   },
+   "OAPSkip": {
+      "description": "OAP skip button text",
+      "message": "Salto"
+   },
+   "OAPSkipped": {
+      "description": "Label for the OAP skipped title",
+      "message": "Saltato"
+   },
+   "OAPStartYourFirstScan": {
+      "description": "Label for the OAP start your first scan button",
+      "message": "Avviare la prima scansione"
+   },
+   "OAPStartYourFirstScanDescription": {
+      "description": "Description for the OAP start your first scan button",
+      "message": "Esaminate le vostre impostazioni per ricevere suggerimenti personalizzati per migliorare la privacy, la sicurezza e le prestazioni."
+   },
+   "OAPStatusFairDescription": {
+      "description": "OAP scan summary description when profile status is fair",
+      "message": "Le protezioni di base sono state messe in atto, ma alcune aree richiedono ancora attenzione. Esaminate l'elenco per aumentare la vostra sicurezza."
+   },
+   "OAPStatusGoodDescription": {
+      "description": "OAP scan summary description when profile status is good",
+      "message": "Il vostro profilo è ben protetto. Non è necessario intervenire, ma le revisioni periodiche contribuiscono a mantenerlo sicuro."
+   },
+   "OAPStatusVulnerableDescription": {
+      "description": "OAP scan summary description when profile status is vulnerable",
+      "message": "Il vostro profilo presenta delle vulnerabilità. Esaminate i dettagli qui sotto per rafforzare la vostra sicurezza e la vostra privacy."
+   },
+   "OAPTitle": {
+      "description": "Title for the OAP page",
+      "message": "Protezione del conto online"
+   },
+   "OapNavItem": {
+      "description": "Label for the Online Account Protection navigation item",
+      "message": "Controllo del profilo"
+   },
+   "OptionalPermissionReqBarBtn": {
+      "description": "Button text for the permission request bar in settings",
+      "message": "Concessione del permesso"
+   },
+   "OptionalPermissionReqBarDesc": {
+      "description": "Description for the permission request bar in settings",
+      "message": "$name$ ha bisogno di un'autorizzazione per migliorare la sicurezza e la protezione dell'utente.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "OverviewSummaryMessage": {
+      "description": "Summary message for the overview section",
+      "message": "Ecco un riepilogo delle attività di protezione del browser."
+   },
+   "PremiumSecurity": {
+      "description": "Label for the premium security card",
+      "message": "Sicurezza Premium"
+   },
+   "PremiumSecurityCardDescription": {
+      "description": "Description for keeping devices safe",
+      "message": "Proteggete i vostri dispositivi, la vostra privacy e la vostra identità da malware, ransomware e minacce online."
+   },
+   "PrivacyVPNCardDescription": {
+      "description": "Description for privacy VPN card",
+      "message": "Rimanete sicuri e anonimi online, ovunque andiate. Utilizzate una VPN per proteggere i vostri dati, soprattutto sulle reti pubbliche."
+   },
+   "ProtectYourPrivacy": {
+      "description": "Label for the protect your privacy button",
+      "message": "Proteggere la privacy"
+   },
+   "ProtectionAllowOptions": {
+      "description": "Label for the protection selection prompt",
+      "message": "Scegliere quali protezioni disattivare"
+   },
+   "ProtectionIsDisbledInSettings": {
+      "description": "Description for when protection is disabled in settings",
+      "message": "La protezione è disattivata nelle impostazioni"
+   },
+   "RemoveAdsConfirmation": {
+      "description": "Confirmation message for removing all adds from the manual ad removal list",
+      "message": "Rimuovere questo annuncio dalla lista dei bloccati?"
+   },
+   "RemoveAdsWarning": {
+      "description": "Confirmation message for removing  add from the manual ad removal list",
+      "message": "Se lo si rimuove dall'elenco, potrebbe ricominciare a essere visualizzato durante la navigazione."
+   },
+   "RemoveAllAdsConfirmation": {
+      "description": "Confirmation message for removing all adds from the manual ad removal list",
+      "message": "Rimuovere tutti gli annunci bloccati?"
+   },
+   "RemoveAllAdsWarning": {
+      "description": "Confirmation message for removing all adds from the manual ad removal list",
+      "message": "Se li rimuovete dall'elenco dei bloccati, potrebbero ricominciare a comparire durante la navigazione."
+   },
+   "RemoveAllBtn": {
+      "description": "Label for the remove all button",
+      "message": "Rimuovi tutto"
+   },
+   "RemoveAllConfirmation": {
+      "description": "Confirmation message for removing all sites from the allow list",
+      "message": "Rimuovere tutti i siti dall'elenco dei siti consentiti?"
+   },
+   "RemoveAllContentControlSiteConfirmation": {
+      "description": "Confirmation message displayed when removing all content controls",
+      "message": "Rimuovere tutti i siti dall'elenco di controllo dei contenuti?"
+   },
+   "RemoveAllContentControlWarning": {
+      "description": "Warning message displayed when removing all content controls",
+      "message": "Siete sicuri di voler rimuovere tutti i Controlli contenuti? Tutti questi siti web non saranno più bloccati."
+   },
+   "RemoveAllWarning": {
+      "description": "Warning message displayed when removing all sites from the allow list",
+      "message": "Se si rimuovono tutti i siti, $name$ ricomincerà a bloccare le minacce o le attività sospette su tutti i siti precedentemente consentiti.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "RemoveBtn": {
+      "description": "Label for the remove button",
+      "message": "Rimuovere"
+   },
+   "RemoveContentControlSiteConfirmation": {
+      "description": "Confirmation message displayed when removing a content control for a specific site",
+      "message": "Rimuovere questo sito dall'elenco di controllo dei contenuti?"
+   },
+   "RemoveContentControlWarning": {
+      "description": "Warning message displayed when removing a content control",
+      "message": "Siete sicuri di voler rimuovere questo Controllo contenuti? Questo sito web non sarà più bloccato."
+   },
+   "RemoveSiteConfirmation": {
+      "description": "Confirmation message for removing a site from the allow list",
+      "message": "Rimuovere questo sito dall'elenco dei siti consentiti?"
+   },
+   "RemoveSiteWarning": {
+      "description": "Warning message displayed when removing a specific site from the allow list",
+      "message": "Se si rimuove questo sito, $name$ inizierà a bloccare nuovamente le minacce o le attività sospette su di esso.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "SearchDomainsPlaceholder": {
+      "description": "Label for the search domains input",
+      "message": "Ricerca domini"
+   },
+   "SeeAllActivityBtn": {
+      "description": "Button text to view all browsing activity",
+      "message": "Vedi tutte le attività"
+   },
+   "SettingsPermissionReqBarBtn": {
+      "description": "Button text for the permission request bar in settings",
+      "message": "Richiesta di autorizzazione"
+   },
+   "SettingsPermissionReqBarDesc": {
+      "description": "Description for the permission request bar in settings",
+      "message": "$name$ ha bisogno dell'autorizzazione a visualizzare gli URL visitati dall'utente per attivare la protezione.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "SiteURL": {
+      "description": "Label for the site column",
+      "message": "URL del sito"
+   },
+   "Type": {
+      "description": "Label for the type column",
+      "message": "Tipo"
+   },
+   "URLPermissionRequired": {
+      "description": "Title for the URL permission required notification",
+      "message": "Autorizzazione URL richiesta"
+   },
+   "UpgradeToGetVPN": {
+      "description": "Button text for upgrading to get VPN",
+      "message": "Aggiornamento per ottenere la VPN"
+   },
+   "UpgradeToPremium": {
+      "description": "Button text for upgrading to premium version",
+      "message": "Aggiornamento a Premium"
+   },
+   "UrlInputField": {
+      "description": "Label for the URL or IP address input field",
+      "message": "Inserire un URL o un indirizzo IP"
+   },
+   "UrlOrIPAddress": {
+      "description": "Label for the URL / IP address field",
+      "message": "URL / indirizzo IP"
+   },
+   "accessControlBrowsingHistoryDescription": {
+      "description": "Description for browsing history permission section",
+      "message": "Consenti a Browser Guard quali siti richiedono l'accesso, in modo da poterli autorizzare o bloccare."
+   },
+   "accessControlBrowsingHistoryTitle": {
+      "description": "Title for browsing history permission section",
+      "message": "Vedi siti web visitati"
+   },
+   "accessControlBulkAllowAll": {
+      "description": "Bulk action to allow all permissions for selected type",
+      "message": "Consenti tutto"
+   },
+   "accessControlBulkAskEveryTimeAll": {
+      "description": "Bulk action to set all permissions to ask every time for selected type",
+      "message": "Chiedere ogni volta tutto"
+   },
+   "accessControlBulkBlockAll": {
+      "description": "Bulk action to block all permissions for selected type",
+      "message": "Blocca tutto"
+   },
+   "accessControlCameraDescription": {
+      "description": "Description for camera access control section",
+      "message": "Siti web autorizzati a utilizzare la fotocamera"
+   },
+   "accessControlCameraTitle": {
+      "description": "Title for camera access control section",
+      "message": "Fotocamera"
+   },
+   "accessControlContentSettingsDescription": {
+      "description": "Description for content settings permission section",
+      "message": "Consente Browser Guard controllare l'accesso alla fotocamera, al microfono, alla posizione e alle notifiche per i siti web."
+   },
+   "accessControlContentSettingsTitle": {
+      "description": "Title for content settings permission section",
+      "message": "Gestisci le impostazioni dei contenuti"
+   },
+   "accessControlEmptyStateDescription": {
+      "description": "Empty state description when no permissions are configured",
+      "message": "Nessun sito web ha autorizzazioni personalizzate impostate per questo tipo di accesso."
+   },
+   "accessControlEmptyStateTitle": {
+      "description": "Empty state title when no permissions are set for a specific type",
+      "message": "Nessun permesso $perm$ trovato",
+      "placeholders": {
+         "perm": {
+            "content": "$1",
+            "example": "camera"
+         }
+      }
+   },
+   "accessControlLocationDescription": {
+      "description": "Description for location access control section",
+      "message": "Siti web autorizzati ad accedere alla tua posizione"
+   },
+   "accessControlLocationTitle": {
+      "description": "Title for location access control section",
+      "message": "Posizione"
+   },
+   "accessControlMicrophoneDescription": {
+      "description": "Description for microphone access control section",
+      "message": "Siti web autorizzati a utilizzare il microfono"
+   },
+   "accessControlMicrophoneTitle": {
+      "description": "Title for microphone access control section",
+      "message": "Microfono"
+   },
+   "accessControlNotificationMessage": {
+      "description": "Body text for the Access Control introduction notification",
+      "message": "Scopri quali siti web dispongono di autorizzazioni nel tuo browser e gestisci il loro accesso."
+   },
+   "accessControlNotificationPrimaryButton": {
+      "description": "Primary button text to open the Access Control feature",
+      "message": "Scansione ora"
+   },
+   "accessControlNotificationTitle": {
+      "description": "Title for the Access Control introduction notification",
+      "message": "Verifica chi può accedere al tuo dispositivo"
+   },
+   "accessControlNotificationsDescription": {
+      "description": "Description for notifications access control section",
+      "message": "Siti web autorizzati a inviarti notifiche"
+   },
+   "accessControlNotificationsTitle": {
+      "description": "Title for notifications access control section",
+      "message": "Notifiche"
+   },
+   "accessControlPermissionNeededDescription": {
+      "description": "Description for access control permission request card",
+      "message": "Lascia che Browser Guard l'accesso al tuo sito"
+   },
+   "accessControlPermissionNeededTitle": {
+      "description": "Title for access control permission request card",
+      "message": "Abilita le autorizzazioni per iniziare"
+   },
+   "accessControlPopupDescription": {
+      "description": "Description for popup access control section",
+      "message": "Siti web autorizzati a visualizzare pop-up"
+   },
+   "accessControlPopupTitle": {
+      "description": "Title for popup access control section",
+      "message": "Pop-up"
+   },
+   "activateBtnText": {
+      "description": "Button text when BG is inactive.",
+      "message": "Attiva"
+   },
+   "adstrackerLabel": {
+      "description": "Label for the ad & tracker blocker feature",
+      "message": "Filtra gli annunci e mantiene la navigazione privata"
+   },
+   "allDoneText": {
+      "description": "Onboarding: final button text",
+      "message": "Tutto fatto"
+   },
+   "allTime": {
+      "description": "Label for the all time time range",
+      "message": "Per tutto il tempo"
+   },
+   "allTimeStatisticsTooltipTxt": {
+      "description": "Tooltip text for old users when select all-time statistics filter.",
+      "message": "Disponibilità della Cronologia rilevamenti iniziata il "
+   },
+   "allowAccess": {
+      "description": "Button text to allow access for a specific permission",
+      "message": "Consentire"
+   },
+   "allowAccessButton": {
+      "description": "Button text to allow permission access",
+      "message": "Consentire"
+   },
+   "allowColumnAllowList": {
+      "description": "Column Header for Allow List of Allowed detection types",
+      "message": "Permetti"
+   },
+   "allowListCompletionButton": {
+      "description": "Button text for Allow List additions",
+      "message": "Aggiungi alla lista"
+   },
+   "allowListControl": {
+      "description": "Label for Allow List control",
+      "message": "Aggiungi URL o indirizzo IP"
+   },
+   "allowListDisable": {
+      "description": "Label for to disable Allow List item",
+      "message": "Scegli le protezioni da disabilitare"
+   },
+   "allowListEmpty": {
+      "description": "Text displayed when there are no items in the Allow List.",
+      "message": "I siti web consentiti compaiono qui."
+   },
+   "allowListIntroBody": {
+      "description": "Body copy for the allow-list intro/onboarding modal",
+      "message": "Aggiungete i siti web di cui vi fidate all'elenco dei siti consentiti per disabilitare le protezioni. In questo modo si evitano i falsi allarmi e si può navigare comodamente sui siti che si conoscono e si amano."
+   },
+   "allowListIntroGotIt": {
+      "description": "Primary button that dismisses the allow-list intro modal",
+      "message": "Capito"
+   },
+   "allowListIntroSubtitle": {
+      "description": "Subtitle for the allow-list intro/onboarding modal",
+      "message": "Controllate i siti di cui vi fidate e personalizzate le vostre protezioni."
+   },
+   "allowListIntroTitle": {
+      "description": "Title for the allow-list intro/onboarding modal",
+      "message": "Gestire l'elenco dei permessi"
+   },
+   "allowListLabel": {
+      "description": "Label to allow for individual ads and trackers on the current site",
+      "message": "Consentire su questo sito"
+   },
+   "allowListNavItem": {
+      "description": "'Allow List' Navigation Item",
+      "message": "Elenco dei permessi"
+   },
+   "allowListNoResults": {
+      "description": "Text displayed when the user searches for an allowed URL and there are no results",
+      "message": "Nessun risultato di ricerca."
+   },
+   "allowListSearchPlaceholder": {
+      "description": "Placeholder text to do a search for an Allow List item",
+      "message": "Cerca tra i siti consentiti"
+   },
+   "allowListSearchTooltip": {
+      "description": "Search text",
+      "message": "Cerca"
+   },
+   "allowListSummary": {
+      "description": "Summary details on how to operate the Allow List page",
+      "message": "Per personalizzare la protezione di un sito web, inserire il relativo URL o indirizzo IP e quindi selezionare la o le protezioni che intendi disabilitare."
+   },
+   "allowListSummarySafari": {
+      "description": "Summary details on how to operate the Allow List page",
+      "message": "Per personalizzare la protezione di un sito web, inserire il relativo URL o indirizzo IP e quindi selezionare la o le protezioni che intendi disabilitare."
+   },
+   "allowListTableHeader": {
+      "description": "Header for Allow List table",
+      "message": "Siti web consentiti"
+   },
+   "allowListWindowTitle": {
+      "description": "Add website to Allow List modal title.",
+      "message": "Aggiungi un sito web alla lista esclusioni"
+   },
+   "allowSite": {
+      "description": "Text to turn on/off protection for site",
+      "message": "Consenti sito"
+   },
+   "allowWebsiteAddedSnackbar": {
+      "description": "Snackbar text when a website is allowed.",
+      "message": "Il sito web è stato aggiunto alla lista esclusioni"
+   },
+   "allowWebsiteDeletedSnackbar": {
+      "description": "Snackbar text when an allowed website is deleted.",
+      "message": "Il sito web è stato eliminato"
+   },
+   "allowWebsiteOption": {
+      "description": "Allow url on website option.",
+      "message": "Consenti per questa pagina web"
+   },
+   "allowedPermissionBtnTxt": {
+      "description": "Text shown when permission is already granted",
+      "message": "Consentito"
+   },
+   "appDesc": {
+      "description": "The description of the application, displayed in the web store.",
+      "message": "Blocca malware, truffe, phishing e tracker per una navigazione più sicura, pulita e senza pubblicità."
+   },
+   "askAccess": {
+      "description": "Button text to set access to ask every time for a specific permission",
+      "message": "Chiedere"
+   },
+   "askEveryTimeAccess": {
+      "description": "Button text to set access to ask every time for a specific permission",
+      "message": "Chiedere ogni volta"
+   },
+   "backBtnText": {
+      "description": "Back button text",
+      "message": "Indietro"
+   },
+   "backText": {
+      "description": "Back text.",
+      "message": "Indietro"
+   },
+   "bgActivatedText": {
+      "description": "Activated text.",
+      "message": "Attivata"
+   },
+   "bgInactive": {
+      "description": "Description text when bg is inactive.",
+      "message": "La protezione Browser Guard è attualmente disinserita per tutti i siti web. Attivala ora per bloccare web tracker, pubblicità e siti web dannosi."
+   },
+   "bgNewVersionAvailabe": {
+      "description": "Description text when bg is active and there is a new version available..",
+      "message": "Nuova versione disponibile. Aggiorna ora per eseguire la versione più recente di Browser Guard."
+   },
+   "bgProtectsFrom": {
+      "description": "Subheading explaining Browser Guard's protection.",
+      "message": "Ora, $name$ protegge da:",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "bgUpdated": {
+      "description": "Browser guard is active and up to date.",
+      "message": "Aggiornato"
+   },
+   "bgUpdatedStatus": {
+      "description": "Description text when bg is active and up to date.",
+      "message": "La versione più recente di Browser Guard è in esecuzione."
+   },
+   "blockAccess": {
+      "description": "Button text to block access for a specific permission",
+      "message": "Blocca accesso"
+   },
+   "blockAction": {
+      "description": "Button text to block access for a specific permission",
+      "message": "Blocco"
+   },
+   "blockContentLabel": {
+      "description": "Label to block individual ads and trackers on the current site",
+      "message": "Blocco su questo sito"
+   },
+   "blockContinueButton": {
+      "description": "Button text to continue to site",
+      "message": "VAI AL SITO"
+   },
+   "blockExplainAdware": {
+      "description": "Text explaining what Adware is",
+      "message": "Gli adware sono software dannosi che fanno comparire pubblicità indesiderate sul tuo computer."
+   },
+   "blockExplainCompromised": {
+      "description": "Text explaining what a compromised site is",
+      "message": "I siti web (o server) compromessi sono siti altrimenti legittimi che vengono utilizzati dagli hacker senza che il titolare ne sia consapevole. I siti web compromessi vengono spesso utilizzati per l'infiltrazione e la diffusione di malware."
+   },
+   "blockExplainDefault": {
+      "description": "Text explaining a default block that has no specifics as above",
+      "message": "Le attività sospette comprendono una varietà di comportamenti di norma riconducibili a technical support scam, cryptojacking, browser hijacking e anche altri tipi di comportamenti dannosi, rischiosi e potenzialmente indesiderati."
+   },
+   "blockExplainExploit": {
+      "description": "Text explaining what an exploit is",
+      "message": "Gli Exploit rappresentano un tipo di malware in grado di sfruttare bug e vulnerabilità di un sistema per consentire al proprio creatore di prenderne il controllo."
+   },
+   "blockExplainFradulent": {
+      "description": "Text explaining what a fradulent site is",
+      "message": "I siti web fraudolenti si presentano sotto una determinata veste, come quella di un sito di assistenza tecnica, di appuntamenti o di acquisti di prodotti illegali o che promette grandi affari, mentre in realtà sono truffe finalizzate a rubare le informazioni o i dati delle carte di credito."
+   },
+   "blockExplainHijack": {
+      "description": "Text explaining what a hijacker is",
+      "message": "Gli hijacker sono un tipo di malware che modifica le impostazioni dei browser web senza l'autorizzazione dell'utente, in genere per infiltrare annunci pubblicitari indesiderati o reindirizzare a siti web pericolosi."
+   },
+   "blockExplainMalvertising": {
+      "description": "Text explaining what malvertising is",
+      "message": "Il Malvertising (anche detto \"malicious advertising\") consiste nell'utilizzo di pubblicità online per diffondere malware con poca o nessuna necessità di interazione da parte dell'utente."
+   },
+   "blockExplainMalware": {
+      "description": "Text explaining what malvertising is",
+      "message": "Il Malware (o \"malicious software\") è un termine ombrello riferibile a qualsiasi programma o codice dannoso che possa compromettere i sistemi."
+   },
+   "blockExplainPharma": {
+      "description": "Text explaining what illegal pharma sites are",
+      "message": "\"Pharma\" è l'abbreviazione di \"Pharmacy\" (farmacia) Nell'ambito della sicurezza informatica, questa espressione si riferisce allo spam o ai siti web che trafficano in farmaci falsi o illegali. Questi siti web possono vendere anche farmaci legali, ma violando le normative locali."
+   },
+   "blockExplainPhishing": {
+      "description": "Text explaining what phishing is",
+      "message": "Il phishing è un tipo di truffa attraverso cui i criminali tentano di ottenere informazioni sugli utenti presentandosi sotto forma di siti web legittimi, per poi chiedere loro password, dati delle carte di credito o altre informazioni sensibili."
+   },
+   "blockExplainRansomware": {
+      "description": "Text explaining what ransomware is",
+      "message": "I ransomware sono malware che impediscono all'utente di accedere al proprio dispositivo e/o criptano i suoi file, obbligandolo a pagare un riscatto per riottenerli."
+   },
+   "blockExplainReputation": {
+      "description": "Text explaining a reputation block",
+      "message": "Questo sito web è sospettato di essere compromesso o di ospitare una potenziale minaccia per la privacy o per la sicurezza."
+   },
+   "blockExplainRiskware": {
+      "description": "Text explaining riskware",
+      "message": "Il termine Riskware (o \"risky software\") indica programmi software legittimi che contengono lacune o vulnerabilità che possono essere sfruttate dagli hacker con finalità dannose."
+   },
+   "blockExplainScam": {
+      "description": "Text explaining Scam activity",
+      "message": "Le attività sospette comprendono una varietà di comportamenti di norma riconducibili a technical support scam, cryptojacking, browser hijacking e anche altri tipi di comportamenti dannosi, rischiosi e potenzialmente indesiderati."
+   },
+   "blockExplainSpam": {
+      "description": "Text explaining what Spam is",
+      "message": "Lo spam è una comunicazione indesiderata, spesso sotto forma di e-mail o telefonata, che viene inviata in massa. Lo spam fa perdere tempo e risorse, motivo per cui molti strumenti di comunicazione hanno integrato delle misure per minimizzarlo."
+   },
+   "blockExplainSpyware": {
+      "description": "Text explaining what Spyware is",
+      "message": "Gli spyware sono malware che raccolgono informazioni su un dispositivo e le inviano a una terza parte/organizzazione che altrimenti non vi avrebbe accesso. In passato, questo termine è stato utilizzato anche per descrivere adware e cookie."
+   },
+   "blockExplainTrojan": {
+      "description": "Text explaining what a Trojan is",
+      "message": "I trojan sono programmi che dichiarano di svolgere una funzione, ma in realtà fanno tutt'altro, generalmente per fini dannosi. I trojan possono assumere la forma di allegati, download e falsi video/programmi che, una volta attivati sul sistema, possono eseguire una serie di attività tra cui il furto di dati sensibili o l'assunzione del controllo del dispositivo."
+   },
+   "blockExplainWorm": {
+      "description": "Text explaining what a Worm is",
+      "message": "I worm sono un tipo di malware simile ai virus, che però non ha bisogno di attaccarsi a un altro programma per diffondersi."
+   },
+   "blockGoBackButton": {
+      "description": "Button text to go back",
+      "message": "TORNA INDIETRO"
+   },
+   "blockItem": {
+      "description": "Top-level context menu item for blocking an item in the current page",
+      "message": "Rimuovi questo annuncio"
+   },
+   "blockListEmpty": {
+      "description": "Text displayed when there are no items in the block list.",
+      "message": "Nessun elemento aggiuntivo"
+   },
+   "blockNavItem": {
+      "description": "'Blocked items' Navigation Item",
+      "message": "Elementi bloccati"
+   },
+   "blockNotificationMalwareLabel": {
+      "description": "Label for the malware URL",
+      "message": "URL del malware:"
+   },
+   "blockNotificationMessage": {
+      "description": "Message of the notification that appears when malware is blocked",
+      "message": "L'attività potenzialmente dannosa è stata bloccata. Tuttavia, è possibile continuare a visualizzare questo sito in tutta sicurezza utilizzando $name$.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "blockNotificationSiteLabel": {
+      "description": "Label for the URL",
+      "message": "URL del sito:"
+   },
+   "blockNotificationTitle": {
+      "description": "Title of the notification that appears when malware is blocked",
+      "message": "Malware bloccato"
+   },
+   "blockOn1Site": {
+      "description": "Tooltip data for when user is looking at blocking an ad/malware for one site",
+      "message": "Bloccato su questo sito"
+   },
+   "blockOnAll": {
+      "description": "Tooltip data for when user is looking at blocking an ad/malware for all sites",
+      "message": "Blocco su tutti i siti"
+   },
+   "blockPageGenericThreat": {
+      "description": "Generic threat type on the block page",
+      "message": "una minaccia"
+   },
+   "blockPageText": {
+      "description": "Text right before noting what page was blocked",
+      "message": "Pagina bloccata:"
+   },
+   "blockPageTitle": {
+      "description": "Title shown on the block page",
+      "message": "Pagina bloccata"
+   },
+   "blockTypesSummaryLine1": {
+      "description": "Line one of the summary of types of blocks on the current website page",
+      "message": "Ad network, tracker, malware,"
+   },
+   "blockTypesSummaryLine1_Mv3": {
+      "description": "Line one of the summary of types of blocks on the current website page in mv3 mode",
+      "message": "Ad network, tracker e"
+   },
+   "blockTypesSummaryLine2": {
+      "description": "Line two of the summary of types of blocks on the current website page",
+      "message": "scam bloccati su questa pagina"
+   },
+   "blockTypesSummaryLine2_Mv3": {
+      "description": "Line two of the summary of types of blocks on the current website page in mv3 mode",
+      "message": "malware"
+   },
+   "blockWarning": {
+      "description": "Warning for users not to click past block page",
+      "message": "Ti suggeriamo caldamente di non proseguire."
+   },
+   "blockWarningLine1": {
+      "description": "The tooltip warning text's first line",
+      "message": "Se visiti questo sito puoi mettere a rischio la tua sicurezza online."
+   },
+   "blockWarningLine2": {
+      "description": "The tooltip warning text's second line",
+      "message": "Se ritieni che continuare sia sicuro, seleziona una delle opzioni sotto riportate. In caso contrario, fare clic su \"Torna indietro\" per tornare alla pagina precedente."
+   },
+   "blockWarningLine3": {
+      "description": "The tooltip warning text's last line, right before the Malwarebytes support link",
+      "message": "Per ulteriori informazioni, visitare"
+   },
+   "blockWebsiteOption": {
+      "description": "Block url on website option.",
+      "message": "Blocca per questa pagina web"
+   },
+   "blockedByTitle": {
+      "description": "",
+      "message": "Sito web bloccato a causa di $mb$",
+      "placeholders": {
+         "mb": {
+            "content": "$1",
+            "example": "Browser Guard"
+         }
+      }
+   },
+   "blockedFor": {
+      "description": "text inbetween host blocked and reason why",
+      "message": "bloccato per"
+   },
+   "blockedItemsCountLabel": {
+      "description": "Label for the count of blocked items",
+      "message": "Articoli bloccati"
+   },
+   "blockedItemsOn": {
+      "description": "Blocked items header with hostname parameter",
+      "message": "Reti pubblicitarie, tracker e malware bloccati su \u003Cspan class=\"font-semibold\">$hostname$\u003C/span>",
+      "placeholders": {
+         "hostname": {
+            "content": "$1",
+            "example": "google.com"
+         }
+      }
+   },
+   "blockedItemsSummary1": {
+      "description": "First part of the summary of blocked items.",
+      "message": "È possibile bloccare manualmente gli annunci e gli elementi indesiderati che Browser Guard non cattura da solo. È un modo semplice per personalizzare la protezione e mantenere la navigazione più pulita."
+   },
+   "blockedItemsSummary2": {
+      "description": "Second part of the summary of blocked items.",
+      "message": "su come rimuovere annunci pubblicitari indesiderati durante la navigazione."
+   },
+   "blockedItemsSummaryLearnMore": {
+      "description": "Learn more text of the blocked items summary",
+      "message": "Scopri di più"
+   },
+   "blockedOn1Site": {
+      "description": "Tooltip data for when user is looking at a blocked ad/malware for one site",
+      "message": "Bloccato su questo sito"
+   },
+   "breachWarningDesc": {
+      "description": "Description for the data breach warning",
+      "message": "In occasione di $date$, è stato rilevato che una violazione dei dati di $title$ potrebbe aver esposto informazioni sensibili. Utilizzate Malwarebytes Digital Footprint Scan per verificare se siete stati colpiti da questa o altre violazioni di dati.",
+      "placeholders": {
+         "date": {
+            "content": "$1",
+            "example": "July 4, 2004"
+         },
+         "title": {
+            " example": "LinkedIn",
+            "content": "$2"
+         }
+      }
+   },
+   "breachWarningScanBtn": {
+      "description": "Button text to scan for data breaches",
+      "message": "Esegui la scansione ora"
+   },
+   "breachWarningTitle": {
+      "description": "Title for the data breach warning",
+      "message": "$title$ avvertenza di violazione dei dati",
+      "placeholders": {
+         "title": {
+            "content": "$1",
+            "example": "LinkedIn"
+         }
+      }
+   },
+   "browseSafelyHeading": {
+      "description": "Heading encouraging the user to browse safely and privately.",
+      "message": "Naviga in sicurezza e in privato!"
+   },
+   "buttonDisableShellWarning": {
+      "description": "Button text to disable the shell warning for the current site",
+      "message": "Disabilita questo avviso per questo sito"
+   },
+   "buttonOptIn": {
+      "description": "Button text to opt in",
+      "message": "Permetti"
+   },
+   "buttonOptOut": {
+      "description": "Button text to opt out",
+      "message": "Rifiuta"
+   },
+   "cancelText": {
+      "description": "Cancel text",
+      "message": "Annulla"
+   },
+   "cantEvaluate": {
+      "description": "Note for when we cannot block ads/trackers/malware on page",
+      "message": "Siamo spiacenti, non è possibile valutare questo tipo di pagina"
+   },
+   "clearBrowserGuardStorageBtn": {
+      "description": "Button text to clear Browser Guard storage",
+      "message": "Spazio libero"
+   },
+   "clearBrowserGuardStorageDesc": {
+      "description": "Description for the clear Browser Guard storage button",
+      "message": "Ripristina tutte le impostazioni e i dati ai valori predefiniti di fabbrica. In questo modo verranno cancellati l'elenco dei siti consentiti, la cronologia dei rilevamenti e le preferenze."
+   },
+   "clearBrowserGuardStorageHeader": {
+      "description": "Button text to clear Browser Guard storage",
+      "message": "Svuota Browser Guard "
+   },
+   "clipboardContentProtectionDesc": {
+      "description": "Description for the clipboard content protection feature",
+      "message": "Ecco cos'altro $name$ può fare per te.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "clipboardContentProtectionTitle": {
+      "description": "Title for the clipboard content protection feature",
+      "message": "Altri modi per stare al sicuro"
+   },
+   "clipboardReadPermDesc": {
+      "description": "Description for the clipboard read permission required notification",
+      "message": "Monitora il contenuto degli appunti per rilevare dati sospetti che possono indicare una potenziale minaccia alla sicurezza."
+   },
+   "clipboardReadPermTitle": {
+      "description": "Title for the clipboard read permission required notification",
+      "message": "Autorizzazione di lettura degli appunti"
+   },
+   "clipboardReadPermissionDesc": {
+      "description": "Description for the read clipboard permission setting",
+      "message": "Permettete a $name$ di scansionare gli appunti in tempo reale alla ricerca di collegamenti o comandi pericolosi. I vostri dati sono sempre privati e potete modificarli in qualsiasi momento nelle Impostazioni.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "clipboardReadPermissionTitle": {
+      "description": "Title for the read clipboard permission setting",
+      "message": "Autorizzazione alla lettura degli appunti"
+   },
+   "clipboardWritePermDesc": {
+      "description": "Description for the clipboard read permission required notification",
+      "message": "Aggiunge un avviso di sicurezza al contenuto copiato se viene rilevato materiale sospetto negli appunti."
+   },
+   "clipboardWritePermTitle": {
+      "description": "Title for the clipboard write permission required notification",
+      "message": "Autorizzazione di scrittura degli appunti"
+   },
+   "contentControlBlockAlertText": {
+      "description": "Alert text displayed when a website is blocked by the content control list.",
+      "message": "Le tue impostazioni impediscono l'accesso a questa pagina. Per ulteriori informazioni sul controllo contenuti, visitare"
+   },
+   "contentControlBlockNavItem": {
+      "description": "Navigation item for blocked content in content control section",
+      "message": "Contenuto bloccato"
+   },
+   "contentControlCompletionButton": {
+      "description": "Button text for content control additions",
+      "message": "Aggiungi alla lista"
+   },
+   "contentControlEmpty": {
+      "description": "Text displayed when there are no items in the content control list.",
+      "message": "Nessun elemento aggiuntivo"
+   },
+   "contentControlErrorAddFailed": {
+      "description": "Error shown when adding to content control list fails unexpectedly",
+      "message": "Impossibile aggiungere il sito web all'elenco di controllo dei contenuti"
+   },
+   "contentControlErrorInvalidDomain": {
+      "description": "Error shown on submit when the content control input is not a valid domain or IP",
+      "message": "Inserisci un dominio o un indirizzo IP valido (non sono ammessi percorsi)"
+   },
+   "contentControlErrorSubPath": {
+      "description": "Error shown when user enters a URL with a path in content control input",
+      "message": "Inserisci solo un dominio (ad es. website.com), non un URL con un percorso (ad es. website.com/page)"
+   },
+   "contentControlGetPremium": {
+      "description": "text when user is not a MBAM user.",
+      "message": "Ottieni Premium"
+   },
+   "contentControlInputLabel": {
+      "description": "Content Control URL/IP Addresses",
+      "message": "Aggiungi URL o indirizzo IP"
+   },
+   "contentControlLearnMore": {
+      "description": "Lear more text in content control modal",
+      "message": "Scopri di più"
+   },
+   "contentControlMessage": {
+      "description": "Content Control modal message.",
+      "message": "Abbonati subito per sbloccare Controllo contenuti e ricevere protezione 24/7 da malware, virus, ransomware e altre minacce informatiche."
+   },
+   "contentControlModalTitle": {
+      "description": "Content Control modal title.",
+      "message": "Funzionalità disponibile solo con Malwarebytes Premium."
+   },
+   "contentControlNavItem": {
+      "description": "'Content Control' Navigation Item",
+      "message": "Controllo contenuti"
+   },
+   "contentControlNoResults": {
+      "description": "Text displayed when the user searches for a content control URL and there are no results",
+      "message": "Nessun risultato di ricerca."
+   },
+   "contentControlNonPremiumMessage1": {
+      "description": "Message for the non premium content on the content control page",
+      "message": "Il Controllo contenuti consente di bloccare l'accesso a qualsiasi sito web, per qualsiasi motivo. È sufficiente aggiungere un URL, un dominio o un indirizzo IP all'elenco di Controllo contenuti e $name$ ne impedirà il caricamento.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "contentControlNonPremiumTitle": {
+      "description": "Title for the non premium content on the content control page",
+      "message": "Personalizza la tua esperienza di navigazione"
+   },
+   "contentControlSearchPlaceholder": {
+      "description": "Placeholder text for content control search",
+      "message": "Cerca controlli contenuti"
+   },
+   "contentControlSearchTooltip": {
+      "description": "Search text",
+      "message": "Cerca"
+   },
+   "contentControlSummary": {
+      "description": "Summary details on how to operate the content control page",
+      "message": "Per bloccare l'accesso al sito web o alla pagina, inserire il relativo URL o indirizzo IP."
+   },
+   "contentControlTableHeader": {
+      "description": "Column Header for Content Control URL/IP Addresses",
+      "message": "URL / indirizzo IP bloccato"
+   },
+   "contentControlUpgrade": {
+      "description": "Upgrade text when user has mbam free version.",
+      "message": "Esegui l'aggiornamento"
+   },
+   "contentControlWebsiteAddedSnackbar": {
+      "description": "Snackbar text when a website is added to the content control list.",
+      "message": "Il sito web è stato aggiunto alla lista di controlli contenuti"
+   },
+   "contentControlWebsiteBlockExplanation": {
+      "description": "Explanation text displayed when a website is blocked by the content control list.",
+      "message": "$name$ ha bloccato questa pagina perché è stata aggiunta all'elenco di controllo dei contenuti.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "contentControlWebsiteBlockHeader": {
+      "description": "Header for the block website toggle",
+      "message": "Sito web bloccato a causa dei controlli contenuti"
+   },
+   "contentControlWebsiteDeletedSnackbar": {
+      "description": "Snackbar text when a website is deleted from the content control list.",
+      "message": "Il sito web è stato eliminato"
+   },
+   "contentControlWindowTitle": {
+      "description": "Add website to content control modal title.",
+      "message": "Aggiungi un sito web alla tua lista di controlli contenuti"
+   },
+   "copyLinkBtn": {
+      "description": "Copy link button text.",
+      "message": "Copia link"
+   },
+   "copyLinkMenuItem": {
+      "description": "Menu item for copying the link",
+      "message": "Copiare il link"
+   },
+   "currentWebsiteNavItem": {
+      "description": "'Current Website' Navigation Item",
+      "message": "Sito web corrente"
+   },
+   "currentWebsiteProtectionHeader": {
+      "description": "Header for toggles on the various protections for the page",
+      "message": "Protezione di questo sito web:"
+   },
+   "currentWebsiteSystemPage": {
+      "description": "Note if user is on a system page",
+      "message": "Le pagine di sistema sono indirizzi che appartengono al browser o ne rappresentano un'estensione; noi non blocchiamo il contenuto di queste pagine."
+   },
+   "currentWebsiteWarning": {
+      "description": "Warning to users to not allowlist this site",
+      "message": "Se inserisci nella lista bianca questo sito metti a rischio il tuo sistema e la tua sicurezza online."
+   },
+   "debugErrorMessage": {
+      "description": "Message when the download fails.",
+      "message": "Ops, qualcosa è andato storto. Riprova o contatta "
+   },
+   "debugLogDescription": {
+      "description": "Description for the debug log section in support and diagnostics view",
+      "message": "Download registro di debug da inviare al servizio di assistenza. Contiene dettagli tecnici utili per diagnosticare e risolvere i problemi."
+   },
+   "debugLogTitle": {
+      "description": "Title for the debug log section in support and diagnostics view",
+      "message": "Registro di debug"
+   },
+   "defaultBlockExplanation": {
+      "description": "Default text explaining why a block occurred",
+      "message": "$mb$ ha bloccato questo sito web poiché può nascondere un'attività $type$.",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes Browser Guard"
+         },
+         "type": {
+            "content": "$1",
+            "example": "malware"
+         }
+      }
+   },
+   "deleteAllBlockedItemsConfirmation": {
+      "description": "Delete all blocked items confirmation question.",
+      "message": "Sei sicuro di voler eliminare tutti gli elementi?"
+   },
+   "deleteAllBlockedItemsOption": {
+      "description": "Delete all blocked items dropdown item.",
+      "message": "Elimina tutti gli elementi"
+   },
+   "deleteAllBlockedItemsTitle": {
+      "description": "Delete all blocked items dropdown title.",
+      "message": "Elimina tutti gli elementi"
+   },
+   "deleteAllConfirmation": {
+      "description": "Delete all allowed websites confirmation",
+      "message": "Sei sicuro di voler eliminare tutti i siti web?"
+   },
+   "deleteAllDetectionHistoryDescription": {
+      "description": "Description for the delete all detections confirmation modal",
+      "message": "Sei sicuro di voler eliminare tutta la cronologia dei rilevamenti? Questa azione non può essere annullata."
+   },
+   "deleteAllDetectionHistoryTitle": {
+      "description": "Title for the delete all detections confirmation modal",
+      "message": "Elimina tutta la cronologia dei rilevamenti"
+   },
+   "deleteAllModalTitle": {
+      "description": "Title of delete all alloed websites modal.",
+      "message": "Elimina tutti i siti web"
+   },
+   "deleteAllWebsitesOption": {
+      "description": "Option text to delete all websites.",
+      "message": "Elimina tutto"
+   },
+   "deleteBlockedItemModalTitle": {
+      "description": "Delete item modal title.",
+      "message": "Elimina voce"
+   },
+   "deleteBlockedItemOption": {
+      "description": "Delete item dropdown option.",
+      "message": "Elimina voce"
+   },
+   "deleteDetectionDescription": {
+      "description": "Description for the delete single detection confirmation modal",
+      "message": "Sei sicuro di voler eliminare questo rilevamento per $site$? Questa azione non può essere annullata.",
+      "placeholders": {
+         "site": {
+            "content": "$1",
+            "example": "example.com"
+         }
+      }
+   },
+   "deleteDetectionDescriptionGeneric": {
+      "description": "Description for the delete single detection confirmation modal when no site is specified",
+      "message": "Sei sicuro di voler eliminare questo rilevamento? Questa azione non può essere annullata."
+   },
+   "deleteDetectionTitle": {
+      "description": "Title for the delete single detection confirmation modal",
+      "message": "Elimina rilevamento"
+   },
+   "deleteItemConfirmation": {
+      "description": "Delete blocked item confirmation question.",
+      "message": "Sei sicuro di voler cancellare questa voce?"
+   },
+   "deleteWebsite": {
+      "description": "Delete website dropdown option and modal title.",
+      "message": "Elimina"
+   },
+   "deleteWebsiteModalConfirmation": {
+      "description": "Delete website modal confirmation question.",
+      "message": "Sei sicuro di voler eliminare questo sito web?"
+   },
+   "deleting": {
+      "description": "Loading label while deleting a single detection",
+      "message": "Eliminazione..."
+   },
+   "deletingAll": {
+      "description": "Loading label while deleting all detections",
+      "message": "Elimina tutto..."
+   },
+   "detectionHistoryCancelRemove": {
+      "description": "Cancel text.",
+      "message": "Annulla"
+   },
+   "detectionHistoryColumnDate": {
+      "description": "Table Column title",
+      "message": "Data"
+   },
+   "detectionHistoryColumnSite": {
+      "description": "Table Column title",
+      "message": "URL sito"
+   },
+   "detectionHistoryColumnType": {
+      "description": "Table Column title",
+      "message": "Tipo"
+   },
+   "detectionHistoryDeleteAllTitle": {
+      "description": "Delete all items modal title.",
+      "message": "Eliminare tutti gli elementi?"
+   },
+   "detectionHistoryDeleteDeleteAllConfirmation": {
+      "description": "Delete all detection history websites confirmation",
+      "message": "Eliminare tutti gli elementi?"
+   },
+   "detectionHistoryDeleteItemConfirmation": {
+      "description": "Delete history item modal confirmation text.",
+      "message": "Sei sicuro di voler eliminare questo elemento?"
+   },
+   "detectionHistoryDeleteItemModalTitle": {
+      "description": "Delete history item modal title.",
+      "message": "Eliminare elemento?"
+   },
+   "detectionHistoryDeleteItemSnackbar": {
+      "description": "Snackbar text when a website is deleted from the detection history.",
+      "message": "L’elemento è stato eliminato"
+   },
+   "detectionHistoryGetPremium": {
+      "description": "text when user is not a MBAM user.",
+      "message": "Ottieni Premium"
+   },
+   "detectionHistoryInfoTooltip": {
+      "description": "Detection history info tooltip text.",
+      "message": "Poiché annunci e tracker si trovano su gran parte dei siti web, per la tua privacy, Browser Guard tiene traccia solo di quelli bloccati"
+   },
+   "detectionHistoryLearnMore": {
+      "description": "Learn more text in detection history page.",
+      "message": "Scopri di più"
+   },
+   "detectionHistoryListEmpty": {
+      "description": "Footer text if there are no history items",
+      "message": "Nessun elemento aggiunto."
+   },
+   "detectionHistoryNavItem": {
+      "description": "Detection history tab title.",
+      "message": "Cronologia rilevamenti"
+   },
+   "detectionHistoryNoResults": {
+      "description": " Footer text when no items found in search",
+      "message": "Nessun risultato di ricerca."
+   },
+   "detectionHistoryNonPremiumFirstCard": {
+      "description": "First card description for no premium users.",
+      "message": "La cronologia rilevamenti ti consente di visualizzare e gestire la tua attività Browser Guard. Ordina per categoria, sito e data e scegli quale cronologia conservare o eliminare."
+   },
+   "detectionHistoryNonPremiumSecondCard": {
+      "description": "Second card description for no premium users.",
+      "message": "Funzione disponibile solo con Malwarebytes Premium. Abbonati oggi per sbloccare Cronologia rilevamenti e avere una protezione 24/7 da malware, virus, ransomware e altre minacce informatiche."
+   },
+   "detectionHistoryNonPremiumTitle": {
+      "description": "History page title for no premium users.",
+      "message": "Mantieni schede sulla tua cronologia rilevamenti."
+   },
+   "detectionHistoryRemoveAll": {
+      "description": "Snackbar text when all the detection history is deleted.",
+      "message": "Tutti gli elementi sono stati eliminati"
+   },
+   "detectionHistoryRemoveAllBtn": {
+      "description": "Delete all option in detection history table.",
+      "message": "Elimina tutto"
+   },
+   "detectionHistorySummary": {
+      "description": "Detection History page summary.",
+      "message": "Seleziona categoria di rilevamento per visualizzare e gestire la cronologia. Cronologia annunci/tracker non inclusa"
+   },
+   "detectionHistoryUpgrade": {
+      "description": "Upgrade text when user has mbam free version.",
+      "message": "Esegui l’aggiornamento"
+   },
+   "detectionHistoryYesRemove": {
+      "description": "Delete confirmation text.",
+      "message": "Sì, elimina"
+   },
+   "devSecFreeDescription": {
+      "description": "Description text when MBAM is in free version.",
+      "message": "Le minacce informatiche sono subdole. Gioca in anticipo e proteggi il tuo dispositivo con la nostra Real-Time Protection."
+   },
+   "devSecFreeInstallBtnText": {
+      "description": "Button text when MBAM is not installed yet.",
+      "message": "Installazione gratuita"
+   },
+   "devSecInstallDescription": {
+      "description": "Description text when MBAM is not installed yet.",
+      "message": "Blocca malware e virus che possono accedere al tuo sistema attraverso e-mail, software compromessi, file sharing e altre provenienze."
+   },
+   "devSecInstalledStatus": {
+      "description": "Status text when MBAM is installed.",
+      "message": "Installata"
+   },
+   "devSecNotInstalledStatus": {
+      "description": "Status text when mbam is not installed yet.",
+      "message": "Non installata"
+   },
+   "devSecPremiumDescription": {
+      "description": "Description text when MBAM is premium.",
+      "message": "Bel lavoro! Malware, spyware e ransomware non hanno alcuna possibilità."
+   },
+   "devSecTitle": {
+      "description": "Device security card title.",
+      "message": "Sicurezza del dispositivo"
+   },
+   "devSecTooltipFree": {
+      "description": "Device security card info tooltip text when MBAM free version is installed.",
+      "message": "Installazione gratuita di Scanner Malwarebytes. Passa alla versione Premium per una protezione completa."
+   },
+   "devSecTooltipNotInstalled": {
+      "description": "Device security card info tooltip text when MBAM is not installed.",
+      "message": "Browser Guard non collegato all'antivirus Malwarebytes su questo dispositivo"
+   },
+   "devSecUpgradeBtnText": {
+      "description": "Button text when MBAM is in free version.",
+      "message": "Esegui l'aggiornamento"
+   },
+   "doNotBlockAgainCheckbox": {
+      "description": "Checkbox text on block page to turn off Browser Guard blocks for detection type",
+      "message": "Non bloccare più questo sito per $type$",
+      "placeholders": {
+         "type": {
+            "content": "$1",
+            "example": "malware"
+         }
+      }
+   },
+   "doneText": {
+      "description": "Done text.",
+      "message": "Fatto"
+   },
+   "downloadBlockText": {
+      "description": "Text right before noting the download blocked",
+      "message": "Download bloccato:"
+   },
+   "downloadBlockText2": {
+      "description": "Text right before noting the download blocked",
+      "message": "Download bloccato da:"
+   },
+   "downloadCompleteStatus": {
+      "description": "Successful download message.",
+      "message": "Download completato"
+   },
+   "downloadError": {
+      "description": "Error message.",
+      "message": "Errore"
+   },
+   "downloadErrorStatus": {
+      "description": "Status when a download fails in BG.",
+      "message": "Download non riuscito"
+   },
+   "downloadingStatus": {
+      "description": "Message during download process.",
+      "message": "Download log di debug in corso..."
+   },
+   "easylistadblock": {
+      "description": "Friendly name for the Easylist blocked item",
+      "message": "Easylist"
+   },
+   "easylistprivacyblock": {
+      "description": "Friendly name for the Easylist Cookie List blocked item",
+      "message": "Elenco dei cookie di Easylist"
+   },
+   "emptyBlockedItemsMessage": {
+      "description": "Message displayed when there are no blocked items to show",
+      "message": "Non è stato rilevato nulla in questa pagina."
+   },
+   "errorAllowListSnackbar": {
+      "description": "Snackbar text when an Allow List operation fails.",
+      "message": "Qualcosa è andato storto, riprova più tardi"
+   },
+   "errorBlockListListSnackbar": {
+      "description": "Snackbar text when an block list operation fails.",
+      "message": "Qualcosa è andato storto, riprova più tardi"
+   },
+   "errorContentControlSnackbar": {
+      "description": "Snackbar text when an Allow List operation fails.",
+      "message": "Qualcosa è andato storto, riprova più tardi"
+   },
+   "errorLoadingAccessControlData": {
+      "description": "Message shown when there is an error loading the access control data",
+      "message": "Errore durante il caricamento dei dati di controllo degli accessi"
+   },
+   "explainBlockHeader": {
+      "description": "Header for text explaining what a detection type is",
+      "message": "Cos'è $type$?",
+      "placeholders": {
+         "type": {
+            "content": "$1",
+            "example": "malware"
+         }
+      }
+   },
+   "exportBtnDefaultText": {
+      "description": "Text for the export button in it's default state",
+      "message": "Esporta"
+   },
+   "exportBtnLoadingText": {
+      "description": "Text for the export button in it's loading state",
+      "message": "Esportazione..."
+   },
+   "exportDescription": {
+      "description": "Description for the export section on the import/export page",
+      "message": "Esporta le impostazioni Browser Guard selezionate e importale con facilità in un altro browser o dispositivo."
+   },
+   "exportError": {
+      "description": "Error message displayed when exporting settings fails",
+      "message": "Esportazione non riuscita. Riprovare più tardi."
+   },
+   "exportHeader": {
+      "description": "Header for the export section on the import/export page",
+      "message": "Esporta impostazioni"
+   },
+   "exportNavItem": {
+      "description": "'Import & Export' Navigation Item",
+      "message": "Importazione ed esportazione"
+   },
+   "exportNonPremiumHeading": {
+      "description": "Heading for the non premium content on the export/import page",
+      "message": "Sincronizzare le impostazioni di protezione"
+   },
+   "exportNonPremiumMessage1": {
+      "description": "Message for the non premium content on the import/export page",
+      "message": "Eseguite facilmente il backup o il trasferimento delle impostazioni con la funzione di importazione ed esportazione in un solo clic di Browser Guard."
+   },
+   "exportNonPremiumMessage2": {
+      "description": "Message for the non premium content on the export/import page",
+      "message": "Importare o esportare le impostazioni di Browser Guard per mantenere la protezione coerente tra i vari browser e dispositivi."
+   },
+   "exportNonPremiumTitle": {
+      "description": "Title for the non premium content on the export/import page",
+      "message": "Gestisci con facilità la tua esperienza di navigazione"
+   },
+   "exportOptionAllowList": {
+      "description": "Label for the Allow List checkbox option on the import/export page",
+      "message": "Elenco dei permessi"
+   },
+   "exportOptionBlockedItems": {
+      "description": "Label for the blocked items checkbox option on the import/export page",
+      "message": "Elementi bloccati"
+   },
+   "exportOptionContentControl": {
+      "description": "Label for the content control checkbox option on the import/export page",
+      "message": "Controllo contenuti"
+   },
+   "exportOptionSettings": {
+      "description": "Label for the settings checkbox option on the import/export page",
+      "message": "Impostazioni"
+   },
+   "extensionPage": {
+      "description": "Shown as a title when the user is on an extension page",
+      "message": "Pagina con estensioni"
+   },
+   "factoryResetText": {
+      "description": "Factory reset and clear Browser Guard storage area text.",
+      "message": "Cancella archivio $name$",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "featureAdTrackerRemoval": {
+      "description": "Feature name for ad and tracker removal",
+      "message": "Rimozione di annunci e tracker"
+   },
+   "featureAdTrackerRemovalTooltip": {
+      "description": "Tooltip for ad and tracker removal feature",
+      "message": "Blocca gli annunci fastidiosi e impedisce ai siti web di tracciare la vostra attività. Navigherete più velocemente e sarete più riservati."
+   },
+   "featureAdvancedPhishingProtection": {
+      "description": "Feature name for advanced phishing protection",
+      "message": "Protezione Advanced dal phishing"
+   },
+   "featureAdvancedPhishingProtectionTooltip": {
+      "description": "Tooltip for advanced phishing protection feature",
+      "message": "Identifica e blocca le truffe che cercano di indurre l'utente a fornire informazioni sensibili come password o dettagli di pagamento."
+   },
+   "featureChromeTopicAPIBlocking": {
+      "description": "Feature name for Chrome topic API blocking",
+      "message": "Blocco dell'API dell'argomento Chrome "
+   },
+   "featureChromeTopicAPIBlockingTooltip": {
+      "description": "Tooltip for Chrome topic API blocking feature",
+      "message": "Impedisce a Chrome di tracciare gli interessi dell'utente per proporre annunci mirati."
+   },
+   "featureClipboardProtection": {
+      "description": "Feature name for clipboard protection",
+      "message": "Protezione degli appunti (copia/incolla)"
+   },
+   "featureClipboardProtectionTooltip": {
+      "description": "Tooltip for clipboard protection feature",
+      "message": "Blocca i programmi che cercano di manomettere ciò che viene copiato o incollato nel dispositivo."
+   },
+   "featureCompromisedSiteProtection": {
+      "description": "Feature name for compromised site protection",
+      "message": "Protezione del sito compromessa"
+   },
+   "featureCompromisedSiteProtectionTooltip": {
+      "description": "Tooltip for compromised site protection feature",
+      "message": "Avverte l'utente se un sito web contiene codice nocivo che potrebbe danneggiarlo."
+   },
+   "featureCookieGDPRBannerBlocking": {
+      "description": "Feature name for cookie and GDPR banner blocking",
+      "message": "Blocco dei cookie e dei banner GDPR"
+   },
+   "featureCookieGDPRBannerBlockingTooltip": {
+      "description": "Tooltip for cookie and GDPR banner blocking feature",
+      "message": "Rifiuta automaticamente i pop-up di consenso per i cookie, in modo da non essere interrotti da banner che chiedono l'accettazione delle politiche di tracciamento o di privacy."
+   },
+   "featureCreditCardSkimmerProtection": {
+      "description": "Feature name for credit card skimmer protection",
+      "message": "Protezione contro gli skimmer delle carte di credito"
+   },
+   "featureCreditCardSkimmerProtectionTooltip": {
+      "description": "Tooltip for credit card skimmer protection feature",
+      "message": "Blocca il codice maligno che tenta di rubare i dati della carta di credito durante il checkout online."
+   },
+   "featureCustomerDefinedContentBlocking": {
+      "description": "Feature name for customer defined content blocking",
+      "message": "Blocco dei contenuti definiti dal cliente"
+   },
+   "featureCustomerDefinedContentBlockingTooltip": {
+      "description": "Tooltip for customer defined content blocking feature",
+      "message": "Create regole personalizzate per bloccare contenuti, annunci o script specifici su qualsiasi sito web."
+   },
+   "featureDataBreachNotifications": {
+      "description": "Feature name for data breach notifications",
+      "message": "Notifiche di violazione dei dati"
+   },
+   "featureDataBreachNotificationsTooltip": {
+      "description": "Tooltip for data breach notifications feature",
+      "message": "Vi avvisa quando visitate siti noti per le recenti violazioni dei dati, in modo che possiate intervenire."
+   },
+   "featureDetailedHistoricalReports": {
+      "description": "Feature name for detailed historical reports",
+      "message": "Rapporti storici dettagliati"
+   },
+   "featureDetailedHistoricalReportsTooltip": {
+      "description": "Tooltip for detailed historical reports feature",
+      "message": "Ottenere rapporti completi sulla cronologia di protezione della navigazione e sulle minacce bloccate."
+   },
+   "featureExportImportSettings": {
+      "description": "Feature name for export and import settings",
+      "message": "Impostazioni di esportazione e importazione"
+   },
+   "featureExportImportSettingsTooltip": {
+      "description": "Tooltip for export and import settings feature",
+      "message": "Salvate le impostazioni di protezione e trasferitele ad altri dispositivi o browser."
+   },
+   "featureGoogleAttributionBlocking": {
+      "description": "Feature name for Google attribution blocking",
+      "message": "Blocco dell'attribuzione di Google"
+   },
+   "featureGoogleAttributionBlockingTooltip": {
+      "description": "Tooltip for Google attribution blocking feature",
+      "message": "Blocca il tracciamento che collega i clic sugli annunci agli acquisti, proteggendo la vostra privacy."
+   },
+   "featureHeuristicProtections": {
+      "description": "Feature name for heuristic protections",
+      "message": "Protezioni euristiche"
+   },
+   "featureHeuristicProtectionsTooltip": {
+      "description": "Tooltip for heuristic protections feature",
+      "message": "Utilizza un rilevamento intelligente basato sul comportamento per individuare le minacce nuove o sconosciute prima che vi danneggino."
+   },
+   "featureInsecureLoginProtection": {
+      "description": "Feature name for insecure login protection",
+      "message": "Protezione del login insicura"
+   },
+   "featureInsecureLoginProtectionTooltip": {
+      "description": "Tooltip for insecure login protection feature",
+      "message": "Blocca i siti di phishing progettati per rubare i dati di accesso."
+   },
+   "featureMalwareRansomwareProtection": {
+      "description": "Feature name for malware and ransomware protection",
+      "message": "Protezione da malware e ransomware"
+   },
+   "featureMalwareRansomwareProtectionTooltip": {
+      "description": "Tooltip for malware and ransomware protection feature",
+      "message": "Blocca i software dannosi che possono infettare il dispositivo o bloccare i file per ottenere un riscatto."
+   },
+   "featurePingTrackerBlocking": {
+      "description": "Feature name for ping tracker blocking",
+      "message": "Blocco del tracker Ping"
+   },
+   "featurePingTrackerBlockingTooltip": {
+      "description": "Tooltip for ping tracker blocking feature",
+      "message": "Blocca i segnali di tracciamento nascosti inviati quando si fa clic sui link, mantenendo privata la vostra attività."
+   },
+   "featureRightClickRemoveAd": {
+      "description": "Feature name for right click to remove any ad",
+      "message": "Fare clic con il tasto destro del mouse per rimuovere qualsiasi annuncio"
+   },
+   "featureRightClickRemoveAdTooltip": {
+      "description": "Tooltip for right click to remove any ad feature",
+      "message": "Permette di rimuovere manualmente gli annunci che sfuggono al blocco automatico."
+   },
+   "featureRiskyPatternProtection": {
+      "description": "Feature name for risky pattern protection",
+      "message": "Protezione dei modelli a rischio"
+   },
+   "featureRiskyPatternProtectionTooltip": {
+      "description": "Tooltip for risky pattern protection feature",
+      "message": "Blocca i siti con modelli di URL noti come pericolosi."
+   },
+   "featureScamFraudProtection": {
+      "description": "Feature name for scam and fraud protection",
+      "message": "Protezione da truffe e frodi"
+   },
+   "featureScamFraudProtectionTooltip": {
+      "description": "Tooltip for scam and fraud protection feature",
+      "message": "Vi protegge dai siti che cercano di ingannarvi per farvi condividere informazioni o consegnare denaro attraverso schemi falsi o ingannevoli."
+   },
+   "featureSearchHijackingProtection": {
+      "description": "Feature name for search hijacking protection",
+      "message": "Protezione contro il dirottamento della ricerca"
+   },
+   "featureSearchHijackingProtectionTooltip": {
+      "description": "Tooltip for search hijacking protection feature",
+      "message": "Impedisce al codice maligno di reindirizzare le ricerche a siti di assistenza fasulli che cercano di rubare le informazioni dell'utente."
+   },
+   "featureSpamProtection": {
+      "description": "Feature name for spam protection",
+      "message": "Protezione antispam"
+   },
+   "featureSpamProtectionTooltip": {
+      "description": "Tooltip for spam protection feature",
+      "message": "Tiene lontani i siti che inviano spam o messaggi indesiderati."
+   },
+   "featureSpywareProtection": {
+      "description": "Feature name for spyware protection",
+      "message": "Protezione da spyware"
+   },
+   "featureSpywareProtectionTooltip": {
+      "description": "Tooltip for spyware protection feature",
+      "message": "Blocca i software che rubano segretamente le informazioni personali."
+   },
+   "featureSuspiciousDownloadProtection": {
+      "description": "Feature name for suspicious download protection",
+      "message": "Protezione dai download sospetti"
+   },
+   "featureSuspiciousDownloadProtectionTooltip": {
+      "description": "Tooltip for suspicious download protection feature",
+      "message": "Blocca i download segnalati come rischiosi o potenzialmente dannosi prima che raggiungano il dispositivo."
+   },
+   "featureTableFreePlan": {
+      "description": "Text shown under free plan column when user is on premium plan",
+      "message": "Piano gratuito"
+   },
+   "featureTableHeaderFeature": {
+      "description": "Header text for the Feature column in feature comparison table",
+      "message": "Caratteristica"
+   },
+   "featureTableHeaderFree": {
+      "description": "Header text for the Free column in feature comparison table",
+      "message": "Gratuito"
+   },
+   "featureTableHeaderPremium": {
+      "description": "Header text for the Premium column in feature comparison table",
+      "message": "Premium"
+   },
+   "featureTablePremiumPlan": {
+      "description": "Text shown under premium plan column when user is on premium plan",
+      "message": "Siete nel piano Premium "
+   },
+   "featureTableUpgradeToPremium": {
+      "description": "Button text for upgrading to premium plan",
+      "message": "Aggiornamento a Premium"
+   },
+   "featureTableYourCurrentPlan": {
+      "description": "Text shown under current plan column when user is on free plan",
+      "message": "Il vostro piano attuale"
+   },
+   "featureTrackerBlocking": {
+      "description": "Feature name for tracker blocking",
+      "message": "Blocco del tracker"
+   },
+   "featureTrackerBlockingTooltip": {
+      "description": "Tooltip for tracker blocking feature",
+      "message": "Blocca i siti che tracciano la vostra attività e raccolgono informazioni personali."
+   },
+   "featureTrojanProtection": {
+      "description": "Feature name for trojan protection",
+      "message": "Protezione dai trojan"
+   },
+   "featureTrojanProtectionTooltip": {
+      "description": "Tooltip for trojan protection feature",
+      "message": "Impedisce i download o i programmi falsi che danneggiano in superficie."
+   },
+   "featureWormProtection": {
+      "description": "Feature name for worm protection",
+      "message": "Protezione dai vermi"
+   },
+   "featureWormProtectionTooltip": {
+      "description": "Tooltip for worm protection feature",
+      "message": "Blocca le minacce informatiche che si diffondono rapidamente attraverso i dispositivi o la rete."
+   },
+   "fullProtectionUpsellDesc": {
+      "description": "Description for the full protection upsell in settings",
+      "message": "Lo stato di protezione e le caratteristiche attuali."
+   },
+   "fullProtectionUpsellNavItem": {
+      "description": "Upsell tab title.",
+      "message": "Protezione completa"
+   },
+   "globalAdProtectionDisabled": {
+      "description": "Message displayed when Global Ad Protection is disabled from settings",
+      "message": "Global Ad Protection è disattivato dalle impostazioni"
+   },
+   "globalMalwareProtectionDisabled": {
+      "description": "Message displayed when Global Malware Protection is disabled from settings",
+      "message": "Global Malware Protection è disattivato dalle impostazioni"
+   },
+   "globalScamProtectionDisabled": {
+      "description": "Message displayed when Global Scam Protection is disabled from settings",
+      "message": "Global Scam Protection è disattivato dalle impostazioni"
+   },
+   "googleattributionreport": {
+      "description": "Attribution for the feature powered by Google",
+      "message": "Rapporto di attribuzione di Google"
+   },
+   "grantText": {
+      "description": "Grant permission text",
+      "message": "Concessione del permesso"
+   },
+   "granularTrustText": {
+      "description": "Tooltip data for when user is looking at allowlisting an ad/malware for one site",
+      "message": "Consentito su questo sito"
+   },
+   "granularTrustedText": {
+      "description": "Tooltip data for when user is looking at an allowlisted ad/malware for one site",
+      "message": "Sito considerato attendibile"
+   },
+   "helpImproveMalwarebytesBrowserGuard": {
+      "description": "Text for the feedback link to help improve Malwarebytes Browser Guard",
+      "message": "Aiutaci a migliorare $mbbg$",
+      "placeholders": {
+         "mbbg": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "heuristicadblock": {
+      "description": "Friendly name for the Heuristic ad block blocked item",
+      "message": "Heuristic Ad Block"
+   },
+   "humanReadableSubTypeAlertLoop": {
+      "description": "When the sub detection type is alertLoop this is the text we show the user",
+      "message": "avviso di abuso API"
+   },
+   "humanReadableSubTypeCompromised": {
+      "description": "When the sub detection type is compromised this is the text we show the user",
+      "message": "compromesso"
+   },
+   "humanReadableSubTypeFullScreenLoop": {
+      "description": "When the sub detection type is fullScreenLoop this is the text we show the user",
+      "message": "abuso della funzionalità a schermo intero del dispositivo"
+   },
+   "humanReadableSubTypeHistoryLoop": {
+      "description": "When the sub detection type is historyLoop this is the text we show the user",
+      "message": "blocco del pulsante Indietro del browser"
+   },
+   "humanReadableSubTypeMalwarePattern": {
+      "description": "When the sub detection type is malware-pattern this is the text we show the user",
+      "message": "un pattern sospetto"
+   },
+   "humanReadableSubTypeNotificationLoop": {
+      "description": "When the sub detection type is notificationLoop this is the text we show the user",
+      "message": "richieste di notifica eccessive"
+   },
+   "humanReadableSubTypePhishingSuspiciousDescription": {
+      "description": "When the sub detection type is phishingSuspiciousDescription this is the text we show the user",
+      "message": "Phishing (descrizione sospetta)"
+   },
+   "humanReadableSubTypePhishingSuspiciousTitle": {
+      "description": "When the sub detection type is phishingSuspiciousTitle this is the text we show the user",
+      "message": "Phishing (titolo sospetto)"
+   },
+   "humanReadableSubTypePrintLoop": {
+      "description": "When the sub detection type is printLoop this is the text we show the user",
+      "message": "quantità sospetta di richieste di stampa"
+   },
+   "humanReadableSubTypeRiskyPattern": {
+      "description": "When the sub detection type is riskyPattern this is the text we show the user",
+      "message": "un modello rischioso"
+   },
+   "humanReadableSubTypeScamHeuristic": {
+      "description": "When the sub detection type is scam_heuristic this is the text we show the user",
+      "message": "sospetta truffa"
+   },
+   "humanReadableSubTypeSuspiciousContent": {
+      "description": "When the sub detection type is suspiciousContent this is the text we show the user",
+      "message": "contenuto sospetto"
+   },
+   "humanReadableSubTypeSuspiciousTLD": {
+      "description": "When the sub detection type is suspiciousTLD this is the text we show the user",
+      "message": "un dominio di primo livello (TLD) sospetto"
+   },
+   "humanReadableSubTypeWebbThreat": {
+      "description": "When the sub detection type is webb-threat this is the text we show the user",
+      "message": "un sito web dannoso rilevato dalla protezione in tempo reale"
+   },
+   "iconInfoPinned1": {
+      "description": "First bullet item explaining Browser Guard protection.",
+      "message": "Minacce online alle vostre finanze, garantendo transazioni sicure."
+   },
+   "iconInfoPinned2": {
+      "description": "Second bullet item explaining Browser Guard protection.",
+      "message": "Phishing e truffe che prendono di mira le vostre informazioni sensibili."
+   },
+   "iconInfoPinned3": {
+      "description": "Third bullet item explaining Browser Guard protection.",
+      "message": "Accesso indesiderato ai vostri dati personali, preservando la vostra privacy."
+   },
+   "iconInfoPinned4": {
+      "description": "Fourth bullet item explaining Browser Guard protection.",
+      "message": "Annunci fastidiosi e tracker che disturbano la navigazione."
+   },
+   "importBtnDefaultText": {
+      "description": "Text for the import button in it's default state",
+      "message": "Aggiungi file"
+   },
+   "importBtnLoadingText": {
+      "description": "Text for the import button in it's loading state",
+      "message": "Importazione..."
+   },
+   "importDescription": {
+      "description": "Description for the import section on the import/export page",
+      "message": "Aggiungi un file per importare le impostazioni Browser Guard da un altro browser o dispositivo."
+   },
+   "importError": {
+      "description": "Error message displayed when importing settings fails",
+      "message": "Importazione non riuscita. Riprovare più tardi."
+   },
+   "importErrorFailedToReadFile": {
+      "description": "Error message displayed when importing settings fails",
+      "message": "Impossibile leggere il file"
+   },
+   "importErrorImportWasCancelled": {
+      "description": "Error message displayed when importing settings fails",
+      "message": "L'importazione è stata annullata"
+   },
+   "importErrorInvalidData": {
+      "description": "Error message displayed when importing settings fails",
+      "message": "Dati di importazione non validi"
+   },
+   "importHeader": {
+      "description": "Header for the import section on the import/export page",
+      "message": "Importa"
+   },
+   "inactiveStatus": {
+      "description": "status text when BG is inactive.",
+      "message": "Disattivo"
+   },
+   "insertCurrentWebsiteTooltip": {
+      "description": "Insert current website tooltip.",
+      "message": "Inserisci il sito web corrente"
+   },
+   "invalidPageForEvaluationMessage": {
+      "description": "Message displayed when the user navigates to a page that cannot be evaluated",
+      "message": "Siamo spiacenti, non possiamo valutare questo tipo di pagina."
+   },
+   "killSwitchModalCancel": {
+      "description": "killSwitch modal cancel button text.",
+      "message": "Annulla"
+   },
+   "killSwitchModalDesc": {
+      "description": "killSwitch Modal confirmation description.",
+      "message": "Disattivare completamente $bg$ per tutti i siti web?",
+      "placeholders": {
+         "bg": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "killSwitchModalTitle": {
+      "description": "kill Switch Modal Title.",
+      "message": "Disattiva tutte le impostazioni di protezione"
+   },
+   "killSwitchModalYes": {
+      "description": "killSwitch modal confirmation button text.",
+      "message": "Sì, disattiva"
+   },
+   "lastMonth": {
+      "description": "Label for the last month time range",
+      "message": "Il mese scorso"
+   },
+   "lastWeek": {
+      "description": "Label for the last week time range",
+      "message": "La scorsa settimana"
+   },
+   "learnMore": {
+      "description": "Learn more link text",
+      "message": "Maggiori informazioni"
+   },
+   "letsGoButton": {
+      "message": "Vai qui"
+   },
+   "linkCopiedNotification": {
+      "description": "Link copied message.",
+      "message": "Link copiato negli appunti!"
+   },
+   "malwareLabel": {
+      "description": "Label for the malware protection feature",
+      "message": "Blocca il software dannoso"
+   },
+   "manageRulesetsDescription": {
+      "description": "Description for managing rulesets",
+      "message": "Trascina e rilascia per selezionare le protezioni che ritieni più importanti. Le protezioni in cima alla lista vengono applicate per prime."
+   },
+   "manageRulesetsTitle": {
+      "description": "Section title for managing rulesets",
+      "message": "Scegli le tue protezioni"
+   },
+   "manualAdRemovalNavItem": {
+      "description": "'Blocked items' Navigation Item",
+      "message": "Rimozione manuale degli annunci"
+   },
+   "manualAdRemovalSummary": {
+      "description": "First part of the summary of manual ad removals.",
+      "message": "Visualizzate gli annunci che avete bloccato manualmente e gestite il vostro elenco personalizzato qui. Volete fare pulizia?"
+   },
+   "manualAdRemovalSummary2": {
+      "description": "Summary on the empty state for the manual ad removals page.",
+      "message": "È possibile bloccare manualmente gli annunci e gli elementi indesiderati che $name$ non cattura da solo. È un modo semplice per personalizzare la protezione e mantenere la navigazione più pulita.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "manualAdRemovalSummaryLearnMore": {
+      "description": "Learn more text of the blocked items summary",
+      "message": "Per saperne di più"
+   },
+   "manualAdRemovalSummaryLink": {
+      "description": "Second part of the summary of manual ad removals.",
+      "message": "Imparate a rimuovere gli annunci indesiderati."
+   },
+   "mv3ChooseFeaturesAds": {
+      "description": "Label for ads radio button",
+      "message": "Elenco annunci/traccianti 1"
+   },
+   "mv3ChooseFeaturesAds2": {
+      "description": "Label for ads radio button",
+      "message": "Elenco annunci/traccianti 2"
+   },
+   "mv3ChooseFeaturesAds2Desc": {
+      "description": "Hint for ads radio button",
+      "message": "Blocca gli annunci e i tracker di terze parti che monitorano la vostra attività online."
+   },
+   "mv3ChooseFeaturesAdsDesc": {
+      "description": "Hint for ads radio button",
+      "message": "Blocca gli annunci e i tracker di terze parti che monitorano la vostra attività online."
+   },
+   "mv3ChooseFeaturesAdsHint": {
+      "description": "Hint for ads radio button",
+      "message": "Predefinito"
+   },
+   "mv3ChooseFeaturesBrowserErrorMessage": {
+      "description": "Error message when ruleset selection fails due to a chrome error",
+      "message": "Chrome ha riscontrato un errore interno. Provare a reinstallare $name$ per risolvere il problema.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "mv3ChooseFeaturesEasylist": {
+      "description": "Label for easylist radio button",
+      "message": "$easylist$",
+      "placeholders": {
+         "easylist": {
+            "content": "EasyList"
+         }
+      }
+   },
+   "mv3ChooseFeaturesEasylistDesc": {
+      "description": "Hint for easylist radio button",
+      "message": "$easylist$ è un popolare elenco di filtri utilizzato dagli ad blocker per bloccare gli annunci e i tracker sui siti web.",
+      "placeholders": {
+         "easylist": {
+            "content": "EasyList"
+         }
+      }
+   },
+   "mv3ChooseFeaturesEasylistPrivacy": {
+      "description": "Label for easylist privacy radio button",
+      "message": "Elenco dei cookie di $easylist",
+      "placeholders": {
+         "easylist": {
+            "content": "EasyList"
+         }
+      }
+   },
+   "mv3ChooseFeaturesEasylistPrivacyDesc": {
+      "description": "Hint for easylist radio button",
+      "message": "$easylist$ Cookie List blocca i banner dei cookie, le windows sovrapposizione del GDPR e altri avvisi relativi alla privacy.",
+      "placeholders": {
+         "easylist": {
+            "content": "EasyList"
+         }
+      }
+   },
+   "mv3ChooseFeaturesErrorMessage": {
+      "description": "Error message when too many filters for available static rulesare selected",
+      "message": "Hai selezionato troppi filtri, superando il limite di Chrome per le regole attive. Di conseguenza, alcuni dei tuoi filtri non sono stati applicati."
+   },
+   "mv3ChooseFeaturesMalware": {
+      "description": "Label for malware radio button",
+      "message": "Protezione del browser"
+   },
+   "mv3ChooseFeaturesMalwareDesc": {
+      "description": "Label for malware radio button",
+      "message": "Protegge da truffe, phishing, programmi dannosi ed exploit."
+   },
+   "mv3ChooseFeaturesSaveBtn": {
+      "description": "Save ruleset selections button",
+      "message": "Salva la mia scelta"
+   },
+   "mv3ChooseFeaturesSuccessfulSave": {
+      "description": "Ruleset selections saved successfully notification",
+      "message": "La vostra scelta è stata salvata"
+   },
+   "mv3ChooseFeaturesTitle": {
+      "description": "Title of the choose features section",
+      "message": "Scegliere quali caratteristiche utilizzare di $name$",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "mv3ChooseFeaturesWhitelist": {
+      "description": "Label for whitelist radio button",
+      "message": "Lista bianca"
+   },
+   "mv3ChooseFeaturesWhitelistDesc": {
+      "description": "Hint for whitelist radio button",
+      "message": "Whitelist di annunci."
+   },
+   "mv3PrefetchAlert": {
+      "description": "Alert message on an mv3 block page when the block was due to a browser prefetch",
+      "message": "Il tuo browser potrebbe precaricare alcuni siti in background prima ancora che tu clicchi. Disattiva il precaricamento per impedire connessioni indesiderate."
+   },
+   "mv3PrefetchAlertTitle": {
+      "description": "Title for the prefetch alert message",
+      "message": "Un blocco inaspettato? Potrebbe trattarsi del precaricamento."
+   },
+   "mv3RuleStatsDynamic": {
+      "description": "Title for dynamic rule in the rule stats",
+      "message": "Regole dinamiche"
+   },
+   "mv3RuleStatsDynamicDesc": {
+      "description": "Description for dynamic rule in the rule stats",
+      "message": "Regole aggiunte dall’utente, come le Liste esclusione e l’elenco elementi bloccati"
+   },
+   "mv3RuleStatsStatic": {
+      "description": "Title for static rule in the rule stats",
+      "message": "Regole statiche"
+   },
+   "mv3RuleStatsStaticDesc": {
+      "description": "Description for static rule in the rule stats",
+      "message": "Regole integrate che bloccano pubblicità e malware"
+   },
+   "mv3RuleStatsStaticRuleset": {
+      "description": "Title for static rulesets in the rule stats",
+      "message": "Set di regole statiche"
+   },
+   "mv3RuleStatsStaticRulesetDesc": {
+      "description": "Description for static rulesets in the rule stats",
+      "message": "Set di regole statiche integrate che bloccano pubblicità e malware"
+   },
+   "mv3RulesetErrorTitle": {
+      "description": "title of the ruleset error page",
+      "message": "Oh oh! $name$ non può funzionare correttamente a causa dei limiti delle regole.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "mv3TrackingAttempt": {
+      "description": "MV3 Tracker block reason",
+      "message": "Tentativo di tracciamento"
+   },
+   "mv3WebsiteBlockAlert": {
+      "description": "Alert message on mv3 block page",
+      "message": "Ti suggeriamo caldamente di non proseguire. Se visiti questo sito puoi mettere a rischio la tua sicurezza. Per ulteriori informazioni, visitare"
+   },
+   "mv3WebsiteBlockContinue": {
+      "description": "Text displayed on the Go back button",
+      "message": "Continua su questo sito web"
+   },
+   "mv3WebsiteBlockContinueAlways": {
+      "description": "Text displayed beside the checkbox to permanently allow a blocked site",
+      "message": "Non bloccare più questo sito."
+   },
+   "mv3WebsiteBlockDisablePrefetch": {
+      "description": "Button text to disable prefetching",
+      "message": "Disattiva il precaricamento."
+   },
+   "mv3WebsiteBlockExplanation": {
+      "description": "Explanation of why we blocked the page",
+      "message": "$name$ ha bloccato questa pagina perché potrebbe contenere attività dannose.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "mv3WebsiteBlockGetStarted": {
+      "description": "Text displayed in the Get started button",
+      "message": "Inizia subito"
+   },
+   "mv3WebsiteBlockGoBack": {
+      "description": "Text displayed on the Go back button",
+      "message": "Torna indietro"
+   },
+   "mv3WebsiteBlockHeader": {
+      "description": "MV3 Block page Website blocked text",
+      "message": "Sito web bloccato"
+   },
+   "mv3WebsiteBlockLearnMore": {
+      "description": "Learn more text at the bottom of the block page",
+      "message": "Per maggiori informazioni sulla sicurezza informatica visita la nostra pagina"
+   },
+   "mv3WebsiteBlockLearnMoreLink": {
+      "description": "Link text to Malwarebytes cybersecurity basics & protection",
+      "message": "Cybersecurity Basics e protezione."
+   },
+   "mv3WebsiteBlockLevelUp": {
+      "description": "Text displayed in the upgrade protection section",
+      "message": "Aumenta la tua sicurezza"
+   },
+   "mv3WebsiteBlockLevelUpInfo": {
+      "description": "Text displayed in the upgrade protection section",
+      "message": "Le minacce informatiche non si fermano al tuo browser. Aggiorna la tua protezione con"
+   },
+   "mv3WebsiteBlockLevelUpInfoContd": {
+      "description": "Continuation of text displayed in the upgrade protection section",
+      "message": "e tieni al sicuro i tuoi dati e dispositivi."
+   },
+   "mv3WebsiteBlockLevelUpInfoLink": {
+      "description": "Link to malwarebytes premium",
+      "message": "Malwarebytes Premium"
+   },
+   "mv3WebsiteBlockMalwarebytesSupport": {
+      "description": "Link text to Malwarebytes Support page",
+      "message": " Supporto $mb$.",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "mv3WebsiteBlocked": {
+      "description": "MV3 Block page Website blocked text",
+      "message": "Sito web bloccato"
+   },
+   "mv3WebsiteTrackerBlockAlert": {
+      "description": "Alert message on mv3 block page",
+      "message": "Ti raccomandiamo di non proseguire. Se visiti questo sito potresti mettere a rischio la tua privacy. Per ulteriori informazioni, visitare"
+   },
+   "mv3WebsiteTrackerBlockExplanation": {
+      "description": "Explanation of why showing a medium ad alert",
+      "message": "$name$ ha bloccato questa pagina perché ha rilevato attività di tracciamento.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "mv3WhatHappened": {
+      "description": "Message describing what caused the ruleset error",
+      "message": "A causa di un aggiornamento o di una nuova estensione aggiunta, Chrome ha raggiunto il limite di regole attive integrate. Questo ha portato Chrome a disabilitare i filtri delle estensioni. Per saperne di più sui limiti delle regole e"
+   },
+   "mv3WhatHappenedLink": {
+      "description": "Link to Google's manifedt V3 docs",
+      "message": "su Manifest V3 di Google qui."
+   },
+   "mv3WhatHappenedTitle": {
+      "description": "Title of the section that explains what caused the ruleset error",
+      "message": "Cosa è successo"
+   },
+   "mv3WhatYouCanDo": {
+      "description": "Description of the what you can do section",
+      "message": "È possibile eliminare dal tuo browser altre estensioni non necessarie."
+   },
+   "mv3WhatYouCanDoOr": {
+      "description": "OR seperator in the \"What you can do\" section",
+      "message": "OPPURE"
+   },
+   "mv3WhatYouCanDoTitle": {
+      "description": "Title of the \"What you can do\" section",
+      "message": "Cosa si può fare."
+   },
+   "nativeMessagingHeader": {
+      "description": "Header for pop up to get user to add native messaging permissions",
+      "message": "Hai Malwarebytes Premium installato?"
+   },
+   "nativeMessagingHeader2": {
+      "description": "Header on block page to get user to add native messaging permissions",
+      "message": "Nascondi avvertenze doppie"
+   },
+   "nativeMessagingMessage": {
+      "description": "Message body for pop up to get user to add native messaging permissions",
+      "message": "Consenti a $name$ di gestire le avvertenze di siti web bloccati per Premium.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "nativeMessagingMessage2": {
+      "description": "Message body on block page to get user to add native messaging permissions",
+      "message": "Nasconde le avvertenze di siti web bloccati da Malwarebytes Premium per utenti che abbiano abilitato sia $name$ che Premium.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "newTab": {
+      "description": "Shown as a title when the user is on a new tab",
+      "message": "Pagina vuota"
+   },
+   "nextBtnText": {
+      "description": "Next button text",
+      "message": "Avanti"
+   },
+   "nextText": {
+      "description": "Back text.",
+      "message": "Avanti"
+   },
+   "noBlocks": {
+      "description": "Note for when there is nothing to block",
+      "message": "Nessun elemento da bloccare"
+   },
+   "noRecordsYet": {
+      "description": "Message displayed when there are no records to show",
+      "message": "Ancora nessuna rimozione manuale degli annunci"
+   },
+   "nonPremiumGetPremiumBtn": {
+      "description": "Get Premium button text for the non premium content on the content control page",
+      "message": "Ottieni Premium"
+   },
+   "nonPremiumLearnMoreBtn": {
+      "description": "Learn more button text for the non premium content on the content control page",
+      "message": "Scopri di più"
+   },
+   "nonPremiumMessage2a": {
+      "description": "First part of the second Message for the non premium content on the content control page",
+      "message": "Questa funzione è disponibile soltanto con"
+   },
+   "nonPremiumMessage2b": {
+      "description": "Second part of the second Message for the non premium content on the content control page",
+      "message": "Malwarebytes Premium"
+   },
+   "nonPremiumMessage2c": {
+      "description": "Second part of the second Message for the non premium content on the content control page",
+      "message": "Abbonati subito per sbloccare il controllo contenuti e ricevi protezione 24/7 da malware, virus, ransomware e altre minacce informatiche."
+   },
+   "oap2faResolvedActionMessage": {
+      "description": "OAP recommendation action message when 2FA is enabled",
+      "message": "Avete già impostato l'autenticazione a due fattori. Ben fatto! Questo ulteriore livello di sicurezza contribuisce a proteggere il vostro account."
+   },
+   "oap2faResolvedTitle": {
+      "description": "OAP recommendation title when 2FA is enabled",
+      "message": "Autenticazione a due fattori: Abilitato"
+   },
+   "oap2faUnresolvedExplanation": {
+      "description": "OAP recommendation explanation when 2FA is not enabled",
+      "message": "Raccomandata dagli esperti di sicurezza, l'autenticazione a due fattori (2FA) garantisce la sicurezza del tuo account anche se qualcuno dovesse entrare in possesso della tua password. Aggiunge un secondo passaggio, come un codice inviato al tuo telefono, per bloccare gli accessi non autorizzati. Ci vogliono solo pochi minuti per configurarla e garantisce una protezione efficace al tuo account."
+   },
+   "oap2faUnresolvedTitle": {
+      "description": "OAP recommendation title when 2FA is not enabled",
+      "message": "Autenticazione a due fattori: Disabilitato"
+   },
+   "oap2faWhatToDoStep1": {
+      "description": "OAP recommendation what to do step 1 for 2FA",
+      "message": "Open Google account settings"
+   },
+   "oap2faWhatToDoStep2": {
+      "description": "OAP recommendation what to do step 2 for 2FA",
+      "message": "Attivare la 2FA"
+   },
+   "oap2faWhatToDoTitle": {
+      "description": "OAP recommendation what to do title for 2FA",
+      "message": "Per proteggere il vostro conto:"
+   },
+   "oapAppsBasicAccessPageTitle": {
+      "description": "OAP recommendation page title for apps with basic access",
+      "message": "Accesso all'app: Accesso all'account Basic "
+   },
+   "oapAppsBasicAccessResolvedActionMessage": {
+      "description": "OAP recommendation action message for apps with basic access (resolved)",
+      "message": "Avete rimosso le app che non utilizzate. La privacy del vostro account sembra buona."
+   },
+   "oapAppsBasicAccessResolvedTitle": {
+      "description": "OAP recommendation title for apps with basic access (resolved)",
+      "message": "Rivedere le app che hanno accesso alle informazioni del vostro profilo"
+   },
+   "oapAppsBasicAccessUnresolvedExplanation": {
+      "description": "OAP recommendation explanation for apps with basic access",
+      "message": "Alcune applicazioni hanno ancora accesso al vostro profilo Google, come il nome, l'e-mail o la foto. Se non le utilizzate, è meglio rimuoverne l'accesso."
+   },
+   "oapAppsBasicAccessUnresolvedTitle": {
+      "description": "OAP recommendation title for apps with basic access",
+      "message": "Rivedere le app che hanno accesso alle informazioni del vostro profilo"
+   },
+   "oapAppsBasicAccessWhatToDoStep1": {
+      "description": "OAP recommendation what to do step 1 for apps with basic access",
+      "message": "Visualizza $appCount$ applicazioni",
+      "placeholders": {
+         "appCount": {
+            "content": "$1",
+            "example": "1"
+         }
+      }
+   },
+   "oapAppsBasicAccessWhatToDoStep1Singular": {
+      "description": "OAP recommendation what to do step 1 for apps with basic access",
+      "message": "Visualizza 1 applicazione"
+   },
+   "oapAppsBasicAccessWhatToDoStep2": {
+      "description": "OAP recommendation what to do step 2 for apps with basic access",
+      "message": "Rimuovete le app che non utilizzate o che non riconoscete."
+   },
+   "oapAppsBasicAccessWhatToDoTitle": {
+      "description": "OAP recommendation what to do title for apps with basic access",
+      "message": "Intervenite per aggiornare il vostro account:"
+   },
+   "oapAppsExtendedAccessPageTitle": {
+      "description": "OAP recommendation page title for apps with extended access",
+      "message": "Accesso alle app: Accesso esteso all'account"
+   },
+   "oapAppsExtendedAccessResolvedActionMessage": {
+      "description": "OAP recommendation action message for apps with extended access (resolved)",
+      "message": "Attualmente nessuna app di terze parti ha accesso esteso al vostro account. Tenete d'occhio questo elenco per collegare nuove app in futuro."
+   },
+   "oapAppsExtendedAccessResolvedTitle": {
+      "description": "OAP recommendation title for apps with extended access (resolved)",
+      "message": "Esaminare l'accesso alle app sensibili"
+   },
+   "oapAppsExtendedAccessUnresolvedExplanation": {
+      "description": "OAP recommendation explanation for apps with extended access",
+      "message": "Alcune app possono accedere a parti sensibili del vostro account Google, come Gmail, Drive o Calendar. Se non le si usa o non ci si fida di loro, è più sicuro rimuoverne l'accesso."
+   },
+   "oapAppsExtendedAccessUnresolvedTitle": {
+      "description": "OAP recommendation title for apps with extended access",
+      "message": "Esaminare l'accesso alle app sensibili"
+   },
+   "oapAppsExtendedAccessWhatToDoStep1": {
+      "description": "OAP recommendation what to do step 1 for apps with extended access",
+      "message": "Visualizza $appCount$ applicazioni",
+      "placeholders": {
+         "appCount": {
+            "content": "$1",
+            "example": "1"
+         }
+      }
+   },
+   "oapAppsExtendedAccessWhatToDoStep1Singular": {
+      "description": "OAP recommendation what to do step 1 for apps with extended access",
+      "message": "Visualizza 1 applicazione"
+   },
+   "oapAppsExtendedAccessWhatToDoStep2": {
+      "description": "OAP recommendation what to do step 2 for apps with extended access",
+      "message": "Rimuovete le app che non utilizzate o che non riconoscete."
+   },
+   "oapAppsExtendedAccessWhatToDoTitle": {
+      "description": "OAP recommendation what to do title for apps with extended access",
+      "message": "Intervenite per aggiornare il vostro account:"
+   },
+   "oapCategoryPrivacy": {
+      "description": "OAP recommendation category label for privacy",
+      "message": "Privacy"
+   },
+   "oapCategorySecurity": {
+      "description": "OAP recommendation category label for security",
+      "message": "Sicurezza"
+   },
+   "oapConnectedDevicesResolvedActionMessage": {
+      "description": "OAP recommendation action message for connected devices (resolved)",
+      "message": "Tutti i dispositivi connessi hanno un aspetto familiare. È un'ottima cosa. Tuttavia, è bene controllare regolarmente questo elenco."
+   },
+   "oapConnectedDevicesResolvedTitle": {
+      "description": "OAP recommendation title for connected devices (resolved)",
+      "message": "Dispositivi collegati: Tutto libero"
+   },
+   "oapConnectedDevicesUnresolvedExplanation": {
+      "description": "OAP recommendation explanation for connected devices",
+      "message": "I dispositivi collegati hanno accesso alle informazioni del vostro account. Per limitare il rischio, rimuovete i dispositivi che non utilizzate o che non riconoscete."
+   },
+   "oapConnectedDevicesUnresolvedTitle": {
+      "description": "OAP recommendation title for connected devices",
+      "message": "Dispositivi connessi: Necessaria una revisione"
+   },
+   "oapConnectedDevicesWhatToDoStep1": {
+      "description": "OAP recommendation what to do step 1 for connected devices",
+      "message": "Visualizza $deviceCount$ dispositivi",
+      "placeholders": {
+         "deviceCount": {
+            "content": "$1",
+            "example": "1"
+         }
+      }
+   },
+   "oapConnectedDevicesWhatToDoStep1Singular": {
+      "description": "OAP recommendation what to do step 1 for connected devices",
+      "message": "Visualizza 1 dispositivo"
+   },
+   "oapConnectedDevicesWhatToDoStep2": {
+      "description": "OAP recommendation what to do step 2 for connected devices",
+      "message": "Rimuovere i dispositivi inutilizzati o non riconosciuti"
+   },
+   "oapConnectedDevicesWhatToDoTitle": {
+      "description": "OAP recommendation what to do title for connected devices",
+      "message": "Agite:"
+   },
+   "oapPasswordChangeResolvedActionMessage": {
+      "description": "OAP recommendation action message when password was recently updated",
+      "message": "Avete recentemente cambiato la vostra password. Questo aiuta a mantenere il tuo account sicuro. Ottimo lavoro!"
+   },
+   "oapPasswordChangeResolvedTitle": {
+      "description": "OAP recommendation title when password was recently updated",
+      "message": "Password aggiornata di recente"
+   },
+   "oapPasswordChangeUnresolvedExplanation": {
+      "description": "OAP recommendation explanation when password update is recommended",
+      "message": "È passato un po' di tempo dall'ultima volta che avete cambiato la password, oppure avete un problema di sicurezza. L'aggiornamento della password aggiunge una forte protezione al vostro account e alle vostre informazioni personali."
+   },
+   "oapPasswordChangeUnresolvedTitle": {
+      "description": "OAP recommendation title when password update is recommended",
+      "message": "Si raccomanda l'aggiornamento della password"
+   },
+   "oapPasswordChangeWhatToDoStep1": {
+      "description": "OAP recommendation what to do step 1 for password change",
+      "message": "Open Google account settings"
+   },
+   "oapPasswordChangeWhatToDoStep2": {
+      "description": "OAP recommendation what to do step 2 for password change",
+      "message": "Cambiare la password"
+   },
+   "oapPublicProfileResolvedActionMessage": {
+      "description": "OAP recommendation action message for public profile info (resolved)",
+      "message": "Avete nascosto le informazioni che non volete condividere con il pubblico e con le app collegate. Siete pronti a partire!"
+   },
+   "oapPublicProfileResolvedTitle": {
+      "description": "OAP recommendation title for public profile info (resolved)",
+      "message": "Rivedere le informazioni del profilo condiviso"
+   },
+   "oapPublicProfileUnresolvedExplanation": {
+      "description": "OAP recommendation explanation for public profile info",
+      "message": "Le app connesse hanno accesso alle informazioni del profilo disponibili pubblicamente. Per limitare l'esposizione, nascondete le informazioni che non volete condividere con il pubblico e con le app connesse."
+   },
+   "oapPublicProfileUnresolvedTitle": {
+      "description": "OAP recommendation title for public profile info",
+      "message": "Rivedere le informazioni del profilo condiviso"
+   },
+   "oapPublicProfileWhatToDoStep1": {
+      "description": "OAP recommendation what to do step 1 for public profile info",
+      "message": "Andate alle impostazioni del profilo del vostro account Google"
+   },
+   "oapPublicProfileWhatToDoStep2": {
+      "description": "OAP recommendation what to do step 2 for public profile info",
+      "message": "Nascondere le informazioni che non si desidera condividere con il pubblico e con le app connesse."
+   },
+   "oapRecoveryEmailResolvedActionMessage": {
+      "description": "OAP recommendation action message when recovery email is set",
+      "message": "Hai aggiunto un'e-mail di recupero al tuo account. Ben fatto! Assicuratevi che sia una di quelle a cui avete accesso."
+   },
+   "oapRecoveryEmailResolvedTitle": {
+      "description": "OAP recommendation title when recovery email is set",
+      "message": "Email di recupero: Imposta"
+   },
+   "oapRecoveryEmailUnresolvedExplanation": {
+      "description": "OAP recommendation explanation when recovery email is not set",
+      "message": "Un'e-mail di recupero vi aiuta a rientrare nel vostro account se dimenticate la password o siete stati bloccati."
+   },
+   "oapRecoveryEmailUnresolvedTitle": {
+      "description": "OAP recommendation title when recovery email is not set",
+      "message": "Email di recupero: Non impostato"
+   },
+   "oapRecoveryEmailWhatToDoStep1": {
+      "description": "OAP recommendation what to do step 1 for recovery email",
+      "message": "Open Google account settings"
+   },
+   "oapRecoveryEmailWhatToDoStep2": {
+      "description": "OAP recommendation what to do step 2 for recovery email",
+      "message": "Aggiungere un'e-mail di recupero"
+   },
+   "oapRecoveryEmailWhatToDoStep3": {
+      "description": "OAP recommendation what to do step 3 for recovery email",
+      "message": "Verificare l'e-mail di recupero"
+   },
+   "oapRecoveryEmailWhatToDoTitle": {
+      "description": "OAP recommendation what to do title for recovery email",
+      "message": "Proteggete il vostro conto:"
+   },
+   "oapRecoveryPhoneResolvedActionMessage": {
+      "description": "OAP recommendation action message when recovery phone is set",
+      "message": "Avete aggiunto un numero di telefono di recupero. Ben fatto! Questo vi aiuta a recuperare l'accesso se qualcosa va storto. Assicuratevi che il numero sia ancora attivo e che possiate utilizzarlo."
+   },
+   "oapRecoveryPhoneResolvedTitle": {
+      "description": "OAP recommendation title when recovery phone is set",
+      "message": "Numero di telefono di recupero: Imposta"
+   },
+   "oapRecoveryPhoneUnresolvedExplanation": {
+      "description": "OAP recommendation explanation when recovery phone is not set",
+      "message": "Un numero di telefono di recupero vi aiuta a rientrare nel vostro conto se dimenticate la password o siete stati bloccati. L'impostazione è rapida e aggiunge un modo sicuro per verificare la vostra identità."
+   },
+   "oapRecoveryPhoneUnresolvedTitle": {
+      "description": "OAP recommendation title when recovery phone is not set",
+      "message": "Numero di telefono di recupero: Non impostato"
+   },
+   "oapRecoveryPhoneWhatToDoStep1": {
+      "description": "OAP recommendation what to do step 1 for recovery phone",
+      "message": "Open Google account settings"
+   },
+   "oapRecoveryPhoneWhatToDoStep2": {
+      "description": "OAP recommendation what to do step 2 for recovery phone",
+      "message": "Aggiungere un numero di telefono di recupero"
+   },
+   "oapRecoveryPhoneWhatToDoStep3": {
+      "description": "OAP recommendation what to do step 3 for recovery phone",
+      "message": "Verifica il tuo numero"
+   },
+   "oapRecoveryPhoneWhatToDoTitle": {
+      "description": "OAP recommendation what to do title for recovery phone",
+      "message": "Impostare un numero di telefono di recupero:"
+   },
+   "obfSlide5Desc": {
+      "description": "Description for the fifth slide of the onboarding flow",
+      "message": "Browser Guard ha bisogno di questa autorizzazione per migliorare la sicurezza e la protezione dell'utente."
+   },
+   "obfSlide5Title": {
+      "description": "Title for the fifth slide of the onboarding flow",
+      "message": "Concessione del permesso di continuare 🛠️"
+   },
+   "onboardingAllowListDesc": {
+      "description": "Onboarding: allow list slide description",
+      "message": "Aggiungete i siti web di cui vi fidate all'elenco dei siti consentiti per disabilitare le protezioni. In questo modo si evitano i falsi allarmi e si può navigare comodamente sui siti che si conoscono e si amano."
+   },
+   "onboardingAllowListStepperTitle": {
+      "description": "Onboarding: allow list stepper title",
+      "message": "Elenco dei permessi"
+   },
+   "onboardingAllowListSubtitle": {
+      "description": "",
+      "message": "Controllate i siti di cui vi fidate e personalizzate le vostre protezioni."
+   },
+   "onboardingAllowListTitle": {
+      "description": "Onboarding: allow list slide title",
+      "message": "Gestire l'elenco dei permessi"
+   },
+   "onboardingBrowsingProtection": {
+      "description": "Browsing protection step title",
+      "message": "Il vostro cruscotto di protezione della navigazione"
+   },
+   "onboardingBrowsingProtectionDesc": {
+      "description": "Description for the browsing protection step in the onboarding modal",
+      "message": "Gestisci le impostazioni di protezione della navigazione per controllare cosa è consentito sui siti che visiti.\u003Cbr />Se un sito non funziona correttamente, prova a disattivare gli annunci pubblicitari o i tracker per vedere se questo risolve il problema."
+   },
+   "onboardingBrowsingProtectionStepperTitle": {
+      "description": "Browsing protection step title in the onboarding modal",
+      "message": "Protezione della navigazione"
+   },
+   "onboardingBrowsingProtectionSubtitle": {
+      "description": "Sub title for the browsing protection step in the onboarding modal",
+      "message": "Scopri quali siti sono bloccati e gestisci il modo in cui $name$ protegge la tua navigazione.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "onboardingBrowsingProtectionTitle": {
+      "description": "Browsing protection step title",
+      "message": "Il vostro cruscotto di protezione della navigazione"
+   },
+   "onboardingDashboardDesc": {
+      "description": "Onboarding: dashboard slide description",
+      "message": "È qui che i contenuti fastidiosi e dannosi fanno la loro fine. Qui è possibile tenere traccia degli elementi bloccati e gestire le protezioni per il sito web che si sta visitando."
+   },
+   "onboardingDashboardTitle": {
+      "description": "Onboarding: dashboard slide title",
+      "message": "Il vostro cruscotto di protezione"
+   },
+   "onboardingLearnMoreLink": {
+      "description": "Onboarding telemetry opt-in learn more link",
+      "message": "Maggiori informazioni"
+   },
+   "onboardingPinExtensionDesc1": {
+      "description": "Description for the pin extension step in the onboarding modal",
+      "message": "Fare clic sull'icona del puzzle nella barra degli indirizzi del browser e selezionare $name$.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "onboardingPinExtensionDesc2": {
+      "description": "Description for the pin extension step in the onboarding modal",
+      "message": "Fare clic sull'icona in qualsiasi momento per attivare o disattivare la protezione."
+   },
+   "onboardingPinExtensionStepperTitle": {
+      "description": "Pin extension step title in the onboarding modal",
+      "message": "Appuntare l'estensione"
+   },
+   "onboardingPinExtensionSubtitle": {
+      "description": "Sub title for the pin extension step in the onboarding modal",
+      "message": "Appuntate $name$ sulla vostra barra degli strumenti per facilitarne la visibilità e la gestione.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "onboardingPinExtensionTitle": {
+      "description": "Pin extension step title",
+      "message": "Mantenere $name$ visibile",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "onboardingStatsDesc": {
+      "description": "Onboarding: statistics slide description",
+      "message": "Traccia gli annunci, le minacce informatiche e le truffe che abbiamo bloccato per rimanere informati e controllare la vostra sicurezza di navigazione."
+   },
+   "onboardingStatsStepperTitle": {
+      "description": "Onboarding: statistics stepper title",
+      "message": "Statistiche"
+   },
+   "onboardingStatsSubtitle": {
+      "description": "Sub title for the statistics step in the onboarding modal",
+      "message": "Scoprite cosa ha bloccato Browser Guard finora."
+   },
+   "onboardingStatsTitle": {
+      "description": "Onboarding: statistics slide title",
+      "message": "Controllare le statistiche"
+   },
+   "onboardingTelemOptIn": {
+      "description": "Onboarding telemetry opt-in description",
+      "message": "Aiutaci a migliorare $mb$ condividendo i dati di protezione anonimi.",
+      "placeholders": {
+         "mb": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "optionalPermissionReqPageDesc": {
+      "description": "Description for the optional permission request page",
+      "message": "Proteggete la vostra sicurezza di navigazione concedendo $name$ le autorizzazioni riportate di seguito.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "permissionButtonText": {
+      "description": "Button text for the permission request page",
+      "message": "Concedere l'autorizzazione ora"
+   },
+   "permissionReqDesc": {
+      "description": "Description for the permission request page",
+      "message": "$name$ ha bisogno del vostro aiuto per approvare l'accesso alle pagine che visitate. Questo ci aiuta a garantire la sicurezza di ogni sito.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "permissionReqHeader": {
+      "description": "Header for the permission request page",
+      "message": "Concessione di nuove autorizzazioni"
+   },
+   "permissionReqInstruction": {
+      "description": "Instruction for the optional permission request page",
+      "message": "Istruzioni"
+   },
+   "permissionReqInstruction1": {
+      "description": "Instruction for the optional permission request page",
+      "message": "Fare clic per attivare la levetta in alto e avviare il processo."
+   },
+   "permissionReqInstruction2": {
+      "description": "Instruction for the optional permission request page",
+      "message": "Quando appare il popup, esaminare la richiesta e fare clic su \"Consenti\" per concedere l'autorizzazione."
+   },
+   "permissionReqInstruction3": {
+      "description": "Instruction for the optional permission request page",
+      "message": "Fatto! Preparatevi a un'esperienza di navigazione più sicura e veloce."
+   },
+   "permissionReqPage": {
+      "description": "Title for the permission request page",
+      "message": "Autorizzazione richiesta"
+   },
+   "permissionReqPageTitle": {
+      "description": "Title for the permission request page",
+      "message": "È necessaria l'autorizzazione"
+   },
+   "pingtracker": {
+      "description": "Ping Tracker",
+      "message": "Ping Tracker"
+   },
+   "premiumFeatureAccessControlTitle": {
+      "description": "Title for the Access Control premium feature",
+      "message": "Controllo degli accessi"
+   },
+   "premiumFeatureContentControlDesc": {
+      "description": "Onboarding: premium feature item description",
+      "message": "Bloccare l'accesso a qualsiasi sito web per qualsiasi motivo."
+   },
+   "premiumFeatureContentControlTitle": {
+      "description": "Onboarding: premium feature item title",
+      "message": "Controllo dei contenuti"
+   },
+   "premiumFeatureDetectionHistoryDesc": {
+      "description": "Onboarding: premium feature item description",
+      "message": "Vedi le minacce che $name$ ti ha aiutato a evitare.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "premiumFeatureDetectionHistoryTitle": {
+      "description": "Onboarding: premium feature item title",
+      "message": "Cronologia rilevamenti"
+   },
+   "premiumFeatureImportExportDesc": {
+      "description": "Onboarding: premium feature item description",
+      "message": "Mantenete le vostre impostazioni indipendentemente dal browser utilizzato."
+   },
+   "premiumFeatureImportExportTitle": {
+      "description": "Onboarding: premium feature item title",
+      "message": "Importazione ed esportazione"
+   },
+   "premiumFeaturesSubtitle": {
+      "description": "Onboarding: premium features subtitle",
+      "message": "Passate a Malwarebytes Premium per sbloccare altri modi per proteggere e personalizzare la vostra navigazione."
+   },
+   "premiumFeaturesTitle": {
+      "description": "Onboarding: premium features slide title",
+      "message": "Caratteristiche Premium "
+   },
+   "privacyPermissionDesc": {
+      "description": "Description for the privacy permission on the onboarding modal",
+      "message": "Nel tentativo di migliorare la velocità di caricamento delle pagine, la tua privacy potrebbe essere compromessa. Ti consigliamo di consentire a $name$ di gestire questa funzione.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "privacyPermissionTitle": {
+      "description": "Title for privacy permission on the onboarding modal",
+      "message": "Anche i siti che non visiti mai possono tracciarti"
+   },
+   "privacyPolicyText": {
+      "message": "Informativa sulla privacy"
+   },
+   "productInformationDesc": {
+      "description": "Title for the product information section in settings",
+      "message": "Tutto ciò che serve in un unico posto per un'esperienza di navigazione più sicura e protetta."
+   },
+   "productInformationTitle": {
+      "description": "Title for the product information section in settings",
+      "message": "Informazioni sul prodotto"
+   },
+   "protectionAdsName": {
+      "description": "Name for ads and tracker protection feature",
+      "message": "Annunci/Tracker"
+   },
+   "protectionContentName": {
+      "description": "Name for content protection feature",
+      "message": "Contenuto"
+   },
+   "protectionLabel": {
+      "description": "Popup title for the protection section",
+      "message": "Protezione"
+   },
+   "protectionMalwareName": {
+      "description": "Name for malware protection feature",
+      "message": "Malware"
+   },
+   "protectionPaused": {
+      "description": "Note for when protection is paused",
+      "message": "Protezione in pausa."
+   },
+   "protectionScamsName": {
+      "description": "Name for scam protection feature",
+      "message": "Truffe"
+   },
+   "protectionSettingsDescription": {
+      "description": "Description text explaining protection settings scope",
+      "message": "Queste impostazioni di protezione si applicano a tutti i siti web."
+   },
+   "protectionStatusInactive": {
+      "description": "Status text when no protections are enabled",
+      "message": "Non protetto"
+   },
+   "protectionStatusPartiallyProtected": {
+      "description": "Status text when some protections are enabled",
+      "message": "Parzialmente protetto"
+   },
+   "protectionStatusProtected": {
+      "description": "Status text when all protections are enabled",
+      "message": "Protetto"
+   },
+   "realTimeScamGuardDetection": {
+      "description": "Feature name for real-time ScamGuard detection",
+      "message": "Rilevamento delle truffe in tempo reale"
+   },
+   "removeAllAllowedWebsitesSnackbar": {
+      "description": "Snackbar text when all the allowed websites are deleted.",
+      "message": "Tutti i siti web sono stati eliminati"
+   },
+   "removeAllBlockedItemsSnackbar": {
+      "description": "Snackbar text when all the blocked items are removed.",
+      "message": "Tutti gli elementi sono stati eliminati"
+   },
+   "removeAllContentControlWebsitesSnackbar": {
+      "description": "Snackbar text when all the websites are deleted from the content control list.",
+      "message": "Tutti i siti web sono stati eliminati"
+   },
+   "removeBlockedItemSnackbar": {
+      "description": "Snackbar text when a blocked item is removed.",
+      "message": "L'elemento è stato eliminato"
+   },
+   "reputationBlockExplanation": {
+      "description": "Text explaining why a reputation block could occur",
+      "message": "$mb$ blocca le pagine provenienti da siti web con traffico relativamente leggero che siano stati segnalati per attività dannose.  Se ritieni questo sito web affidabile, fai clic su VAI AL SITO.  In caso contrario, seleziona TORNA INDIETRO.",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "restoreDefault": {
+      "description": "Restore default button text",
+      "message": "Ripristina impostazioni predefinite"
+   },
+   "riskyPatternExplanation": {
+      "description": "Text explaining why a risky pattern block could occur",
+      "message": "$mb$ blocca i modelli rischiosi sia provenienti da siti web con traffico relativamente leggero sia caratterizzati da contenuti potenzialmente dannosi. Ciò serve a proteggerti da nuovi $type$. Tuttavia, se ritieni affidabile il contenuto del sito e desideri procedere, fai clic su \"Continua\".",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes Browser Guard"
+         },
+         "type": {
+            "content": "$1",
+            "example": "scams"
+         }
+      }
+   },
+   "rulesetGroupAds": {
+      "description": "Display name for ads blocking ruleset group",
+      "message": "Blocca gli annunci pubblicitari di terze parti e i tracker online"
+   },
+   "rulesetGroupMalware": {
+      "description": "Display name for malware protection ruleset group",
+      "message": "Proteggiti da truffe, phishing e malware"
+   },
+   "rulesetGroupPrivacy": {
+      "description": "Display name for privacy ruleset group",
+      "message": "Nascondi i banner sui cookie e le informative sulla privacy"
+   },
+   "rulesetLimitDescription": {
+      "description": "Description for quota warning",
+      "message": "Chrome limita il numero di regole che possono essere eseguite contemporaneamente. Le regole con priorità inferiore vengono ignorate, il che potrebbe ridurre il livello di protezione. Modifica la priorità per decidere quali regole mantenere attive."
+   },
+   "rulesetLimitReached": {
+      "description": "Title for quota warning banner",
+      "message": "Limite del set di regole raggiunto"
+   },
+   "rulesetManagementDescription": {
+      "description": "Description for ruleset management page",
+      "message": "Se i limiti del browser impediscono il caricamento di alcune regole, è possibile decidere quali protezioni attivare impostando le priorità."
+   },
+   "rulesetManagementLinkDescription": {
+      "description": "Description for ruleset management page",
+      "message": "Scegli quali regole di sicurezza applicare e definisci le tue priorità in materia di protezione."
+   },
+   "rulesetManagementLinkTitle": {
+      "description": "Title for ruleset management link",
+      "message": "Norme di protezione"
+   },
+   "rulesetManagementTitle": {
+      "description": "Title for ruleset management page",
+      "message": "Gestisci la protezione del tuo browser"
+   },
+   "rulesetStatusApplied": {
+      "description": "Tooltip for applied ruleset status",
+      "message": "Applicato"
+   },
+   "rulesetStatusNotApplied": {
+      "description": "Tooltip for not applied ruleset status",
+      "message": "Non applicato (limite raggiunto)"
+   },
+   "rulesetStatusPartiallyApplied": {
+      "description": "Tooltip for partially applied ruleset status",
+      "message": "Applicato parzialmente"
+   },
+   "rulesetsSaveFailed": {
+      "description": "Error toast title when ruleset save fails",
+      "message": "Impossibile salvare le modifiche"
+   },
+   "rulesetsSaveFailedMessage": {
+      "description": "Error toast message when ruleset save fails",
+      "message": "Impossibile salvare le modifiche. Riprova."
+   },
+   "rulesetsSaved": {
+      "description": "Success toast title when rulesets are saved",
+      "message": "Modifiche salvate"
+   },
+   "rulesetsSavedMessage": {
+      "description": "Success toast message when rulesets are saved",
+      "message": "Le modifiche apportate alle priorità delle regole sono state applicate"
+   },
+   "safariCurrentWebsiteAddToAllowList": {
+      "description": "Add to Allow List button text  on the current website tab",
+      "message": "Aggiungi alla Lista esclusioni"
+   },
+   "safariCurrentWebsiteAllowStatusAdd": {
+      "description": "Allow status message - shows up if the website is not in the allow list",
+      "message": "Aggiungi questo sito alla Lista esclusioni"
+   },
+   "safariCurrentWebsiteAllowStatusExists": {
+      "description": "Allow status message - shows up if the website is alredy in the allow list",
+      "message": "Sito già presente nella Lista esclusioni"
+   },
+   "safariCurrentWebsiteRemoveFromAllowList": {
+      "description": "Remove from Allow List button text on the current website tab",
+      "message": "Rimuovi dalla Lista esclusioni"
+   },
+   "safariProtectionStatusMsg": {
+      "description": "Protection status message",
+      "message": "La protezione è $status$",
+      "placeholders": {
+         "status": {
+            "content": "$1",
+            "example": "active"
+         }
+      }
+   },
+   "safariProtectionStatusOff": {
+      "description": "browsing protection for Safari is off",
+      "message": "La tua esperienza di navigazione NON è protetta"
+   },
+   "safariProtectionStatusOn": {
+      "description": "browsing protection for Safari is on",
+      "message": "La tua esperienza di navigazione è protetta"
+   },
+   "saveMyChoice": {
+      "description": "Save button text",
+      "message": "Salva la mia scelta"
+   },
+   "saving": {
+      "description": "Saving button text when save is in progress",
+      "message": "Salvataggio in corso..."
+   },
+   "scamGuardAnalyzing": {
+      "description": "Status text shown while the AI scanner is actively analyzing the page",
+      "message": "Analisi"
+   },
+   "scamGuardChecking": {
+      "description": "Status text shown while the AI scanner is initiating a check",
+      "message": "Verifica"
+   },
+   "scamGuardDisclaimer": {
+      "description": "Disclaimer shown under the Scam Guard Lite scan results noting that the automated analysis is not guaranteed to be accurate",
+      "message": "Nota: $scamguardlite$ utilizza un'analisi automatizzata e non garantisce l'accuratezza. Verifica le informazioni in modo indipendente.",
+      "placeholders": {
+         "scamguardlite": {
+            "content": "Scam Guard Lite"
+         }
+      }
+   },
+   "scamGuardDownloadingTitle": {
+      "description": "Title for the popover shown while the on-device AI model used by Scam Guard Lite is downloading",
+      "message": "Scaricamento in corso..."
+   },
+   "scamGuardErrorContactSupport": {
+      "description": "Link text for contacting support when the scan fails",
+      "message": "Contatta l'assistenza."
+   },
+   "scamGuardErrorDefault": {
+      "description": "Default error message when the AI scan fails",
+      "message": "Controlla la connessione e riprova."
+   },
+   "scamGuardErrorSupport": {
+      "description": "Text shown before the contact support link on error",
+      "message": "Non funziona ancora?"
+   },
+   "scamGuardErrorTitle": {
+      "description": "Title shown when the AI scan encounters an error",
+      "message": "Si è verificato un errore"
+   },
+   "scamGuardLabelDanger": {
+      "description": "Badge label shown when the scanned site is considered dangerous",
+      "message": "Pericoloso"
+   },
+   "scamGuardLabelNeutral": {
+      "description": "Badge label shown when the scanned site has no obvious threats",
+      "message": "Nessuna minaccia evidente"
+   },
+   "scamGuardLabelSafe": {
+      "description": "Badge label shown when the scanned site is considered safe",
+      "message": "Sito affidabile"
+   },
+   "scamGuardLabelWarning": {
+      "description": "Badge label shown when the scanned site appears suspicious",
+      "message": "Sospetto"
+   },
+   "scamGuardModelDownloadingDescription": {
+      "description": "Body text for the popover shown while the on-device AI model used by Scam Guard Lite is downloading",
+      "message": "Stiamo scaricando Gemini per alimentare $scamguardlite$. Questa operazione viene eseguita una sola volta.",
+      "placeholders": {
+         "scamguardlite": {
+            "content": "Scam Guard Lite"
+         }
+      }
+   },
+   "scamGuardOurRecommendation": {
+      "description": "Label preceding the recommendation text in scan results",
+      "message": "Il nostro consiglio:"
+   },
+   "scamGuardReadyTitle": {
+      "description": "Title for the popover shown when the on-device AI model is fully downloaded and Scam Guard Lite is ready to use",
+      "message": "$scamguardlite$ è pronto",
+      "placeholders": {
+         "scamguardlite": {
+            "content": "Scam Guard Lite"
+         }
+      }
+   },
+   "scamGuardRecDescDanger": {
+      "description": "Recommendation description when the site is dangerous",
+      "message": "Questo sito web presenta diversi elementi che fanno pensare a una truffa di phishing."
+   },
+   "scamGuardRecDescNeutral": {
+      "description": "Recommendation description when no threats are found",
+      "message": "Non abbiamo trovato nulla di sospetto, ma ti invitiamo a prestare attenzione quando condividi informazioni personali online."
+   },
+   "scamGuardRecDescSafe": {
+      "description": "Recommendation description when the site is safe",
+      "message": "Si tratta di un sito noto e affidabile, ma $scamguardlite$ potrebbe comunque trovare in questa pagina elementi che richiedono un'attenzione particolare. Controlla i link, i messaggi o i moduli contrassegnati prima di condividere informazioni personali.",
+      "placeholders": {
+         "scamguardlite": {
+            "content": "Scam Guard Lite"
+         }
+      }
+   },
+   "scamGuardRecDescWarning": {
+      "description": "Recommendation description when the site is suspicious",
+      "message": "Questo sito presenta alcuni indizi che fanno pensare a un sito truffaldino. Evita di inserire qui dati personali o password."
+   },
+   "scamGuardRecHeaderDanger": {
+      "description": "Recommendation header when the site is dangerous",
+      "message": "Non fidarti"
+   },
+   "scamGuardRecHeaderNeutral": {
+      "description": "Recommendation header when no threats are found",
+      "message": "Nessun risultato trovato"
+   },
+   "scamGuardRecHeaderSafe": {
+      "description": "Recommendation header when the site is safe",
+      "message": "Navigazione sicura"
+   },
+   "scamGuardRecHeaderWarning": {
+      "description": "Recommendation header when the site is suspicious",
+      "message": "Si raccomanda cautela"
+   },
+   "scamGuardResult": {
+      "description": "Heading for the streaming analysis result section",
+      "message": "Risultato"
+   },
+   "scamGuardRetry": {
+      "description": "Button label to retry the AI scan after an error",
+      "message": "Riprova"
+   },
+   "scamGuardTitle": {
+      "description": "Title for the AI Scanner feature-announcement popover (stage 1)",
+      "message": "Installa $scamguardlite$",
+      "placeholders": {
+         "scamguardlite": {
+            "content": "Scam Guard Lite"
+         }
+      }
+   },
+   "scamGuardTooltipChrome": {
+      "description": "Tooltip describing how Scam Guard Lite works in Chrome (uses Google Gemini Nano on-device)",
+      "message": "$scamguardlite$ è alimentato da Google Gemini Nano e funziona interamente nel tuo browser. I tuoi dati rimangono sul tuo dispositivo e non li vediamo mai.",
+      "placeholders": {
+         "scamguardlite": {
+            "content": "Scam Guard Lite"
+         }
+      }
+   },
+   "scamGuardTooltipEdge": {
+      "description": "Tooltip describing how Scam Guard Lite works in Edge (uses Microsoft Phi Mini on-device)",
+      "message": "$scamguardlite$ è alimentato da Microsoft Phi Mini e funziona interamente nel tuo browser. I tuoi dati rimangono sul tuo dispositivo e non li vediamo mai.",
+      "placeholders": {
+         "scamguardlite": {
+            "content": "Scam Guard Lite"
+         }
+      }
+   },
+   "scamLabel": {
+      "description": "Label for the scam protection feature",
+      "message": "Blocca i tentativi di accesso ai vostri dati personali"
+   },
+   "scanWithScamGuardLite": {
+      "description": "Menu item in the context menu for scanning the current page with the on-device AI Scam Guard Lite model",
+      "message": "Scansiona tramite $scamguardlite$",
+      "placeholders": {
+         "scamguardlite": {
+            "content": "Scam Guard Lite"
+         }
+      }
+   },
+   "searchHijackingWarningHeader": {
+      "description": "Header on the pop up that warns the user of possible search hijacking",
+      "message": "Rilevato dirottamento della ricerca"
+   },
+   "searchHijackingWarningMessage": {
+      "description": "Body of the popup that warns the user of possible search hijacking",
+      "message": "Abbiamo rilevato modifiche non autorizzate nei risultati della tua ricerca. Un truffatore potrebbe cercare di ingannarti sovrapponendo il suo numero di telefono a quello di un sito web attendibile."
+   },
+   "settingsAdsDescription": {
+      "description": "Description for toggling ad/tracker protection",
+      "message": "Blocca pubblicità e tracker di terzi che monitorano la tua attività online."
+   },
+   "settingsAdsTrackersTitle": {
+      "description": "Title for the Ads/Trackers protection toggle",
+      "message": "Annunci/Trackers"
+   },
+   "settingsAllProtectionDescription": {
+      "description": "Description for toggling all protection settings on or off",
+      "message": "Attivare/disattivare l'estensione $name$.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "settingsAllProtectionLabel": {
+      "description": "Label for toggling all protection settings on or off",
+      "message": "Tutte le impostazioni di protezione"
+   },
+   "settingsDupWarningsDescription": {
+      "description": "Description for MB4 Integration Setting",
+      "message": "Nasconde le avvertenze di siti web bloccati da Malwarebytes Premium per utenti che abbiano abilitato sia $mb$ che Premium.",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "settingsDupWarningsHeader": {
+      "description": "Header for MB4 Integration Setting",
+      "message": "Nascondi avvertenze doppie"
+   },
+   "settingsGtldDescription": {
+      "description": "Description for toggling gTLD domain protection",
+      "message": "Blocca domini di primo livello (TLD) sospetti e utilizzati di frequente da siti di scam o phishing."
+   },
+   "settingsGtldTitle": {
+      "description": "Title for the gTLD domains protection toggle",
+      "message": "domini gTLD"
+   },
+   "settingsMalwareDescription": {
+      "description": "Description for toggling malware protection",
+      "message": "Blocca programmi o codici dannosi."
+   },
+   "settingsMalwareTitle": {
+      "description": "Title for the Malware protection toggle",
+      "message": "Malware"
+   },
+   "settingsNavItem": {
+      "description": "'Settings' Navigation Item",
+      "message": "Impostazioni"
+   },
+   "settingsPageDescription": {
+      "description": "Description text on the Settings page explaining its purpose",
+      "message": "Controllate il modo in cui $name$ vi protegge online. Regolate cosa viene bloccato, quali siti sono affidabili e come ricevere le notifiche.",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "settingsPermissionsLabel": {
+      "description": "Label for the Permissions section",
+      "message": "Permessi"
+   },
+   "settingsRulesetManagementLabel": {
+      "description": "Description for ruleset management in settings",
+      "message": "Scegli quali regole di sicurezza applicare e definisci le tue priorità in materia di protezione."
+   },
+   "settingsRulesetManagementLinkLabel": {
+      "description": "Link label for ruleset management in settings",
+      "message": "Gestisci regole"
+   },
+   "settingsScamsDescription": {
+      "description": "Description for toggling scams protection",
+      "message": "Blocca truffe online, comprendendo technical support scam, browser locker e attività di phishing."
+   },
+   "settingsScamsTitle": {
+      "description": "Title for the Scams protection toggle",
+      "message": "Truffe"
+   },
+   "settingsSearchResultReputationDescription": {
+      "description": "Description for the search result reputation protection toggle",
+      "message": "Vedi un badge di sicurezza accanto a ogni risultato di ricerca per aiutarti a individuare i siti rischiosi, alimentato dai dati di reputazione di $malwarebytes$.",
+      "placeholders": {
+         "malwarebytes": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "settingsSearchResultReputationTitle": {
+      "description": "Title for the search result reputation protection toggle",
+      "message": "Reputazione dei risultati di ricerca"
+   },
+   "settingsSummaryText": {
+      "description": "Settings Summary text, displayed above the toggles",
+      "message": "Queste impostazioni di protezione si applicano a tutti i siti web. È possibile personalizzare le impostazioni per ciascun sito web nella scheda Corrente del sito web in questione."
+   },
+   "settingsToggleBlockCountDescription": {
+      "description": "Description for toggling the block count",
+      "message": "Abilita il conteggio degli elementi bloccati nell'icona dell'estensione."
+   },
+   "settingsToggleBlockCountLabel": {
+      "description": "Label for toggling the block count",
+      "message": "Mostra conteggio degli elementi bloccati"
+   },
+   "settingsToggleBreachAlertsDesc": {
+      "description": "Description for toggling breach alerts.",
+      "message": "Avvisi di violazione"
+   },
+   "settingsToggleClipboardReadPermissionDesc": {
+      "description": "Description for toggling clipboard read permission",
+      "message": "Autorizzazione alla lettura degli appunti."
+   },
+   "settingsToggleClipboardReadPermissionTooltip": {
+      "description": "Tooltip explaining clipboard monitoring functionality",
+      "message": "Monitora il contenuto degli appunti per rilevare\ndati sospetti che possono indicare una\npotenziale minaccia alla sicurezza."
+   },
+   "settingsToggleMaliciousNotificationDesc": {
+      "description": "Description for toggling malicious notifications.",
+      "message": "Notifiche malware in tempo reale"
+   },
+   "settingsToggleMonthlyNotificationDesc": {
+      "description": "Description for toggling monthly notifications.",
+      "message": "Riepilogo mensile"
+   },
+   "settingsToggleNewReleaseNotificationDesc": {
+      "description": "New Release notifications toggle description.",
+      "message": "Notifiche sulle nuove versioni"
+   },
+   "settingsToggleNotificationLabel": {
+      "description": "Label for toggling Notifications.",
+      "message": "Notifiche"
+   },
+   "settingsTogglePrivacyPermissionDesc": {
+      "description": "Description for the privacy permission",
+      "message": "Impedisci ai siti di tracciarti prima ancora di visitarli."
+   },
+   "settingsTogglePrivacyPermissionTooltip": {
+      "description": "Tooltip for the privacy permission toggle",
+      "message": "Alcuni siti si connettono silenziosamente agli tracker pubblicitari prima che tu li visiti. Questo li blocca."
+   },
+   "settingsToggleProfileCheckerNotificationDesc": {
+      "description": "Profile checker notifications toggle description.",
+      "message": "Notifiche del controllo profilo"
+   },
+   "settingsToggleSafariUpdater": {
+      "description": "Label for toggling automatic updates for Safari",
+      "message": "Aggiornamenti automatici"
+   },
+   "settingsToggleSafariUpdaterDesc": {
+      "description": "Description for automatic updates for Safari",
+      "message": "Aggiorna automaticamente i database in background."
+   },
+   "settingsToggleSearchHijackingNotificationDesc": {
+      "description": "Description for search hijacking notifications toggle button.",
+      "message": "Notifiche di dirottamento della ricerca"
+   },
+   "settingsToggleSkimmerDescription": {
+      "description": "Description for toggling advanced skimmer protection for credit card protection",
+      "message": "Proteggi il tuo metodo di pagamento nelle pagine di checkout."
+   },
+   "settingsToggleSkimmerLabel": {
+      "description": "Label for toggling advanced skimmer protection",
+      "message": "Protezione anti-skimmer avanzata"
+   },
+   "settingsToggleVerboseLoggingDescription": {
+      "description": "Description for toggling verbose logging",
+      "message": "Abilita registrazione dettagliata a fini di debug"
+   },
+   "settingsToggleVerboseLoggingLabel": {
+      "description": "Label for toggling verbose logging",
+      "message": "Registrazione dettagliata"
+   },
+   "settingsVerboseLoggingDescription": {
+      "description": "Description for the Verbose Logging section",
+      "message": "Abilita la registrazione verbosa a scopo di debug."
+   },
+   "settingsVerboseLoggingLabel": {
+      "description": "Label for the Verbose Logging section",
+      "message": "Registrazione verbosa"
+   },
+   "shareExtensionBtn": {
+      "description": "Share extension button text.",
+      "message": "Condividi estensione"
+   },
+   "shareExtensionMenuItem": {
+      "description": "Menu item for sharing the extension",
+      "message": "Estensione della quota"
+   },
+   "shareOnFacebookBtn": {
+      "description": "Share on Facebook button text.",
+      "message": "Condividi su Facebook"
+   },
+   "shareOnLinkedInBtn": {
+      "description": "Share on LinkedIn button text.",
+      "message": "Condividi su LinkedIn"
+   },
+   "shareOnTwitterBtn": {
+      "description": "Share on Twitter button text.",
+      "message": "Condividi su X (Twitter)"
+   },
+   "shellInjectionGotItMessage": {
+      "description": "Button text to close the shell injection warning popup",
+      "message": "Capisco"
+   },
+   "shellInjectionWarningHeader": {
+      "description": "Header on the pop up that warns the user of possible shell injections",
+      "message": "Testo sospetto copiato"
+   },
+   "shellInjectionWarningMessage": {
+      "description": "Body of the popup that warns the user of possible shell injections",
+      "message": "Procedere con estrema cautela. Questo sito web potrebbe tentare di indurvi a eseguire comandi dannosi. Si consiglia di NON copiare questo testo da nessuna parte."
+   },
+   "siteReputationSafeBody": {
+      "description": "Body text shown in the site reputation tooltip when the URL is safe",
+      "message": "Non abbiamo trovato elementi sospetti su questa pagina."
+   },
+   "siteReputationSafeHeading": {
+      "description": "Heading shown in the site reputation tooltip when the URL is safe",
+      "message": "Questa pagina è sicura"
+   },
+   "siteReputationUnsafeBody": {
+      "description": "Body text shown in the site reputation tooltip when the URL is unsafe",
+      "message": "Abbiamo trovato alcuni elementi sospetti su questa pagina."
+   },
+   "siteReputationUnsafeHeading": {
+      "description": "Heading shown in the site reputation tooltip when the URL is unsafe",
+      "message": "Questa pagina non è sicura"
+   },
+   "siteSettingsFor": {
+      "description": "Site settings header with hostname parameter",
+      "message": "Impostazioni del sito per \u003Cspan class=\"font-semibold\">$hostname$\u003C/span>",
+      "placeholders": {
+         "hostname": {
+            "content": "$1",
+            "example": "google.com"
+         }
+      }
+   },
+   "skipForNowText": {
+      "description": "Skip for now text",
+      "message": "Saltare per ora"
+   },
+   "startBrowsingToSeeStats": {
+      "description": "Message prompting the user to browse in order to generate statistics",
+      "message": "Iniziare la navigazione per vedere le statistiche"
+   },
+   "statisticsTitle": {
+      "description": "Title for the statistics section",
+      "message": "Statistiche"
+   },
+   "stats30Days": {
+      "description": "Dropdown selector for stats page to select stats for 30 days",
+      "message": "30 giorni"
+   },
+   "statsAllTime": {
+      "description": "Dropdown selector for stats page to select stats for all time history",
+      "message": "Sempre"
+   },
+   "statsChartNoAvailable": {
+      "description": "Text when the user select the All time history option",
+      "message": "Un grafico non è disponibile per statistiche Sempre"
+   },
+   "statsIsBlocked": {
+      "description": "Notation for specific item blocked e.g \"Ads / Trackers Blocked\"",
+      "message": "Bloccato"
+   },
+   "statsItemsBlocked": {
+      "description": "Notation for items blocked",
+      "message": "Elementi bloccati"
+   },
+   "statsNavItem": {
+      "description": "'Statistics' Navigation Item",
+      "message": "Statistiche"
+   },
+   "statsThisWeek": {
+      "description": "Dropdown selector for stats page to select stats for this week",
+      "message": "Questa settimana"
+   },
+   "statsToday": {
+      "description": "Dropdown selector for stats page to select stats for today",
+      "message": "Oggi"
+   },
+   "statsTwoWeeks": {
+      "description": "Dropdown selector for stats page to select stats for two weeks",
+      "message": "Due settimane"
+   },
+   "supportAndDiagnosticsDescription": {
+      "description": "Description for the about section in support and diagnostics view",
+      "message": "Accedi alle risorse di supporto, verifica la presenza di aggiornamenti, download e gestisci Browser Guard di Browser Guard ."
+   },
+   "supportAndDiagnosticsHeader": {
+      "description": "Header for the about section in support and diagnostics view",
+      "message": "Informazioni su"
+   },
+   "supportAndDiagnosticsNavItem": {
+      "description": "Navigation item for support and diagnostics section in settings",
+      "message": "Assistenza e diagnostica"
+   },
+   "supportCheckErrorLine1": {
+      "description": "Line 1 of an error checking for DB updates",
+      "message": "Si è verificato un errore. Riprova oppure"
+   },
+   "supportCheckErrorLine2": {
+      "description": "Line 2 of an error checking for DB updates",
+      "message": "contatta l'assistenza"
+   },
+   "supportCheckForUpdates": {
+      "description": "Button text to check for updates",
+      "message": "Ricerca aggiornamenti del database"
+   },
+   "supportCheckForUpdatesIP": {
+      "description": "Button text when checking for updates",
+      "message": "Ricerca aggiornamenti in corso"
+   },
+   "supportCopyrightText": {
+      "message": "$mb$. Tutti i diritti riservati.",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "supportDbComplete": {
+      "description": "Button text when database update is complete",
+      "message": "Il database è aggiornato",
+      "placeholders": {
+         "mb": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "supportDbUpdating": {
+      "description": "Button text when database is actively updating",
+      "message": "Aggiornamento in corso"
+   },
+   "supportDownloadLogs": {
+      "description": "Button text to download user logs",
+      "message": "Scarica log di debug"
+   },
+   "supportFactoryResetMessage": {
+      "description": "'Clear Browser Guard Storage' warning prompt message",
+      "message": "Sei certo di voler cancellare il tuo archivio $bg$?",
+      "placeholders": {
+         "bg": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "supportFactoryResetNo": {
+      "description": "Button to decline factory reset prompt",
+      "message": "Annulla"
+   },
+   "supportFactoryResetYes": {
+      "description": "Button to accept factory reset prompt",
+      "message": "Sì"
+   },
+   "supportLegalAndPolicy": {
+      "message": "Note legali e politica"
+   },
+   "supportLicenseLinkText": {
+      "description": "End User License Agreement link text",
+      "message": "Accordo di licenza per l'utente finale (EULA)"
+   },
+   "supportLinkText": {
+      "description": "Link text to Malwarebytes Support page",
+      "message": "Supporto $mb$",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "supportMbLabsExplain": {
+      "description": "Text explaining Malwarebytes Labs website link",
+      "message": "Le ultime novità in materia di sicurezza e formazione informatica"
+   },
+   "supportMbLabsLink": {
+      "description": "Link text to Malwarebytes Labs",
+      "message": "Novità $mb$ Labs",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "supportMbLink": {
+      "description": "Link text to Malwarebytes website",
+      "message": "Sito web di $mb$",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "supportMbLinkExplain": {
+      "description": "Text explaining Malwarebytes website link",
+      "message": "Tutto $mb$",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "supportMbSupportExplain": {
+      "description": "Text explaining Malwarebytes support website link",
+      "message": "Abbiamo le risposte"
+   },
+   "supportMbSupportLink": {
+      "description": "Link text to Malwarebytes support",
+      "message": "Supporto $name$",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "supportMenuItem": {
+      "description": "Menu item for Support page",
+      "message": "Assistenza"
+   },
+   "supportNavItem": {
+      "description": "'Support' Navigation Item",
+      "message": "Supporto"
+   },
+   "supportProductInfo": {
+      "description": "Header for area showing version information",
+      "message": "Informazioni sul prodotto"
+   },
+   "supportResourcesTitle": {
+      "description": "Title for Support resources links",
+      "message": "Supporto prodotti"
+   },
+   "supportTxt": {
+      "description": "Support text.",
+      "message": "Supporto"
+   },
+   "supportUserGuideExplain": {
+      "description": "Text explaining product user guide website link",
+      "message": "Come sfruttare al meglio il tuo $mb$",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "supportUserGuideLink": {
+      "description": "Link to Malwarebytes user guides",
+      "message": "Manuali utente dei prodotti"
+   },
+   "supportVersionInfoSubheader": {
+      "description": "Sub-Header for area showing version information",
+      "message": "Versione di $mb$",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "suspiciousContentExplanation": {
+      "description": "Text explaining why a suspicious content (download) block could occur",
+      "message": "$mb$ esegue la scansione dei download avviati nel browser e potrebbe bloccare/rimuovere gli elementi considerati sospetti. Se ritieni affidabile il contenuto/sito web e desideri procedere, fai clic su \"Continua\".",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "suspiciousTldExplanation": {
+      "description": "Text explaining why a suspicious TLD block could occur",
+      "message": "$mb$ ha bloccato questa pagina poiché utilizza un dominio di primo livello (TLD) sospetto. Tali domini sono utilizzati di frequente per scam o phishing, tuttavia possono essere utilizzati anche da siti web legittimi. Se ritieni questo sito web affidabile, fai clic su VAI AL SITO. In caso contrario, seleziona TORNA INDIETRO.",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "systemPage": {
+      "description": "Shown as a title when the user is on a system page",
+      "message": "Pagina di sistema"
+   },
+   "tagline": {
+      "message": "Pronto a iniziare?"
+   },
+   "telemOptInLabel": {
+      "description": "Directly visible text to convince users to opt in to telemetry",
+      "message": "Aiutaci a migliorare condividendo in anonimo dati di rilevamento e dispositivo con $mb$",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         }
+      }
+   },
+   "telemOptInTooltip": {
+      "description": "Tooltip for when user hovers over visible opt in text",
+      "message": "Raccogliamo i dati in forma anonima a ogni minaccia rilevata o bloccata. Ciò ci aiuta a creare un'esperienza migliore per l'utente e a migliorare i nostri prodotti nella protezione da malware."
+   },
+   "thankYouUsingBG": {
+      "description": "Heading that thanks user for using Browser Guard.",
+      "message": "Grazie per aver utilizzato Browser Guard"
+   },
+   "today": {
+      "description": "Label for the today time range",
+      "message": "Oggi"
+   },
+   "toggleOff": {
+      "description": "It's off",
+      "message": "DISATTIVA"
+   },
+   "toggleOn": {
+      "description": "It's on",
+      "message": "ATTIVA"
+   },
+   "total": {
+      "description": "The word \"Total\"",
+      "message": "Totale"
+   },
+   "twoWeeks": {
+      "description": "Label for the two weeks time range",
+      "message": "Due settimane"
+   },
+   "unblock": {
+      "description": "Unblock action",
+      "message": "Sblocca"
+   },
+   "upSellSummaryText": {
+      "description": "Full protection tab summary text.",
+      "message": "Le minacce informatiche non si fermano al tuo browser. Controlla lo stato della tua protezione su questo dispositivo: nel browser e altrove."
+   },
+   "updateBtnText": {
+      "description": "Update Browser Guard button text.",
+      "message": "Aggiorna"
+   },
+   "upsellLearnMoreText": {
+      "description": "MBAM premium installed.",
+      "message": "Scopri di più"
+   },
+   "urlColumnAllowList": {
+      "description": "Column Header for Allow List URL/IP Addresses",
+      "message": "URL/indirizzo IP"
+   },
+   "urlColumnContentControl": {
+      "description": "Column Header for Content Control URL/IP Addresses",
+      "message": "URL / indirizzo IP bloccato"
+   },
+   "viewTutorialMenuItem": {
+      "description": "Button text for viewing the tutorial",
+      "message": "Visualizza il tutorial"
+   },
+   "viewTutorialNavItem": {
+      "description": "'View tutorial' Navigation Item",
+      "message": "Visualizza tutorial"
+   },
+   "vpnFreeInstallDescription": {
+      "description": "VPN description status when mbam is not premium.",
+      "message": "Metti in sicurezza la tua connessione WiFi e proteggi la tua privacy online con la nostra VPN \"no-log\"."
+   },
+   "vpnFreeInstallStatus": {
+      "description": "VPN card text when mabam is not premium.",
+      "message": "Disattiva"
+   },
+   "vpnFreeIntallTooltip": {
+      "description": "",
+      "message": "Scanner gratuito Malwarebytes installato. Passa alla versione Premium per una protezione completa."
+   },
+   "vpnInstalledStatus": {
+      "description": "Installed status of VPN.",
+      "message": "Installata"
+   },
+   "vpnInstalledStatusDescription": {
+      "description": "Vpn enabled description.",
+      "message": "Ben fatto! Potrai proteggere la tua privacy online ogniqualvolta Malwarebytes VPN sarà connesso."
+   },
+   "vpnNotInstalledDescription": {
+      "description": "Not installed VPN description text.",
+      "message": "Metti in sicurezza la tua connessione WiFi e proteggi la tua privacy online con la nostra VPN \"no-log\"."
+   },
+   "vpnNotInstalledStatus": {
+      "description": "Status text when mbam is not installed yet.",
+      "message": "Non installata"
+   },
+   "vpnNotInstalledTooltipTxt": {
+      "description": "Vpn protection card info tooltip text.",
+      "message": "Browser Guard non collegato alla VPN Malwarebytes su questo dispositivo"
+   },
+   "vpnProtectionTitle": {
+      "description": "Vpn card title.",
+      "message": "Protezione VPN"
+   },
+   "warning": {
+      "message": "Avvertenza"
+   },
+   "websiteBlockHeader": {
+      "description": "Header at top right before indicating block type",
+      "message": "Sito web bloccato a causa di "
+   },
+   "websiteBlockText": {
+      "description": "Text right before noting what site was blocked",
+      "message": "Sito web bloccato:"
+   },
+   "websiteProtectionsButton": {
+      "description": "Button text for accessing website-specific protection settings",
+      "message": "Protezioni del sito web"
+   },
+   "webstorePage": {
+      "description": "Shown as a title when the user is on the Chrome Webstore",
+      "message": "Chrome Webstore"
+   },
+   "welcomeChrome": {
+      "description": "Tells user to keep Browser Guard extension icon pinned to address bar",
+      "message": "Inserisci $name$ sulla tua barra dell'indirizzo",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "welcomeChromeInfo": {
+      "description": "More info on pinning the extension",
+      "message": "(Fai clic sull'icona a forma di puzzle e quindi sull'icona a forma di puntina)"
+   },
+   "welcomeDefault": {
+      "description": "Default Welcome message",
+      "message": "Fai clic sull'icona Malwarebytes sulla tua barra dell'indirizzo per aderire alla condivisione dei dati e aiutarci a creare un ambiente privo di malware."
+   },
+   "welcomeDone": {
+      "description": "Final line telling user setup is done",
+      "message": "Fatto! Preparati a un'esperienza di navigazione più sicura e veloce."
+   },
+   "welcomeDoneMessage": {
+      "description": "Message displayed when the user completes the onboarding flow",
+      "message": "Grazie per aver utilizzato $name$!",
+      "placeholders": {
+         "name": {
+            "content": "Browser Guard"
+         }
+      }
+   },
+   "welcomeEdge": {
+      "description": "Tells edge user to keep Browser Guard extension icon pinned to address bar",
+      "message": "Mantieni $name$ visibile nella tua barra dell'indirizzo",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "welcomeEdgeInfo": {
+      "description": "More info on pinning the extension",
+      "message": "(Fai clic sull'icona a forma di puzzle e quindi sull'icona a forma di occhio)"
+   },
+   "welcomeHeader": {
+      "description": "Welcome header on welcome pages",
+      "message": "Benvenuto!"
+   },
+   "welcomeHeaderAction": {
+      "description": "Welcome header on welcome pages with user action (telemetry opt-in, pin Browser Guard etc.)",
+      "message": "Hai quasi finito!"
+   },
+   "welcomeIconInfo": {
+      "description": "Info on how to use the Malwarebytes icon",
+      "message": "Fai clic sull'icona Malwarebytes per attivare o disattivare la protezione in qualsiasi momento."
+   },
+   "welcomePinEdgeInfo1": {
+      "description": "Tells user to keep Browser Guard extension icon pinned to Edge address bar.",
+      "message": "Mostra Malwarebytes Browser Guard nella barra degli strumenti. Fai clic"
+   },
+   "welcomePinEdgeInfo2": {
+      "description": "Tells user to keep Browser Guard extension icon pinned to Edge address bar.",
+      "message": "sull’icona a forma di puzzle e quindi sull’icona a forma di occhio."
+   },
+   "welcomePinInfo1": {
+      "description": "Tells user to keep Browser Guard extension icon pinned to address bar",
+      "message": "Tenete $name$ bloccato nella barra degli indirizzi.",
+      "placeholders": {
+         "name": {
+            "content": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "welcomePinInfo2": {
+      "description": "Tells user to keep Browser Guard extension icon pinned to address bar",
+      "message": "Fai clic sull’icona a forma di puzzle e quindi sull’icona a forma di puntina."
+   },
+   "welcomePinInfoFirefox1": {
+      "description": "Tells user to keep Browser Guard extension icon pinned to address bar",
+      "message": "Inserisci Malwarebytes Browser Guard sulla tua barra dell’indirizzo."
+   },
+   "welcomePinInfoFirefox2": {
+      "description": "Tells user to keep Browser Guard extension icon pinned to address bar",
+      "message": "Fai clic sull’icona a forma di puzzle -> quindi fai clic sulla rotellina -> seleziona “aggiungi"
+   },
+   "welcomePinInfoFirefox3": {
+      "description": "Tells user to keep Browser Guard extension icon pinned to address bar",
+      "message": "alla barra degli strumenti”."
+   },
+   "welcomeTitle": {
+      "description": "Welcome page title",
+      "message": "Benvenuto a $name$",
+      "placeholders": {
+         "name": {
+            "content": "$1",
+            "example": "Malwarebytes Browser Guard"
+         }
+      }
+   },
+   "welcomeTo": {
+      "description": "Onboarding welcome header prefix",
+      "message": "Benvenuti a"
+   },
+   "whatsNewMenuItem": {
+      "description": "Menu item for What's New page",
+      "message": "Cosa c'è di nuovo"
+   },
+   "yesDeleteButton": {
+      "description": "Delete all confirmation",
+      "message": "Sì, elimina"
+   },
+   "youtubeAdsIntroDontShowAgain": {
+      "description": "Secondary button text that permanently dismisses the YouTube intro notification",
+      "message": "Non mostrare più"
+   },
+   "youtubeAdsIntroMessage": {
+      "description": "Body text for the first-visit YouTube ad-blocking notification",
+      "message": "Il blocco degli annunci su $utube$ è disattivato.\nFai clic sull'icona $mb$ nella barra degli strumenti per attivarlo. Puoi disattivarlo in qualsiasi momento.",
+      "placeholders": {
+         "mb": {
+            "content": "Malwarebytes"
+         },
+         "utube": {
+            "content": "YouTube"
+         }
+      }
+   },
+   "youtubeAdsIntroTitle": {
+      "description": "Title for the first-visit YouTube ad-blocking notification",
+      "message": "Vuoi bloccare gli annunci su $utube$?",
+      "placeholders": {
+         "utube": {
+            "content": "YouTube"
+         }
+      }
+   }
+}

@@ -68,6 +68,17 @@
   const esc = (s) => window.OlongNotes && window.OlongNotes.escapeHtml
     ? window.OlongNotes.escapeHtml(s)
     : String(s == null ? '' : s);
+  // Shared avatar helper (js/avatar.js). Resolves to a no-op stub if
+  // the file didn't load for some reason — the page still renders the
+  // colored initials fallback in that case via tintFor() + initials().
+  const shared = (window.OlongNotes && window.OlongNotes.shared) || {};
+  const renderAvatar = shared.renderAvatar || function (u, opts) {
+    const name = (u && u.user_name) || '';
+    const tint = (shared.tintFor && shared.tintFor(name)) || '#3d6bf0';
+    return '<span class="question-row__avatar" style="--avatar-tint:' + tint + '" aria-hidden="true">' +
+           (name && name.trim ? name.trim().charAt(0).toUpperCase() : '?') +
+           '</span>';
+  };
   const initials = (name) => (name && name.trim ? name.trim().charAt(0).toUpperCase() : '?');
 
   function relativeTime(iso) {
@@ -131,6 +142,10 @@
     const tint = tintFor(q.subjects && q.subjects.subject_name);
     const asker = (q.users && q.users.user_name) || 'Anonymous';
     const subjectName = (q.subjects && q.subjects.subject_name) || '';
+    // Avatar: photo if the asker uploaded one, otherwise the tinted
+    // initials-circle fallback (same color/size as before — see
+    // js/avatar.js for the helper details).
+    const askerAvatar = renderAvatar(q.users, { variant: 'row', tint: tint });
     const bucket = bucketForGrade(q.grade_level);
     const bucketLabel = BUCKET_LABEL[bucket] || 'All Levels';
     const isAnswered = String(q.status || '').toLowerCase() === 'answered';
@@ -153,7 +168,7 @@
 
     // The title links to the real question page (works without JS too).
     li.innerHTML =
-      '<span class="question-row__avatar" style="--avatar-tint:' + tint + '" aria-hidden="true">' + esc(initials(asker)) + '</span>' +
+      askerAvatar +
       '<div class="question-row__body">' +
         '<div class="question-row__header">' +
           '<span class="question-row__asker">' + esc(asker) + '</span>' +

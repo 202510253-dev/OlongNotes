@@ -1,0 +1,120 @@
+@import url("common-styles.css");
+
+body {
+    font-family: 'roboto', sans-serif;
+}
+
+main {
+    padding-bottom: 50px;
+}
+
+#re-title {
+    margin-bottom: 40px;
+}
+
+#re-info>div:not(:last-child) {
+    margin-bottom: 32px;
+}
+
+h4 {
+    font-weight: 800;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+p {
+    font-family: 'roboto', sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+}
+
+.bold {
+    font-weight: 700;
+}
+
+#choose-features>h4 {
+    margin-bottom: 32px;
+}
+
+#choose-features>h4 {
+    margin-bottom: 32px;
+}
+
+#choose-features {
+    flex-direction: column;
+}
+
+#choose-features>label {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+#choose-features>label>input[type=checkbox] {
+    margin-top: 3px;
+}
+
+#choose-features>label>div {
+    display: flex;
+    flex-direction: column;
+}
+
+#choose-features>label:has(input[type=checkbox].error) {
+    border: 1px dashed #FF5656;
+}
+
+#choose-features {
+    font-family: 'roboto', sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+}
+
+#choose-features .hint {
+    color: #999999;
+}
+
+#choose-features>label>div>p:first-child {
+    font-weight: 500;
+}
+
+#choose-features button {
+    margin-top: 16px;
+}
+
+#error-message {
+    margin-top: 16px;
+    background-color: #FCDEDE;
+    padding: 16px 32px;
+    border-radius: 16px;
+    color: #1F222D;
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+#save-choice-btn-container {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: end;
+}
+
+#choice-saved {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 16px;
+}
+.ruleset-content {
+    gap: 20px !important;
+}

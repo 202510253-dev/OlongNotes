@@ -1,0 +1,117 @@
+{
+   "action": {
+      "default_icon": {
+         "16": "app/assets/bg-icon/bg-favicon-16x16.png",
+         "200": "app/assets/bg-icon/bg-favicon-200x200.png",
+         "256": "app/assets/bg-icon/bg-favicon-256x256.png",
+         "32": "app/assets/bg-icon/bg-favicon-32x32.png",
+         "48": "app/assets/bg-icon/bg-favicon-48x48.png",
+         "512": "app/assets/bg-icon/bg-favicon-512x512.png",
+         "64": "app/assets/bg-icon/bg-favicon-64x64.png",
+         "96": "app/assets/bg-icon/bg-favicon-96x96.png"
+      },
+      "default_popup": "app/popup/index.html",
+      "default_title": "Malwarebytes"
+   },
+   "author": "Malwarebytes",
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "js": [ "content-debugging.js" ],
+      "matches": [ "https://browserguard.local/*" ],
+      "run_at": "document_start"
+   }, {
+      "all_frames": true,
+      "js": [ "content-scripts.js" ],
+      "match_about_blank": true,
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "content-oap-notification.js" ],
+      "matches": [ "https://myaccount.google.com/*" ],
+      "run_at": "document_idle"
+   }, {
+      "js": [ "content-linkedin.js" ],
+      "matches": [ "https://www.linkedin.com/*" ],
+      "run_at": "document_idle"
+   } ],
+   "content_security_policy": {
+      "extension_pages": "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; frame-ancestors 'self' https://my.malwarebytes.com; frame-src 'none'; worker-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' * blob:;"
+   },
+   "declarative_net_request": {
+      "rule_resources": [ {
+         "enabled": true,
+         "id": "mbgc.mv3.whitelist_1",
+         "path": "db/mbgc.mv3.whitelist_1.json"
+      }, {
+         "enabled": false,
+         "id": "mbgc.mv3.ads_1",
+         "path": "db/mbgc.mv3.ads_1.json"
+      }, {
+         "enabled": false,
+         "id": "mbgc.mv3.ads_2",
+         "path": "db/mbgc.mv3.ads_2.json"
+      }, {
+         "enabled": false,
+         "id": "mbgc.mv3.malware_1",
+         "path": "db/mbgc.mv3.malware_1.json"
+      }, {
+         "enabled": false,
+         "id": "mbgc.mv3.easylist_1",
+         "path": "db/mbgc.mv3.easylist_1.json"
+      }, {
+         "enabled": false,
+         "id": "mbgc.mv3.easyprivacy_1",
+         "path": "db/mbgc.mv3.easyprivacy_1.json"
+      }, {
+         "enabled": true,
+         "id": "mbgc.arw",
+         "path": "db/mbgc.arw.json"
+      }, {
+         "enabled": true,
+         "id": "mbgc.mv3.always_allow_DNR",
+         "path": "db/mbgc.mv3.always_allow_DNR.json"
+      } ]
+   },
+   "default_locale": "en",
+   "description": "__MSG_appDesc__",
+   "externally_connectable": {
+      "matches": [ "https://my.malwarebytes.com/*" ]
+   },
+   "host_permissions": [ "\u003Call_urls>" ],
+   "icons": {
+      "128": "app/assets/bg-icon/bg-favicon-128x128.png",
+      "16": "app/assets/bg-icon/bg-favicon-16x16.png",
+      "180": "app/assets/bg-icon/bg-favicon-180x180.png",
+      "192": "app/assets/bg-icon/bg-favicon-192x192.png",
+      "200": "app/assets/bg-icon/bg-favicon-200x200.png",
+      "256": "app/assets/bg-icon/bg-favicon-256x256.png",
+      "32": "app/assets/bg-icon/bg-favicon-32x32.png",
+      "48": "app/assets/bg-icon/bg-favicon-48x48.png",
+      "512": "app/assets/bg-icon/bg-favicon-512x512.png",
+      "64": "app/assets/bg-icon/bg-favicon-64x64.png",
+      "96": "app/assets/bg-icon/bg-favicon-96x96.png"
+   },
+   "incognito": "split",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjXDCiC04k7bBsxt8m01loWKV8h20m8H6Wnm9DNt4CpmRKFeRTTiv6vFWkjQSKUaBvbO2mTy/2kAj5pWgufQZjyfBBCxuh51c7UOnXSyPSZ2KS3mIGd47Y4+Wi2xf0NxmWdtSrGy2NFIZx34GhWsHnrMH80M7ZDi+Oi0NvZMCi/Go+e96zAF4IBFM/Geraf0uJOgbdrD47NBtRU5MSDxdL2TG3y2KFamm5Pl0W3+srIf+0X2vdgaYAkXzIzYzRCP8JDhI5hooTvv8XnUL2/oAX0S6kiMhRMXoeIPRtGGH4HH7W3nJ4YxGHFMUYy/uIe2CqKS8EXJ0XE7A4xSkggPTkQIDAQAB",
+   "manifest_version": 3,
+   "name": "Malwarebytes Browser Guard",
+   "optional_permissions": [ "clipboardRead", "clipboardWrite", "history", "contentSettings", "privacy" ],
+   "permissions": [ "alarms", "downloads", "storage", "tabs", "declarativeNetRequest", "declarativeNetRequestFeedback", "unlimitedStorage", "webRequest", "contextMenus", "nativeMessaging", "activeTab", "scripting", "identity" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "3.3.2",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "*.eot", "*.ttf", "*.woff", "*.woff2", "app/popup/assets/icons/*" ],
+      "use_dynamic_url": true
+   }, {
+      "matches": [ "https://my.malwarebytes.com/*", "https://myaccount-stage.malwarebytes.com/*" ],
+      "resources": [ "app/popup/index.html", "app/popup/popup.css" ],
+      "use_dynamic_url": false
+   }, {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "app/assets/close-icon.svg", "app/assets/tooltip.svg", "app/eventpages/downloading.html", "app/eventpages/block-notification.html", "app/eventpages/breach-notification.html", "app/eventpages/block-notification.css", "app/eventpages/block-notification-dark.css", "app/eventpages/breach-notification.css", "app/eventpages/breach-notification-dark.css", "app/eventpages/monthly-notification.html", "app/eventpages/monthly-notification.css", "app/eventpages/monthly-notification-dark.css", "app/assets/check-icon.svg", "app/assets/check-icon-dark.svg", "app/eventpages/release-notification.html", "app/eventpages/release-notification.css", "app/eventpages/release-notification-dark.css", "app/eventpages/clipboard-notification.html", "app/eventpages/clipboard-notification.css", "app/eventpages/clipboard-notification-dark.css", "app/eventpages/search-hijacking-notification.html", "app/eventpages/search-hijacking-notification.css", "app/eventpages/search-hijacking-notification-dark.css", "app/eventpages/ruleset-error.html", "app/eventpages/debugger.html", "injection-instart.js", "injection-tss-mv3.js", "content-search-engines.js", "injection-topics.js", "injection-tss-skimmer.js", "content-shell-main.js", "vendor/*", "app/popup/index.html", "app/popup/popup.css" ],
+      "use_dynamic_url": true
+   } ]
+}

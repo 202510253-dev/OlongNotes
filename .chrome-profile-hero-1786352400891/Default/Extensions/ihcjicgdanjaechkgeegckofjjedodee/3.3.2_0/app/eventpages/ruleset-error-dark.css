@@ -1,0 +1,6 @@
+@import url("common-styles-dark.css");
+
+#error-message {
+    color: #F06666;
+    background-color: #1F222D;    
+}

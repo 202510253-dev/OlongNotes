@@ -30,6 +30,20 @@
     radial-gradient(120% 80% at 0% 0%, rgba(61, 107, 240, 0.45) 0%, transparent 60%),
     radial-gradient(80% 80% at 100% 100%, rgba(155, 93, 229, 0.35) 0%, transparent 60%);
 }
+/* Custom cover/banner image. When set, it sits on top of the navy
+   gradient (which stays as the fallback behind it). object-fit: cover
+   with center positioning mirrors the homepage hero technique — no
+   distortion, no overflow at any width. The gradient stays visible
+   behind the image so transparent PNGs / short images still get the
+   navy backdrop. */
+.profile-hero__banner-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
 .profile-hero__overlay {
   position: absolute;
   inset: 0;
@@ -43,6 +57,41 @@
   );
 }
 
+/* ---- Banner edit affordance (owner only) ----
+   Facebook-style hover overlay: a semi-transparent dark strip at the
+   bottom of the banner with a camera icon + "Edit Cover" label. Only
+   reachable when rendered (ownership gate removes it from the DOM for
+   non-owners). Hidden is used to gate it before loadProfile resolves
+   ownership. */
+.profile-hero__banner-edit {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(15, 20, 40, 0.6);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.18s ease, background-color 0.18s ease;
+}
+.profile-hero:hover .profile-hero__banner-edit,
+.profile-hero__banner-edit:focus-visible {
+  opacity: 1;
+}
+.profile-hero__banner-edit:hover {
+  background: rgba(15, 20, 40, 0.8);
+}
+.profile-hero__banner-edit[hidden] { display: none; }
+
 .profile-hero__content {
   position: relative;
   z-index: 2;
@@ -54,6 +103,7 @@
 }
 
 .profile-hero__avatar {
+  position: relative;
   flex-shrink: 0;
   width: 96px;
   height: 96px;
@@ -67,7 +117,47 @@
   color: #ffffff;
   background: rgba(255, 255, 255, 0.16);
   border: 3px solid rgba(255, 255, 255, 0.35);
+  overflow: hidden;
 }
+/* The initials fallback — kept on top of the solid fill until a custom
+   photo replaces it. */
+.profile-hero__avatar-initials {
+  display: inline-block;
+}
+/* Custom profile photo — object-fit: cover into the same circular frame
+   (border-radius comes from the parent's overflow:hidden). */
+.profile-hero__avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+/* Avatar edit affordance (owner only) — Facebook-style. A full-circle
+   semi-transparent dark overlay with a centered camera icon that fades
+   in on hover/focus. Removed from the DOM for non-owners entirely. */
+.profile-hero__avatar-edit {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 50%;
+  background: rgba(11, 31, 77, 0.55);
+  color: #ffffff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.profile-hero__avatar:hover .profile-hero__avatar-edit,
+.profile-hero__avatar-edit:focus-visible {
+  opacity: 1;
+}
+.profile-hero__avatar-edit[hidden] { display: none; }
 
 .profile-hero__info { flex: 1; min-width: 0; }
 
@@ -996,7 +1086,12 @@
   .bookmarks-layout { grid-template-columns: 1fr; }
 }
 
-/* ---- Responsive ---- */
+/* ---- Responsive ----
+   Banner crop is tuned purely for overflow/distortion (object-fit: cover
+   + center), never for where a "subject" sits — a user-uploaded banner is
+   arbitrary content we can't pre-position. The banner image scales with
+   its container, so it stays full-bleed and undistorted at every width.
+   The edit buttons are repositioned so they don't overlap the content. */
 @media (max-width: 980px) {
   .notes-layout { grid-template-columns: 1fr; }
   .settings-layout { grid-template-columns: 1fr; }
@@ -1004,7 +1099,36 @@
   .settings-nav a { white-space: nowrap; }
 }
 @media (max-width: 720px) {
-  .profile-hero__content { flex-direction: column; align-items: center; padding: 28px 20px 26px; }
+  /* BANNER HEIGHT FIX — the cover image must have a stable, fixed height
+     on mobile, independent of how much content (bio length, stat count)
+     stacks below it. Previously the image/overlay filled the whole card
+     via inset:0, so when the content stacked tall/narrow on mobile the
+     cover-crop + full-height gradient left the photo as just a sliver
+     (mostly solid navy). Now the image/bg/overlay only cover a fixed
+     200px strip at the top of the card; the avatar/text/stats flow below
+     it (avatar overlaps the banner's bottom edge, Facebook-style).
+     Center-cover is kept as the generic default — no per-user position
+     tuning, since banners are arbitrary uploads. */
+  .profile-hero__bg,
+  .profile-hero__banner-img,
+  .profile-hero__overlay {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    height: 200px;
+  }
+.profile-hero__content {
+    flex-direction: column;
+    align-items: center;
+    /* Keep the avatar/text/stats in normal flow BELOW the fixed banner,
+       but give the content a 150px top padding so the avatar cleanly
+       straddles the banner's bottom edge (Facebook-style overlap).
+       A positive padding-top (not a negative margin) is used so the card's
+       overflow:hidden never clips the avatar. The avatar frame itself is
+       NOT resized or distorted — only its vertical position shifts. */
+    padding: 150px 20px 26px;
+  }
   .profile-hero__info { text-align: center; }
   .profile-hero__name-row { justify-content: center; }
   .profile-hero__handle { justify-content: center; }
@@ -1012,13 +1136,19 @@
   .profile-hero__stats { justify-content: center; gap: 22px; }
   .profile-hero__bio { margin-left: auto; margin-right: auto; }
   .profile-body { padding: 24px 16px 60px; }
+/* With the fixed-height banner, keep the edit button pinned to the
+     banner's top-right, clear of the overlapping avatar/content below.
+     min-height keeps it a ≥44px tap-friendly touch target on mobile. */
+  .profile-hero__banner-edit { top: 12px; bottom: auto; right: 12px; min-height: 44px; }
 }
 @media (max-width: 600px) {
   .notes-toolbar__actions { width: 100%; }
   .search-field { flex: 1; }
   .search-field input { width: 100%; }
   .settings-actions .btn { width: 100%; }
-  .profile-hero__content { padding: 24px 18px 22px; }
+  /* Keep padding-top at 150px so the avatar still straddles the 200px
+     banner on small phones — only tighten the side/bottom padding. */
+  .profile-hero__content { padding: 150px 18px 22px; }
   .profile-hero__stats { gap: 16px; }
   .profile-hero__stats strong { font-size: 1rem; }
   .profile-hero__stats span { font-size: 0.62rem; }
@@ -1030,4 +1160,7 @@
   .profile-hero__stats strong { font-size: 0.95rem; }
   .profile-tabs { margin-top: 16px; }
   .profile-tab { padding: 10px 12px; font-size: 0.82rem; }
+  /* Compact the banner edit button on the smallest screens. */
+  .profile-hero__banner-edit { padding: 6px 10px; font-size: 0.76rem; gap: 6px; }
+  .profile-hero__banner-edit svg { width: 14px; height: 14px; }
 }

@@ -21,10 +21,12 @@ const express = require('express')
 const router = express.Router()
 const { supabase, supabaseAdmin } = require('../supabase')
 const auth = require('../middleware/auth')
+const multer = require('multer')
+const { v4: uuidv4 } = require('uuid')
 
 // ---------- Constants ----------
 const PROFILE_SELECT =
-  'id, user_name, role, bio, avatar_url, location, strand, school_id, ' +
+  'id, user_name, role, bio, avatar_url, banner_url, location, strand, school_id, ' +
   'grade_level, created_at, verified_at, account_status'
 
 const NOTE_SELECT =
@@ -56,9 +58,9 @@ const NOTE_STATUS_PUBLISHED = 'published'
 // shape the frontend expects. Empty strings coalesce to null so the
 // UI never has to render undefined. Verified schema 2026-08-07:
 //
-//   users: id (bigint), user_name, role, bio, avatar_url, location,
-//          strand, school_id, grade_level, created_at, verified_at,
-//          account_status, auth_id
+//   users: id (bigint), user_name, role, bio, avatar_url, banner_url,
+//          location, strand, school_id, grade_level, created_at,
+//          verified_at, account_status, auth_id
 function pickProfile(row, schoolRow) {
   if (!row) return null
   return {
@@ -67,6 +69,7 @@ function pickProfile(row, schoolRow) {
     role: row.role || 'user',
     bio: row.bio || null,
     avatar_url: row.avatar_url || null,
+    banner_url: row.banner_url || null,
     location: row.location || null,
     strand: row.strand || null,
     school_id: row.school_id || null,
@@ -86,6 +89,226 @@ function parseIdParam(raw) {
   if (!id || Number.isNaN(id) || id <= 0) return null
   return id
 }
+
+// ---------------------------------------------------------------------------
+// Profile image upload (avatar / banner) helpers
+// ---------------------------------------------------------------------------
+// These endpoints reuse the EXISTING Supabase Storage bucket (`olongnotes`)
+// with a distinct path prefix per image type — `avatars/{userId}/...` and
+// `banners/{userId}/...` — rather than creating a second bucket. The bucket
+// is public and the CSP already whitelists `*.supabase.co` for imgSrc
+// (server.js), so the resulting public URLs render directly in <img>.
+//
+// The allowed-MIME list here is intentionally separate from the notes
+// uploader (routes/notes.js): profile images accept jpg/jpeg/png/webp only,
+// while notes accepts PDF/Word/PPT plus jpg/png. This endpoint must NOT
+// allow Office/PDF files into a user's avatar/banner column.
+
+const PROFILE_IMAGE_MIMES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+])
+
+// 5MB cap for avatar/banner images. These are small display images, not
+// documents — 5MB gives plenty of headroom for a high-res headshot or
+// cover while keeping the bucket lean. (The notes uploader uses 10MB for
+// documents; 5MB is the right number here.)
+const PROFILE_IMAGE_MAX_BYTES = 5 * 1024 * 1024
+
+// Map a file extension to its true image MIME. Browsers can send a
+// generic/octet-stream MIME even for valid images, so preferring the
+// extension keeps the stored contentType correct and rejects disguised
+// files. Mirrors the extension-first approach in routes/notes.js.
+const IMAGE_EXT_MIME = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+}
+
+const uploadProfileImage = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: PROFILE_IMAGE_MAX_BYTES },
+  fileFilter: (req, file, cb) => {
+    const ext = file.originalname.split('.').pop().toLowerCase()
+    const mime = IMAGE_EXT_MIME[ext] || file.mimetype
+    if (PROFILE_IMAGE_MIMES.has(mime)) {
+      // Normalize the stored mimetype to our canonical value so the DB
+      // row and the <img> always see a known type.
+      file.mimetype = mime
+      cb(null, true)
+    } else {
+      cb(new Error('File type not allowed'), false)
+    }
+  },
+})
+
+// Extracts the storage path from a Supabase public URL for the
+// `olongnotes` bucket. Returns null if the URL doesn't match the
+// expected format (so cleanup never touches a non-bucket URL).
+function parseStoragePath(url) {
+  const marker = '/storage/v1/object/public/olongnotes/'
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  return url.slice(idx + marker.length) || null
+}
+
+// Deletes a previously-stored image from the bucket by parsing its public
+// URL back to a storage path. Hard requirement on replace: when a user
+// uploads a new avatar/banner, the old file must be removed so re-uploads
+// don't accumulate orphaned files. Guards the "no previous file" case
+// (null/empty URL) and is best-effort — a cleanup failure logs a warning
+// and never fails the request that already succeeded.
+async function removeStoredImage(publicUrl) {
+  if (!publicUrl) return
+  const filePath = parseStoragePath(publicUrl)
+  if (!filePath) {
+    console.warn('[users] Could not parse storage path from URL — old file not removed:', publicUrl)
+    return
+  }
+  const { error } = await supabaseAdmin.storage
+    .from('olongnotes')
+    .remove([filePath])
+  if (error) {
+    console.error('[users] Storage remove error — old file may be orphaned:', error)
+    console.error('Orphaned path:', filePath)
+  }
+}
+
+// Shared handler for PATCH /api/users/me/avatar and PATCH /api/users/me/banner.
+// Both follow the same flow:
+//   1. Multer captures the single uploaded file (image MIME + <=5MB).
+//   2. Validate a file was actually provided.
+//   3. Upload to the existing `olongnotes` bucket under avatars/ or banners/.
+//   4. Persist the public URL to the matching users column.
+//   5. Delete the previous file from storage (parse old URL -> path).
+//   6. Return the updated profile (same shape as GET /api/users/:id).
+async function uploadProfileImageRoute(req, res, { folder, column }) {
+  const file = req.file
+  if (!file) {
+    return res.status(400).json({ message: 'No image file was uploaded.' })
+  }
+
+  const ext = file.originalname.split('.').pop().toLowerCase()
+  const fileName = `${uuidv4()}.${ext}`
+  const filePath = `${folder}/${req.user.id}/${fileName}`
+
+  try {
+    // 1. Upload to Supabase Storage (existing bucket, separate prefix).
+    const { error: storageError } = await supabase.storage
+      .from('olongnotes')
+      .upload(filePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      })
+    if (storageError) {
+      console.error('[users] storage upload error:', storageError)
+      return res.status(500).json({ message: 'Image upload failed. Please try again.' })
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('olongnotes')
+      .getPublicUrl(filePath)
+    const publicUrl = urlData.publicUrl
+
+    // 2. Read the current column value so we can clean up the old file
+    //    AFTER the DB write succeeds (never delete before the new URL is
+    //    persisted — if the DB write fails we keep the old file intact).
+    const { data: existing, error: existingError } = await supabase
+      .from('users')
+      .select(column)
+      .eq('id', req.user.id)
+      .maybeSingle()
+    if (existingError) {
+      console.error('[users] read existing column error:', existingError)
+      // Not fatal — we can still proceed, we just can't clean up the old file.
+    }
+    const previousUrl = existing ? existing[column] : null
+
+    // 3. Persist the new URL to the user's row.
+    const { data: updated, error: updateError } = await supabase
+      .from('users')
+      .update({ [column]: publicUrl })
+      .eq('id', req.user.id)
+      .select(PROFILE_SELECT)
+      .maybeSingle()
+    if (updateError) {
+      console.error('[users] update column error:', updateError)
+      // Roll back the just-uploaded file so we don't orphan it.
+      await supabaseAdmin.storage.from('olongnotes').remove([filePath]).catch(() => {})
+      return res.status(500).json({ message: 'Could not save image. Please try again.' })
+    }
+    if (!updated) {
+      await supabaseAdmin.storage.from('olongnotes').remove([filePath]).catch(() => {})
+      return res.status(404).json({ message: 'User not found.' })
+    }
+
+    // 4. Delete the previous file (hard requirement to avoid orphans).
+    await removeStoredImage(previousUrl)
+
+    // 5. Shape the response exactly like GET /api/users/:id.
+    let schoolRow = null
+    if (updated.school_id) {
+      const { data: sch, error: schError } = await supabase
+        .from('schools')
+        .select('id, school_name')
+        .eq('id', updated.school_id)
+        .maybeSingle()
+      if (!schError) schoolRow = sch
+    }
+    const profile = pickProfile(updated, schoolRow)
+    profile.joined_label = joinedLabel(updated.created_at)
+
+    return res.status(200).json({ user: profile })
+  } catch (err) {
+    console.error('[users] uploadProfileImageRoute exception:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+}
+
+// ---------- PATCH /api/users/me/avatar ----------
+//
+// Auth required. Uploads a new profile picture for the authenticated user.
+// Accepts a single image file (jpg/png/webp, <=5MB) as multipart/form-data
+// under the field name `file`. Stores it in the existing `olongnotes`
+// bucket under avatars/{userId}/, writes avatar_url, and deletes the
+// previous avatar file. Ownership is implicit — the endpoint is scoped to
+// req.user.id, so a user can only ever update their own avatar.
+router.patch('/me/avatar', auth, (req, res, next) => {
+  uploadProfileImage.single('file')(req, res, (err) => {
+    if (err) {
+      // Tag so server.js' global error handler returns the profile-specific
+      // wording (5MB / jpeg-png-webp) instead of the notes uploader's
+      // defaults (10MB / PDF, Word, Excel, JPG, PNG).
+      req._profileUpload = true
+      return next(err)
+    }
+    next()
+  })
+}, (req, res) => {
+  return uploadProfileImageRoute(req, res, { folder: 'avatars', column: 'avatar_url' })
+})
+
+// ---------- PATCH /api/users/me/banner ----------
+//
+// Auth required. Uploads a new cover/banner image for the authenticated
+// user. Same multipart contract + validation as /me/avatar; stores under
+// banners/{userId}/, writes banner_url, and deletes the previous banner file.
+router.patch('/me/banner', auth, (req, res, next) => {
+  uploadProfileImage.single('file')(req, res, (err) => {
+    if (err) {
+      // Tag so server.js' global error handler returns the profile-specific
+      // wording (5MB / jpeg-png-webp) instead of the notes uploader's
+      // defaults (10MB / PDF, Word, Excel, JPG, PNG).
+      req._profileUpload = true
+      return next(err)
+    }
+    next()
+  })
+}, (req, res) => {
+  return uploadProfileImageRoute(req, res, { folder: 'banners', column: 'banner_url' })
+})
 
 // Tiny relative-time helper for the "Joined X ago" line. Avoids
 // pulling in date-fns for one place; mirrors the helper in

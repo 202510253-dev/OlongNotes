@@ -88,11 +88,18 @@
 
   function $(id) { return document.getElementById(id); }
 
-  const els = {};
+const els = {};
   function cacheEls() {
     els.shell = $('profileShell');
     els.empty = $('profileEmpty');
     els.avatar = $('profileAvatar');
+    els.avatarInitials = $('profileAvatarInitials');
+    els.avatarImg = $('profileAvatarImg');
+    els.avatarEdit = $('profileAvatarEdit');
+    els.avatarInput = $('profileAvatarInput');
+    els.bannerImg = $('profileBannerImg');
+    els.bannerEdit = $('profileBannerEdit');
+    els.bannerInput = $('profileBannerInput');
     els.name = $('profileName');
     els.badge = $('profileBadge');
     els.handle = $('profileHandle');
@@ -230,10 +237,26 @@
     }
   }
 
-  function renderHero(user, stats) {
+function renderHero(user, stats) {
     if (!els.avatar || !user) return;
     const displayName = user.username || 'Member';
-    els.avatar.textContent = initialsOf(displayName);
+    // Avatar: if the user has a custom photo, show it (object-fit: cover
+    // into the circular frame). Otherwise keep the initials fallback.
+    const hasAvatar = user.avatar_url && user.avatar_url.trim();
+    if (els.avatarInitials) els.avatarInitials.textContent = initialsOf(displayName);
+    if (els.avatarImg) {
+      els.avatarImg.hidden = !hasAvatar;
+      if (hasAvatar) els.avatarImg.src = user.avatar_url;
+      else els.avatarImg.removeAttribute('src');
+    }
+    // Banner: if the user has a custom cover image, show it (object-fit:
+    // cover, center). Otherwise keep the navy gradient behind the overlay.
+    const hasBanner = user.banner_url && user.banner_url.trim();
+    if (els.bannerImg) {
+      els.bannerImg.hidden = !hasBanner;
+      if (hasBanner) els.bannerImg.src = user.banner_url;
+      else els.bannerImg.removeAttribute('src');
+    }
     if (els.name) els.name.textContent = displayName;
     if (els.badge) els.badge.textContent = roleLabel(user.role);
     if (els.handle) els.handle.textContent = `@${displayName} · Joined ${user.joined_label || joinedLabel(user.created_at)}`;
@@ -418,6 +441,211 @@
     // back to Overview so the user isn't staring at an empty panel.
     if (!isOwner && els.settingsTabBtn.classList.contains('is-active')) {
       activate('overview');
+    }
+  }
+
+// ---------- Custom avatar / banner upload (owner only) ----------
+
+  // Client-side validation for the picked image. Returns an error string
+  // or null if valid. Mirrors the BACKEND's PROFILE_IMAGE_MIMES exactly
+  // (routes/users.js) and the 5MB cap — jpeg/png/webp only. Keeping the
+  // two lists in sync avoids the "preview looks fine then server 400s"
+  // jarring revert. The input accept="image/*" still narrows the picker
+  // for UX; this re-checks the selected file's actual MIME.
+  const IMAGE_MAX_BYTES = 5 * 1024 * 1024; // 5MB — matches PROFILE_IMAGE_MAX_BYTES in routes/users.js
+  const ALLOWED_IMAGE_MIMES = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+  ];
+  function validateImageFile(file) {
+    if (!file) return 'No file selected.';
+    if (!ALLOWED_IMAGE_MIMES.includes(file.type)) {
+      return 'Please choose an image file (JPG, PNG, or WebP).';
+    }
+    if (file.size > IMAGE_MAX_BYTES) {
+      return 'Image is too large. Maximum size is 5MB.';
+    }
+    return null;
+  }
+
+  // Shows a transient inline error near the hero. Kind = 'error' makes it
+  // red; 'success' makes it green. Auto-hides after 4s.
+  function showHeroNotice(text, kind) {
+    // Reuse the settings message element (it's styled for both states) —
+    // render it just above the hero so the error is visible without a
+    // settings-tab dependency.
+    let notice = document.getElementById('profileHeroNotice');
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.id = 'profileHeroNotice';
+      notice.className = 'settings-message';
+      const hero = document.querySelector('.profile-hero');
+      hero && hero.parentNode.insertBefore(notice, hero);
+    }
+    notice.className = 'settings-message settings-message--' + (kind || 'success');
+    notice.textContent = text;
+    clearTimeout(notice._timer);
+    notice._timer = setTimeout(() => { notice.hidden = true; }, 4000);
+  }
+
+  // Revoke a previously-created object URL (avoids a memory leak if the
+  // user picks files repeatedly without a relayout).
+  let pendingAvatarUrl = null;
+  let pendingBannerUrl = null;
+
+  // Generic upload flow shared by avatar + banner. Validates the file,
+  // shows an immediate local preview (object URL), uploads via the
+  // existing multipart POST endpoint, and on success updates the URL in
+  // currentProfile + re-renders. On failure it reverts the preview back
+  // to the previous state and shows an inline error.
+  async function handleImageUpload({ kind, file, previewEl, imgEl, urlField }) {
+    // Validate client-side.
+    const err = validateImageFile(file);
+    if (err) {
+      showHeroNotice(err, 'error');
+      return;
+    }
+
+    // Remember the current persisted URL so we can revert on failure.
+    const previousUrl = (currentProfile && currentProfile[urlField]) || null;
+
+    // Immediate local preview via object URL while the upload is in
+    // flight so the UI doesn't feel frozen.
+    const objectUrl = URL.createObjectURL(file);
+    if (previewEl) {
+      previewEl.hidden = false;
+      previewEl.src = objectUrl;
+    }
+    if (kind === 'avatar') pendingAvatarUrl = objectUrl;
+    else pendingBannerUrl = objectUrl;
+
+    // Disable the edit buttons while uploading to prevent double-submits.
+    if (els.avatarEdit) els.avatarEdit.disabled = true;
+    if (els.bannerEdit) els.bannerEdit.disabled = true;
+
+try {
+      const formData = new FormData();
+      formData.append('file', file);
+      // The backend scopes the upload to the authenticated user via
+      // req.user.id (PATCH /api/users/me/avatar and /me/banner), so we
+      // don't pass the target id in the URL — ownership is implicit. The
+      // api.patch helper forwards the FormData as multipart (isForm:true)
+      // so multer can parse the uploaded file.
+const res = await api.patch(
+        `/users/me/${kind}`,
+        formData,
+        { auth: true, isForm: true }
+      );
+      // The backend returns the full updated profile as { user: profile },
+      // shaped exactly like GET /api/users/:id — so the new URL lives at
+      // res.user[urlField] (avatar_url or banner_url). Read it from there,
+      // not off the top-level response.
+      const updatedUser = (res && res.user) || {};
+      // The backend returns { user: <profile> } where <profile> is shaped
+      // exactly like GET /api/users/:id — so the persisted URL lives under
+      // updatedUser[urlField] (avatar_url or banner_url). The previous
+      // fallback chain (updatedUser.<other> / res.*) was dead: res is the
+      // { user } envelope, so res.avatar_url was always undefined and could
+      // only ever have masked a missing urlField with the wrong image.
+      const newUrl = updatedUser[urlField];
+      if (!newUrl) throw new Error('Upload succeeded but no URL was returned.');
+
+      // Update in-memory profile + re-render so the persisted URL is used
+      // (no longer the object URL).
+      currentProfile[urlField] = newUrl;
+      renderHero(currentProfile, currentStats || {});
+      showHeroNotice('Photo updated.', 'success');
+    } catch (e) {
+      console.error(`[profile] ${kind} upload failed:`, e);
+      // Revert the preview back to the previous state (photo or initials /
+      // gradient fallback).
+      if (imgEl) {
+        if (previousUrl) { imgEl.src = previousUrl; imgEl.hidden = false; }
+        else { imgEl.hidden = true; imgEl.removeAttribute('src'); }
+      }
+      if (e && e.status === 401) {
+        if (ON.clearToken) ON.clearToken();
+        showHeroNotice('Your session expired. Please log in again.', 'error');
+      } else {
+        showHeroNotice((e && e.message) || 'Upload failed. Please try again.', 'error');
+      }
+    } finally {
+      if (els.avatarEdit) els.avatarEdit.disabled = false;
+      if (els.bannerEdit) els.bannerEdit.disabled = false;
+      // Clean up the pending object URL (the preview now uses the
+      // persisted URL on success, or we've reverted on failure).
+      const pending = kind === 'avatar' ? pendingAvatarUrl : pendingBannerUrl;
+      if (pending) { try { URL.revokeObjectURL(pending); } catch (_) {} }
+      if (kind === 'avatar') pendingAvatarUrl = null;
+      else pendingBannerUrl = null;
+    }
+  }
+
+// Wires the avatar + banner edit affordances. MUST only be called when
+  // the viewer owns the profile. For non-owners the edit buttons AND the
+  // hidden file inputs are REMOVED from the DOM entirely — not merely
+  // hidden via CSS/`hidden` — so there is no reachable affordance, no
+  // click handler, and no file input a viewer could trigger. This is a
+  // hard ownership gate, not a cosmetic hide.
+  function bindImageUploads() {
+    const isOwner = Boolean(
+      currentProfile && currentUserId != null && currentTargetId === currentUserId
+    );
+
+    if (!isOwner) {
+      // Non-owner: strip the edit affordances from the DOM so they can't
+      // be reached via DevTools, keyboard, or any event path.
+      [els.avatarEdit, els.avatarInput, els.bannerEdit, els.bannerInput].forEach((el) => {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      });
+      return;
+    }
+
+    // Avatar: clicking the overlay button opens the hidden file input.
+    if (els.avatarEdit && els.avatarInput) {
+      els.avatarEdit.hidden = false;
+      els.avatarEdit.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        els.avatarInput.click();
+      });
+      els.avatarInput.addEventListener('change', () => {
+        const file = els.avatarInput.files && els.avatarInput.files[0];
+        els.avatarInput.value = '';
+        if (file) {
+          handleImageUpload({
+            kind: 'avatar',
+            file,
+            previewEl: els.avatarImg,
+            imgEl: els.avatarImg,
+            urlField: 'avatar_url',
+          });
+        }
+      });
+    }
+
+    // Banner: clicking the edit button opens the hidden file input.
+    if (els.bannerEdit && els.bannerInput) {
+      els.bannerEdit.hidden = false;
+      els.bannerEdit.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        els.bannerInput.click();
+      });
+      els.bannerInput.addEventListener('change', () => {
+        const file = els.bannerInput.files && els.bannerInput.files[0];
+        els.bannerInput.value = '';
+        if (file) {
+          handleImageUpload({
+            kind: 'banner',
+            file,
+            previewEl: els.bannerImg,
+            imgEl: els.bannerImg,
+            urlField: 'banner_url',
+          });
+        }
+      });
     }
   }
 
@@ -950,7 +1178,12 @@
       showEmpty();
       return;
     }
-    loadProfile(targetId).then(() => {
+loadProfile(targetId).then(() => {
+      // Wire the avatar/banner edit affordances now that ownership is
+      // known (currentUserId + currentTargetId are set). For owners this
+      // unhides + binds the buttons; for non-owners it's a no-op so the
+      // affordances stay hidden.
+      bindImageUploads();
       // Honor ?tab=<name> deep-link after the shell is up.
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');

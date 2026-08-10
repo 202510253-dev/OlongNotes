@@ -25,6 +25,25 @@
   // self-contained rather than importing from another page's script).
   const initials = (name) => (name && name.trim ? name.trim().charAt(0).toUpperCase() : '?');
 
+  // Shared avatar helper (js/avatar.js). Same fallback-as-no-op pattern
+  // as browse-community.js — if avatar.js didn't load we still render
+  // the colored initials / person-icon fallback via tintFor()+initials().
+  const shared = (window.OlongNotes && window.OlongNotes.shared) || {};
+  const renderAvatar = shared.renderAvatar || function (u, opts) {
+    const name = (u && u.user_name) || '';
+    const tint = (shared.tintFor && shared.tintFor(name)) || '#3d6bf0';
+    const variant = (opts && opts.variant) || 'row';
+    if (variant === 'comment') {
+      return '<span class="comment-item__avatar" aria-hidden="true">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">' +
+          '<circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/>' +
+        '</svg></span>';
+    }
+    return '<span class="question-row__avatar" style="--avatar-tint:' + tint + '" aria-hidden="true">' +
+           (name && name.trim ? name.trim().charAt(0).toUpperCase() : '?') +
+           '</span>';
+  };
+
   function relativeTime(iso) {
     if (!iso) return '';
     const then = new Date(iso).getTime();
@@ -354,7 +373,7 @@ function renderQuestionDetail(q) {
           '</div>' +
 
           '<div class="modal-question__head">' +
-            '<span class="question-row__avatar" style="--avatar-tint:' + tint + '" aria-hidden="true">' + esc(initials(asker)) + '</span>' +
+            renderAvatar(q.users, { variant: 'row', tint: tint }) +
             '<div>' +
               '<div class="question-detail__asker-row">' +
                 '<span class="question-detail__asker-label">Asked by</span>' +
@@ -448,9 +467,7 @@ function renderQuestionDetail(q) {
 
     return (
       '<li class="comment-item" data-answer-id="' + esc(a.id) + '">' +
-        '<span class="comment-item__avatar" aria-hidden="true">' +
-          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>' +
-        '</span>' +
+        renderAvatar(a.users, { variant: 'comment' }) +
         '<div class="comment-item__body">' +
           '<div class="comment-item__head">' +
             '<span class="comment-item__name"><a href="' + profileHref + '">' + esc(answererName) + '</a></span>' +

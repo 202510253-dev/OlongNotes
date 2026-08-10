@@ -1,0 +1,59 @@
+﻿[hero@1280] { x: 0, y: 76, width: 1280, height: 649.0625, scale: 1 }
+[styles@1280]
+  {"label":"eyebrow","text":"For Students. By Students.","x":24,"y":186,"w":213.703125,"h":31,"fontSize":"12.48px","color":"rgba(255, 255, 255, 0.92)","background":"rgba(255, 255, 255, 0.12)","borderRadius":"999px"}
+  {"label":"title","text":"A Local, Free Notes Repository for the Students of Olongapo City","x":24,"y":239,"w":640,"h":167.0625,"fontSize":"46.4px","color":"rgb(255, 255, 255)","background":"rgba(0, 0, 0, 0)","borderRadius":"0px"}
+  {"label":"accent","text":"Olongapo City","x":304.6875,"y":345.375,"w":342.109375,"h":65,"fontSize":"46.4px","color":"rgb(218, 165, 32)","background":"rgba(0, 0, 0, 0)","borderRadius":"0px"}
+  {"label":"subtitle","text":"Knowledge shared today becomes success for tomorrow.","x":24,"y":424.0625,"w":480,"h":20,"fontSize":"16.8px","color":"rgba(255, 255, 255, 0.85)","background":"rgba(0, 0, 0, 0)","borderRadius":"0px"}
+  {"label":"browseBtn","text":"Browse Notes","x":24,"y":476.0625,"w":163.40625,"h":52,"fontSize":"16px","color":"rgb(255, 255, 255)","background":"rgb(47, 111, 237)","borderRadius":"10px"}
+  {"label":"uploadBtn","text":"Upload Notes","x":203.40625,"y":476.0625,"w":186.6875,"h":52,"fontSize":"16px","color":"rgb(255, 255, 255)","background":"rgba(255, 255, 255, 0.12)","borderRadius":"10px"}
+  {"label":"searchCard","text":"All SchoolsAll SchoolsAMELIA HEIGHTS ELEMENTARY SCHOOLASINAN ELEMENTARY SCHOOLAU","x":40,"y":592.0625,"w":1200,"h":143,"fontSize":"16px","color":"rgb(255, 255, 255)","background":"rgb(255, 255, 255)","borderRadius":"20px"}
+[styles@375] {
+  "eyebrow": {
+    "x": 16,
+    "y": 164,
+    "w": 213.703125,
+    "h": 31,
+    "text": "For Students. By Students."
+  },
+  "title": {
+    "x": 16,
+    "y": 217,
+    "w": 343,
+    "h": 130.5625,
+    "text": "A Local, Free Notes Repository for the S"
+  },
+  "accent": {
+    "x": 16,
+    "y": 310.921875,
+    "w": 200.546875,
+    "h": 39,
+    "text": "Olongapo City"
+  },
+  "browse": {
+    "x": 16,
+    "y": 437.5625,
+    "w": 343,
+    "h": 50,
+    "text": "Browse Notes"
+  },
+  "upload": {
+    "x": 16,
+    "y": 503.5625,
+    "w": 343,
+    "h": 52,
+    "text": "Upload Notes"
+  },
+  "search": {
+    "x": 0,
+    "y": 619.5625,
+    "w": 375,
+    "h": 316,
+    "text": "All SchoolsAll SchoolsAMELIA HEIGHTS ELE"
+  },
+  "viewport": {
+    "w": 375,
+    "h": 812
+  },
+  "theme": "light"
+}
+done. screenshots in: C:\Users\Opriasa\Desktop\OlongNotes_off\olongnotes\hero-screens

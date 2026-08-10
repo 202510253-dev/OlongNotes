@@ -1,0 +1,1 @@
+import{Mv3UserBlocksHandler}from"./user-blocks-mv3";export const userBlocksHandler=new Mv3UserBlocksHandler;
