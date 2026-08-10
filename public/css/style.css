@@ -1043,7 +1043,6 @@ body.upload-modal-open .footer {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.navbar__profile-chip svg { color: var(--gray-400); flex-shrink: 0; }
 
 .theme-toggle {
   display: flex; align-items: center; gap: 6px;
@@ -2503,7 +2502,17 @@ body.upload-modal-open .footer {
   .navbar__actions { gap: 10px; margin-left: auto; }
   .btn--sm { padding: 8px 14px; font-size: 0.82rem; }
   .navbar__profile-name { display: none; }
-  .navbar__profile-chip { padding: 6px; gap: 0; }
+  .navbar__profile-chip {
+    /* Mobile: show the avatar as a clean standalone circle (no chevron,
+       no name). Width/height match the avatar so the chip is a button
+       that IS the avatar, with no extra padding halo. */
+    padding: 0;
+    gap: 0;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+  }
+  .navbar__profile-avatar { width: 34px; height: 34px; font-size: 0.82rem; }
 
   /* Mobile top bar: the theme toggle moved into the side drawer, and
      the desktop Log In / Sign Up buttons + guest-action group collapse
@@ -2516,16 +2525,29 @@ body.upload-modal-open .footer {
 }
 
 @media (max-width: 560px) {
-  /* Keep the brand compact so the bar never overflows at 360px. */
-  .navbar__brand { margin-right: 12px; }
-  .navbar__logo img { height: 52px; }
-  .navbar__inner { height: 64px; }
-  .navbar__burger { margin-right: 10px; width: 40px; height: 40px; }
-  .navbar__actions { gap: 6px; }
+  /* Mobile nav: shrink every chrome element so the bar reads as light,
+     modern, and never overflows at 360-430px. Mirrors modern app chrome
+     (compact hamburger 36×36, slim brand mark, slimmer header bar). */
+  .navbar__brand { margin-right: 10px; gap: 10px; }
+  .navbar__logo img { height: 40px; }
+  .navbar__title { font-size: 1rem; }
+  .navbar__inner { height: 56px; }
+  .navbar__burger {
+    margin-right: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .navbar__burger span { width: 18px; }
+  .navbar__actions { gap: 8px; }
+  .navbar__profile-chip { width: 32px; height: 32px; }
+  .navbar__profile-avatar { width: 32px; height: 32px; font-size: 0.78rem; }
 }
 
 @media (max-width: 720px) {
-  .hero { padding-top: 100px; padding-bottom: 50px; }
+  /* Tighter top padding so the eyebrow pill ("For Students. By Students.")
+     sits closer to the navbar — keeps mobile chrome compact and modern. */
+  .hero { padding-top: 76px; padding-bottom: 50px; }
   .hero__content {
     margin-left: 0;
     margin-right: 0;
