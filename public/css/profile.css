@@ -478,12 +478,14 @@
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+              background-color 0.18s var(--ease), border-color 0.18s var(--ease);
 }
 .note-card:hover {
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   background-color: var(--gray-50);
-  border-color: var(--gray-200);
+  border-color: var(--accent-blue, #3d6bf0);
 }
 .note-card__icon {
   flex-shrink: 0;
@@ -509,6 +511,17 @@
   font-weight: 700;
   color: var(--navy);
   margin: 0;
+  /* Long note titles can otherwise push the date out of the row
+     on narrow viewports. min-width:0 lets h3 shrink past its
+     content; overflow-wrap:break-word wraps long single tokens;
+     the ellipsis gives a clean cut when there's no other choice.
+     Combined with the date's flex-shrink:0 + white-space:nowrap,
+     the title gracefully yields space to the date instead of
+     overflowing. */
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .note-card__updated {
   display: flex;
@@ -877,6 +890,12 @@
   border-color: var(--gray-200);
 }
 [data-theme="dark"] .note-card:hover {
+  /* Same translateY + shadow as the light-mode hover so the
+     animation timing stays consistent in dark mode. Border goes
+     gray (no accent-blue visible on the navy bg) and background
+     shifts to gray-100. */
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
   background: var(--gray-100);
   border-color: var(--gray-200);
 }
@@ -1140,6 +1159,20 @@
      banner's top-right, clear of the overlapping avatar/content below.
      min-height keeps it a ≥44px tap-friendly touch target on mobile. */
   .profile-hero__banner-edit { top: 12px; bottom: auto; right: 12px; min-height: 44px; }
+  /* My-notes cards: on phones the title + date row wants to wrap the
+     title onto 2 lines instead of ellipsizing, so the date doesn't
+     lose its visible space and users can see what each note is.
+     Also tighten card padding so the icon+body fit at 320-360px. */
+  .note-card { padding: 14px 14px; gap: 12px; }
+  .note-card__head h3 {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
 }
 @media (max-width: 600px) {
   .notes-toolbar__actions { width: 100%; }

@@ -251,13 +251,15 @@
     padding: 16px 16px 16px 14px;
     text-decoration: none;
     cursor: pointer;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+                border-color 0.18s var(--ease), background-color 0.18s var(--ease);
   }
 
   .subject-tile:hover {
     border-color: var(--accent-blue, #3d6bf0);
     box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    background: var(--navy-100, #f2f4f8);
   }
 
   .subject-tile__icon {

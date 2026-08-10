@@ -243,6 +243,19 @@ body.modal-open .footer {
   pointer-events: none;
   user-select: none;
 }
+/* Side drawer uses its own body class so opening it locks page
+   scroll (overflow:hidden) and disables pointer events on the
+   background via the drawer's own backdrop, but does NOT blur
+   the page — the drawer is a navigation surface, not a focused
+   modal that needs the page dimmed. The default modal-open blur
+   would make the rest of the site unreadable while the drawer
+   is open. */
+body.side-drawer-open {
+  overflow: hidden;
+}
+body.side-drawer-open #siteMain {
+  pointer-events: none;
+}
 
 .auth-card {
   position: relative;
@@ -1314,9 +1327,14 @@ body.upload-modal-open .footer {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  /* Stronger navy border ring so the card reads as 'floating outlined
-     panel' against the dark hero (matches the design reference). */
-  border: 1.5px solid rgba(11, 31, 77, 0.10);
+  /* Visible navy hairline border so the card reads as a floating
+     outlined panel against BOTH the dark hero above AND the now-
+     white Featured Notes section below (background-color:
+     var(--surface) on .featured-notes removed the previous
+     gray-stripe contrast). The border needs to be dark enough to
+     read on a white background too — rgba(11,31,77,0.32) gives
+     that visible separation without dominating the page. */
+  border: 1.5px solid rgba(11, 31, 77, 0.32);
 }
 .search-card__input {
   display: flex;
@@ -1423,7 +1441,8 @@ body.upload-modal-open .footer {
   padding: 22px;
   overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 0.15s var(--ease), border-color 0.15s var(--ease);
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+              border-color 0.18s var(--ease);
 }
 .featured-card::before {
   content: '';
@@ -1433,8 +1452,9 @@ body.upload-modal-open .footer {
   background: var(--tint, var(--accent-blue));
 }
 .featured-card:hover {
-  box-shadow: var(--shadow-sm);
-  border-color: var(--tint, var(--gray-200));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--tint, var(--accent-blue));
 }
 
 .featured-card__top {
@@ -2412,7 +2432,7 @@ body.upload-modal-open .footer {
   padding: 20px;
   transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease), background 0.2s var(--ease);
 }
-.contributor-card:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); background: var(--surface); }
+.contributor-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); background: var(--surface); border-color: var(--accent-blue, #3d6bf0); }
 
 .contributor-card__avatar {
   width: 52px; height: 52px;

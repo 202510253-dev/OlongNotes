@@ -402,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backdrop: document.getElementById('sideDrawerBackdrop'),
     closeBtn: document.getElementById('sideDrawerClose'),
     triggerAttr: navBurger,
+    bodyClass: 'side-drawer-open',
   });
   navBurger?.addEventListener('click', () => (sideDrawer.isOpen() ? sideDrawer.close() : sideDrawer.open()));
 
@@ -443,6 +444,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('img.site-logo').forEach((img) => {
       img.src = theme === 'dark' ? 'img/olongnotesW.png' : 'img/olongnotes.png';
     });
+    // Stamp <html> with data-logo-swapped="1" once the logo src has
+    // been corrected for the current theme. style.css has a CSS gate
+    // html:not([data-logo-swapped]) img.site-logo { visibility:hidden }
+    // that hides the logos until this stamp is set, so the swap has
+    // to happen BEFORE the stamp. The inline head-blocker does this
+    // for pages that ship it; script.js is the fallback for pages
+    // that don't ship the head-blocker but DO load this script
+    // (every page except admin.html). Without this stamp, logos on
+    // those pages stay invisible forever.
+    document.documentElement.setAttribute('data-logo-swapped', '1');
   };
 
   const getStoredTheme = () => {

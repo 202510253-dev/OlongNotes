@@ -287,7 +287,8 @@ html {
   padding: 11px 4px;
   border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.12s ease;
+  transition: background 0.18s var(--ease), transform 0.18s var(--ease),
+              box-shadow 0.18s var(--ease);
   text-decoration: none;
   min-width: 0;
   width: 100%;
@@ -295,7 +296,7 @@ html {
 
 .school-row:hover {
   background: var(--navy-100, #f2f4f8);
-  transform: translateX(2px);
+  transform: translateX(3px);
 }
 
 .school-row__icon {
@@ -324,12 +325,12 @@ html {
 .school-row__chevron {
   flex-shrink: 0;
   color: var(--gray-600, #9aa2b1);
-  transition: transform 0.15s ease, color 0.15s ease;
+  transition: transform 0.18s var(--ease), color 0.18s var(--ease);
 }
 
 .school-row:hover .school-row__chevron {
   color: var(--accent-blue, #3d6bf0);
-  transform: translateX(2px);
+  transform: translateX(3px);
 }
 
 /* Grid view: card layout */

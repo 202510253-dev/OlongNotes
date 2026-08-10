@@ -246,6 +246,14 @@ router.post('/', auth, (req, res, next) => {
         .from('olongnotes')
         .upload(filePath, file.buffer, {
           contentType: file.mimetype,
+          // Force Content-Disposition: inline on the public URL so the
+          // browser renders PDFs/PPTs/images inside the document-viewer
+          // iframe instead of auto-downloading them. Without this,
+          // Supabase Storage defaults to "attachment", which triggers
+          // a save-as dialog as soon as the iframe loads. This is the
+          // same fix that was originally planned in the step-8 UI
+          // fixes commit (3978990) but got lost between sessions.
+          contentDisposition: 'inline',
           upsert: false
         })
 
@@ -639,6 +647,87 @@ router.delete('/:id', auth, async (req, res) => {
     console.error('Delete error:', err)
     return res.status(500).json({ message: 'Server error.' })
   }
+})
+
+/* ---------------------------------------------------------
+   ADMIN: Backfill Content-Disposition: inline on every existing
+   storage object. Files uploaded before the contentDisposition
+   fix defaulted to "attachment", which causes the document-viewer
+   iframe to trigger an auto-download instead of rendering the
+   PDF/PPT/image inline. This endpoint re-uploads each file with
+   the new metadata so existing notes get the same behavior as
+   new uploads. Idempotent — safe to re-run.
+
+   Defined BEFORE the /:id/* dynamic routes so Express matches
+   '/admin/backfill-inline' against this handler instead of
+   treating 'admin' as :id.
+
+   POST /api/notes/admin/backfill-inline
+   Body: { dryRun?: boolean }  - default true (no writes)
+   Auth: requires an admin role (gated by middleware below)
+--------------------------------------------------------- */
+router.post('/admin/backfill-inline', auth, async (req, res) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Admin only.' })
+  }
+  const dryRun = req.body && req.body.dryRun !== false
+
+  // Fetch every published note's file URL.
+  const { data: notes, error } = await supabaseAdmin
+    .from('notes')
+    .select('id, file_url, file_type')
+    .eq('status', 'published')
+  if (error) {
+    return res.status(500).json({ message: 'Failed to list notes.', error: error.message })
+  }
+
+  const results = []
+  for (const note of notes || []) {
+    const path = parseStoragePath(note.file_url)
+    if (!path) {
+      results.push({ id: note.id, status: 'skipped', reason: 'no-storage-path' })
+      continue
+    }
+    if (dryRun) {
+      results.push({ id: note.id, path, status: 'would-update' })
+      continue
+    }
+    // Use supabaseAdmin (service role) to update the existing file
+    // with Content-Disposition: inline. The update() call replaces
+    // the file buffer but we read it first to avoid zero-byte
+    // overwrite. The simplest no-data-loss path: download the
+    // current file, then re-upload with the new metadata.
+    const { data: blob, error: dlErr } = await supabaseAdmin.storage
+      .from('olongnotes')
+      .download(path)
+    if (dlErr || !blob) {
+      results.push({ id: note.id, path, status: 'failed', error: (dlErr && dlErr.message) || 'download-failed' })
+      continue
+    }
+    const buf = Buffer.from(await blob.arrayBuffer())
+    const { error: upErr } = await supabaseAdmin.storage
+      .from('olongnotes')
+      .update(path, buf, {
+        contentType: note.file_type || 'application/octet-stream',
+        contentDisposition: 'inline',
+        upsert: true,
+      })
+    if (upErr) {
+      results.push({ id: note.id, path, status: 'failed', error: upErr.message })
+    } else {
+      results.push({ id: note.id, path, status: 'updated' })
+    }
+  }
+
+  const summary = {
+    total: results.length,
+    updated: results.filter((r) => r.status === 'updated').length,
+    failed: results.filter((r) => r.status === 'failed').length,
+    skipped: results.filter((r) => r.status === 'skipped').length,
+    wouldUpdate: results.filter((r) => r.status === 'would-update').length,
+    dryRun,
+  }
+  res.json({ summary, results })
 })
 
 // POST /api/notes/:id/report and auth required

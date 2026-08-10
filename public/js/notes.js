@@ -3,17 +3,12 @@
 //
 // What this page shows:
 //   Every published note, sorted by popularity (likes + downloads)
-//   descending, with a 20-per-page "Load more" affordance.
+//   descending, paginated 8 per page with numbered pagination.
 //
-// The same popularity metric the homepage teaser uses is reused here
-// — no new metric. The server doesn't currently expose a sort-by-pop
-// option on /api/notes, so we sort the client-side over the fetched
-// page. That's fine for the small per-page set the "Load more" model
-// fetches (20 rows).
-//
-// Backend: GET /api/notes?limit=20&offset=N returns
+// Backend: GET /api/notes?limit=8&offset=N returns
 //   { notes: [...], pagination: { total, limit, offset, has_more } }
-// — we trust has_more to know when to hide the Load more button.
+// — we trust total + offset to compute page count and render
+// prev / numbered buttons / next with ellipsis for gaps.
 //
 // Click-to-open: same routing as the rest of the site →
 // document-viewer.html?id=<note_id>.
@@ -39,16 +34,18 @@
   const notesCount = document.getElementById('notesCount');
 
   // ---------- State ----------
-  // We accumulate pages into state.notes so "Load more" appends rather
-  // than replaces. Render reads from this list every time.
+  // Single-page model: each fetch REPLACES state.notes (no append).
+  // The pagination nav rebuilds from total + totalPages; the count
+  // line reads "Showing X-Y of Z notes" off the slice.
   const state = {
     notes: [],
+    page: 1,
     total: 0,
-    hasMore: false,
+    totalPages: 0,
     loading: false,
   };
 
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 8;
 
   // ---------- Helpers (lifted from subject-notes.js, kept compatible) ----------
   function initials(name) {
@@ -99,10 +96,10 @@
   }
 
   // ---------- Notes loader ----------
-  // Loads one page starting at `offset`. On success, appends to
-  // state.notes and updates pagination state. On failure, surfaces an
-  // empty state but never throws — the page should always render.
-  async function loadPage(offset) {
+  // Loads one page (1-indexed). On success, REPLACES state.notes
+  // (single-page model — no append). On failure, surfaces an empty
+  // state but never throws — the page should always render.
+  async function loadPage(pageNumber) {
     if (!api) {
       docEmpty.hidden = false;
       return;
@@ -111,46 +108,88 @@
     if (notesPagination) notesPagination.setAttribute('aria-busy', 'true');
 
     try {
-      const query = new URLSearchParams();
-      query.set('limit', String(PAGE_SIZE));
-      query.set('offset', String(offset));
+      const targetPage = Math.max(1, parseInt(pageNumber, 10) || 1)
+      const offset = (targetPage - 1) * PAGE_SIZE
+      const query = new URLSearchParams()
+      query.set('limit', String(PAGE_SIZE))
+      query.set('offset', String(offset))
 
-      const data = await api.get(`/notes?${query.toString()}`);
-      const payload = (data && typeof data === 'object') ? data : { notes: [] };
-      const rows = Array.isArray(payload.notes) ? payload.notes : [];
-      const pagination = payload.pagination || {};
+      const data = await api.get(`/notes?${query.toString()}`)
+      const payload = (data && typeof data === 'object') ? data : { notes: [] }
+      const rows = Array.isArray(payload.notes) ? payload.notes : []
+      const pagination = payload.pagination || {}
 
-      const mapped = rows.map(adaptNoteFromApi);
-      state.notes = state.notes.concat(mapped);
-      state.total = pagination.total || state.notes.length;
-      state.hasMore = Boolean(pagination.has_more);
+      state.notes = rows.map(adaptNoteFromApi)
+      state.page = targetPage
+      state.total = pagination.total || state.notes.length
+      state.totalPages = state.total > 0
+        ? Math.max(1, Math.ceil(state.total / PAGE_SIZE))
+        : 0
     } catch (e) {
-      console.warn('[notes] Could not load page.', e);
-      // If this was the FIRST page, show empty. Otherwise keep what we
-      // already have and just stop loading more.
-      if (offset === 0) state.notes = [];
+      console.warn('[notes] Could not load page.', e)
+      state.notes = []
+      state.total = 0
+      state.totalPages = 0
     } finally {
-      state.loading = false;
-      if (notesPagination) notesPagination.removeAttribute('aria-busy');
+      state.loading = false
+      if (notesPagination) notesPagination.removeAttribute('aria-busy')
     }
+  }
+
+  // ---------- Pagination builder ----------
+  // Builds the innerHTML for the numbered pagination nav. Page window
+  // is {1, last, current, current±1, current±2} deduped via Set; gaps
+  // > 1 between consecutive entries render as an ellipsis span.
+  //
+  // Renamed local `window` → `pageWindow` to avoid shadowing the
+  // browser global (eslint-disable on the original draft flagged it).
+  function buildPaginationHtml(current, totalPages) {
+    if (totalPages <= 1) return ''
+
+    const pageWindow = new Set([1, totalPages, current, current - 1, current + 1, current - 2, current + 2])
+    const sortedPages = [...pageWindow]
+      .filter((p) => p >= 1 && p <= totalPages)
+      .sort((a, b) => a - b)
+
+    const prevDisabled = current <= 1 ? ' is-disabled' : ''
+    const nextDisabled = current >= totalPages ? ' is-disabled' : ''
+
+    const parts = []
+    parts.push(`<button type="button" class="notes-pagination__btn notes-pagination__nav${prevDisabled}" data-page="prev" aria-label="Previous page"${prevDisabled ? ' disabled' : ''}>‹</button>`)
+
+    let prev = 0
+    for (const p of sortedPages) {
+      if (prev && p - prev > 1) {
+        parts.push('<span class="notes-pagination__ellipsis" aria-hidden="true">…</span>')
+      }
+      const isCurrent = p === current
+      parts.push(
+        `<button type="button" class="notes-pagination__btn${isCurrent ? ' is-current' : ''}" data-page="${p}" aria-label="Page ${p}"${isCurrent ? ' aria-current="page"' : ''}>${p}</button>`
+      )
+      prev = p
+    }
+
+    parts.push(`<button type="button" class="notes-pagination__btn notes-pagination__nav${nextDisabled}" data-page="next" aria-label="Next page"${nextDisabled ? ' disabled' : ''}>›</button>`)
+
+    return parts.join('')
   }
 
   // ---------- Render ----------
   function render() {
-    docEmpty.hidden = state.notes.length > 0;
+    docEmpty.hidden = state.notes.length > 0
 
-    // Sort the accumulated notes by popularity (likes + downloads) DESC
-    // so the global ordering matches the homepage teaser. Done client-
-    // side per page-load because /api/notes doesn't expose a pop-sort
-    // query param yet — fine at 20/page.
+    // Sort the page slice by popularity (likes + downloads) DESC so the
+    // global ordering matches the homepage teaser. Done client-side per
+    // page-load because /api/notes doesn't expose a pop-sort query
+    // param yet — fine at 8/page.
     const sorted = [...state.notes].sort(
-      (a, b) => (b.likes + b.downloads) - (a.likes + a.downloads)
-    );
+      (a, b) => (b.likes + b.downloads) - (a.likes + b.downloads)
+    )
 
-  docGrid.innerHTML = '';
+    docGrid.innerHTML = ''
     sorted.forEach((doc) => {
-      const card = document.createElement('div');
-      card.className = 'doc-card';
+      const card = document.createElement('div')
+      card.className = 'doc-card'
       card.innerHTML = `
         <div class="doc-card__top">
           ${fileIconMarkup(doc.fileType)}
@@ -171,32 +210,84 @@
           <span class="doc-card__stat doc-card__stat--downloads">${downloadIconMarkup} ${esc(String(doc.downloads))} downloads</span>
         </div>
         <button class="btn btn--outline btn--sm doc-card__open" type="button">Open File</button>
-      `;
+      `
 
       card.querySelector('.doc-card__open').addEventListener('click', () => {
-        window.location.href = `document-viewer.html?id=${encodeURIComponent(doc.id)}`;
-      });
+        window.location.href = `document-viewer.html?id=${encodeURIComponent(doc.id)}`
+      })
 
-      docGrid.appendChild(card);
-    });
+      docGrid.appendChild(card)
+    })
 
-    // Pagination element visibility: render() in this file builds the
-    // page buttons (or an empty wrapper) when notesPagination exists.
-    // The actual prev/next/page-number buttons are rendered by the
-    // caller — this file is now a load-only consumer.
-    if (state.total > 0) {
-      notesCount.textContent = `Showing ${state.notes.length} of ${state.total} notes`;
+    // ---------- Pagination nav ----------
+    // Hide the nav when there's ≤ 1 page total; otherwise rebuild the
+    // innerHTML from the page window and unhide.
+    if (!notesPagination) {
+      // Count line below still updates even if the nav was dropped.
+      updateCount()
+      return
+    }
+
+    if (state.totalPages <= 1) {
+      notesPagination.innerHTML = ''
+      notesPagination.hidden = true
     } else {
-      notesCount.textContent = '';
+      notesPagination.innerHTML = buildPaginationHtml(state.page, state.totalPages)
+      notesPagination.hidden = false
+    }
+
+    updateCount()
+  }
+
+  function updateCount() {
+    if (!notesCount) return
+    if (state.total <= 0) {
+      notesCount.textContent = ''
+      return
+    }
+    const start = (state.page - 1) * PAGE_SIZE + 1
+    const end = Math.min(state.page * PAGE_SIZE, state.total)
+    notesCount.textContent = `Showing ${start}-${end} of ${state.total} notes`
+  }
+
+  // ---------- Pagination click handler ----------
+  // Single delegated handler on the nav element resolves the data-page
+  // attribute: "prev" / "next" shift by ±1, a number jumps directly.
+  // goToPage() clamps to the valid range and no-ops on same-page /
+  // loading-state / out-of-range.
+  async function goToPage(target) {
+    if (state.loading) return
+    let nextPage = state.page
+    if (target === 'prev') nextPage = state.page - 1
+    else if (target === 'next') nextPage = state.page + 1
+    else {
+      const n = parseInt(target, 10)
+      if (!Number.isNaN(n)) nextPage = n
+    }
+    nextPage = Math.max(1, Math.min(nextPage, state.totalPages || 1))
+    if (nextPage === state.page) return
+    await loadPage(nextPage)
+    render()
+    // Scroll to the top of the grid so the new page is in view.
+    const gridTop = document.getElementById('docGrid')
+    if (gridTop && typeof gridTop.scrollIntoView === 'function') {
+      gridTop.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
+  if (notesPagination) {
+    notesPagination.addEventListener('click', (e) => {
+      const btn = e.target.closest('.notes-pagination__btn')
+      if (!btn || btn.disabled) return
+      const target = btn.dataset.page
+      if (!target) return
+      goToPage(target)
+    })
+  }
+
   // ---------- Boot ----------
-  // notes.html uses numbered pagination (rendered by the same module),
-  // not a Load-More button — clicks are wired in the pagination
-  // render path, not here. Nothing to wire at boot.
   (async function init() {
-    await loadPage(0);
-    render();
-  })();
-})();
+    await loadPage(1)
+    render()
+  })()
+})()

@@ -218,8 +218,16 @@
   border-radius: 14px;
   padding: 18px 18px 16px;
   box-shadow: var(--shadow-sm);
+  border: 1px solid transparent;
   display: flex;
   flex-direction: column;
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+              background-color 0.18s var(--ease), border-color 0.18s var(--ease);
+}
+.doc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-blue, #3d6bf0);
 }
 
 .doc-card__top {
@@ -386,6 +394,114 @@
 .link-arrow--back svg { margin-right: 2px; }
 @media (max-width: 560px) {
   .notes-page__more .btn { width: 100%; }
+}
+
+/* ---------------------------------------------------------
+   NUMBERED PAGINATION (notes.html — All Notes)
+   Lives in school-profile.css because it's shared between the
+   school-profile / subject-notes / all-notes pages that all use
+   the same .doc-card markup and pagination nav. Inactive button
+   mirrors the .btn--outline treatment (white surface + gray
+   border); current page mirrors .btn--primary (navy fill + white
+   text); disabled buttons fade to opacity 0.4 with cursor
+   not-allowed. Mobile (≤560px) shrinks the buttons to 32px so the
+   full nav fits without overflow on a 360px viewport.
+--------------------------------------------------------- */
+.notes-page__more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.notes-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.notes-pagination__btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  background: var(--surface, #ffffff);
+  color: var(--text-body, #1f2937);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.notes-pagination__btn:hover:not(:disabled):not(.is-current):not(.is-disabled) {
+  background: var(--gray-100, #f3f4f6);
+  border-color: var(--gray-300, #d1d5db);
+}
+
+.notes-pagination__btn.is-current {
+  background: var(--accent-blue, #2F6FED);
+  border-color: var(--accent-blue, #2F6FED);
+  color: #ffffff;
+  cursor: default;
+}
+
+.notes-pagination__btn.is-disabled,
+.notes-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.notes-pagination__nav {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.notes-pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 36px;
+  color: var(--text-muted, #6b7280);
+  font-weight: 600;
+  user-select: none;
+}
+
+.notes-page__count {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted, #6b7280);
+  text-align: center;
+}
+
+/* Dark-mode overrides — bordered buttons stay legible against
+   the dark surface; current page still pops with the accent-blue
+   fill. */
+[data-theme="dark"] .notes-pagination__btn {
+  background: var(--surface, #1a2138);
+  border-color: var(--gray-700, #374151);
+  color: var(--text-body, #e5e7eb);
+}
+[data-theme="dark"] .notes-pagination__btn:hover:not(:disabled):not(.is-current):not(.is-disabled) {
+  background: var(--gray-800, #1f2937);
+  border-color: var(--gray-600, #4b5563);
+}
+
+@media (max-width: 560px) {
+  .notes-pagination__btn,
+  .notes-pagination__ellipsis {
+    min-width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
 }
 
 /* ---------------------------------------------------------
