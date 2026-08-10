@@ -1133,55 +1133,6 @@ const remapped = new FormData();
     }
   });
 
-  /* ---------------- Discover / Learn / Interact ---------------- */
-  const discoverScroll = document.getElementById('discoverScroll');
-  const discoverItems = document.querySelectorAll('.discover-item');
-  const discoverBadges = document.querySelectorAll('.discover-badge-item');
-  const discoverVisuals = document.querySelectorAll('.discover-visual-item');
-  const discoverProgressFill = document.getElementById('discoverProgressFill');
-  const discoverGroups = [discoverItems, discoverBadges, discoverVisuals];
-
-  const markActive = (nodeList, index) => {
-    nodeList.forEach((item, i) => {
-      item.classList.toggle('is-active', i === index);
-      item.classList.toggle('is-passed', i < index);
-    });
-  };
-
-  if (discoverScroll && discoverItems.length) {
-
-    const isNarrowViewport = () => window.matchMedia('(max-width: 1100px)').matches;
-
-    if (isNarrowViewport()) {
-      // Mobile / tablet / small-laptop: no scroll-jacking. CSS keeps
-      // every panel in normal, readable stacked flow with no overlap.
-    } else {
-      let ticking = false;
-
-      const updateDiscover = () => {
-        ticking = false;
-        const rect = discoverScroll.getBoundingClientRect();
-        const scrollable = discoverScroll.offsetHeight - window.innerHeight;
-        const progress = Math.min(Math.max(scrollable > 0 ? -rect.top / scrollable : 0, 0), 0.999);
-        const index = Math.floor(progress * discoverItems.length);
-
-        discoverGroups.forEach((group) => markActive(group, index));
-        if (discoverProgressFill) discoverProgressFill.style.width = `${progress * 100}%`;
-      };
-
-      const onDiscoverScroll = () => {
-        if (!ticking) {
-          ticking = true;
-          window.requestAnimationFrame(updateDiscover);
-        }
-      };
-
-      window.addEventListener('scroll', onDiscoverScroll, { passive: true });
-      window.addEventListener('resize', onDiscoverScroll);
-      updateDiscover();
-    }
-  }
-
   /* =======================================================
      APPLY ROLE
      The one function that knows what each perspective looks
@@ -1255,4 +1206,165 @@ const heroContribBtn = document.getElementById('heroContribBtn');
       window.history.replaceState({}, '', next);
     }
   } catch (_) { /* query-string inspection is best-effort */ }
+
+  /* ---------------- Discover heading typewriter ----------------
+   Watches the section heading above the 3-card Discover / Learn /
+   Interact row. When ~50% of it scrolls into view, types the
+   heading text character-by-character (40ms / char — natural
+   typing pace). Fires once per page load (observer unobserves
+   after first trigger) and respects prefers-reduced-motion by
+   showing the full heading immediately.
+
+   Markup contract (matches index.html):
+     <h2 class="discover-heading" data-typewriter
+         data-typewriter-text="Everything you need to learn and share, in one place.">
+       <span class="discover-heading__text" aria-hidden="true"></span>
+       <span class="discover-heading__sr">…</span>
+       <span class="discover-heading__cursor" aria-hidden="true">|</span>
+     </h2>
+
+   The .discover-heading__sr copy is read by screen readers even
+   before JS runs (or if JS fails to load), so the section still
+   has an accessible heading. The visible text + cursor are
+   decorative duplicates. */
+  const typewriterHeading = document.querySelector('.discover-heading[data-typewriter]');
+  if (typewriterHeading) {
+    const textEl = typewriterHeading.querySelector('.discover-heading__text');
+    const cursorEl = typewriterHeading.querySelector('.discover-heading__cursor');
+    const fullText = typewriterHeading.getAttribute('data-typewriter-text') || '';
+
+    // Reduced motion: skip the animation entirely. Show full text,
+    // hide the cursor, mark as typed so the cursor stays gone if
+    // styles re-evaluate. No observer needed — no scroll trigger.
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || !fullText || !textEl || !cursorEl) {
+      if (textEl) textEl.textContent = fullText;
+      if (cursorEl) cursorEl.style.display = 'none';
+      typewriterHeading.classList.add('is-typed');
+    } else {
+      // 40ms per character = ~25 chars/sec, natural typing pace.
+      // Slight jitter (±20ms) keeps the animation from feeling
+      // mechanical on longer strings. Random within range per char.
+      const PER_CHAR_BASE_MS = 40;
+      const PER_CHAR_JITTER_MS = 20;
+
+      const runTypewriter = () => {
+        let i = 0;
+        const tick = () => {
+          if (i <= fullText.length) {
+            textEl.textContent = fullText.slice(0, i);
+            i += 1;
+            const delay = PER_CHAR_BASE_MS + Math.floor(Math.random() * PER_CHAR_JITTER_MS);
+            setTimeout(tick, delay);
+          } else {
+            // Typing complete — fade the cursor out via the
+            // .is-typed class so the heading lands on the final
+            // clean look the design intended.
+            typewriterHeading.classList.add('is-typed');
+          }
+        };
+        tick();
+      };
+
+      // IntersectionObserver fires once when ~50% of the heading
+      // is visible. threshold: 0.5 means "50% of the element".
+      // { once: true } via unobserving in the callback is the
+      // bulletproof version (Safari < 15.4 didn't support the
+      // once option on IO callbacks).
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              obs.unobserve(entry.target); // fire once, never again
+              runTypewriter();
+              break;
+            }
+          }
+        }, { threshold: 0.5 });
+        io.observe(typewriterHeading);
+      } else {
+        // Very old browsers without IO: just run it immediately.
+        // The heading still appears (no IntersectionObserver
+        // support = no animation library guarantee either way).
+        runTypewriter();
+      }
+    }
+  }
+
+  /* ---------------- Discover stat pills scroll-in ----------------
+   The 3 stat pills (.discover-badge) stagger in left-to-right with a
+   fade+rise entrance — feels like part of the same scroll choreography
+   as the typewriter heading above.
+
+   Markup contract: 3 siblings (.discover-badge) inside .discover-badge-list.
+   Reduced motion users see the final state immediately (handled in CSS). */
+  const reduceMotionForReveal = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reduceMotionForReveal && 'IntersectionObserver' in window) {
+    // ---- Stat pills: stagger the 3 badges when the badge-list is
+    // ~25% visible. 80ms stagger between siblings so they cascade
+    // left-to-right without feeling slow. ----
+    const badgeList = document.querySelector('.discover-badge-list');
+    if (badgeList) {
+      const badges = Array.from(badgeList.querySelectorAll('.discover-badge'));
+      const badgeIO = new IntersectionObserver((entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            badges.forEach((badge, idx) => {
+              setTimeout(() => badge.classList.add('is-visible'), idx * 80);
+            });
+            obs.unobserve(entry.target);
+            break;
+          }
+        }
+      }, { threshold: 0.25 });
+      badgeIO.observe(badgeList);
+    }
+  } else {
+    // No IO support or reduced motion: reveal everything immediately
+    // so nothing stays at opacity:0 forever.
+    document.querySelectorAll('.discover-badge').forEach((el) => {
+      el.classList.add('is-visible');
+    });
+  }
+
+  /* ---------------- Top Contributors mobile scroll-in ----------------
+     Mobile-only entrance: the 4 .contributor-card elements fade + rise
+     in sequence as the user scrolls the section into view. Desktop
+     skips this entirely — the @media (min-width: 769px) block in
+     style.css keeps cards at their final state by default, so the
+     desktop layout is bit-identical to before this was added.
+
+     Markup contract: 4 siblings (.contributor-card) inside .contributors-grid.
+     Reduced motion + no-IO users see the final state immediately
+     (handled by the CSS fallback + the else branch below). */
+  const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
+  const contributorsGrid = document.querySelector('.contributors-grid');
+
+  if (contributorsGrid) {
+    if (isMobileViewport && !reduceMotionForReveal && 'IntersectionObserver' in window) {
+      // ---- Mobile + IO: stagger the 4 cards when ~20% of the grid
+      // is visible. 100ms stagger so 4 cards finish cascading in
+      // ~400ms — feels responsive without dragging. ----
+      const cards = Array.from(contributorsGrid.querySelectorAll('.contributor-card'));
+      const contributorsIO = new IntersectionObserver((entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            cards.forEach((card, idx) => {
+              setTimeout(() => card.classList.add('is-visible'), idx * 100);
+            });
+            obs.unobserve(entry.target);
+            break;
+          }
+        }
+      }, { threshold: 0.2 });
+      contributorsIO.observe(contributorsGrid);
+    } else {
+      // Desktop, reduced motion, or no IO: reveal all cards
+      // immediately so the section never sits empty.
+      contributorsGrid.querySelectorAll('.contributor-card').forEach((el) => {
+        el.classList.add('is-visible');
+      });
+    }
+  }
 });

@@ -1,5 +1,5 @@
 /* =========================================================
-   OlongNotes â€” Landing Page Styles
+   OlongNotes ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Landing Page Styles
    ========================================================= */
 
 /* ----- Design tokens ----- */
@@ -46,7 +46,7 @@
 /* ----- Dark mode token overrides -----
    Toggled by script.js setting data-theme="dark" on <html> (or
    <body>). Only tokens that are safe to flip site-wide are
-   redefined here â€” see the comment above for why --navy/--white
+   redefined here ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â see the comment above for why --navy/--white
    are deliberately excluded. */
 [data-theme="dark"] {
   --surface: #101a34;
@@ -78,7 +78,7 @@ html {
    stamp is set, hide .site-logo so users don't see a flash of the
    wrong-theme logo between paint and JS execution. */
 html:not([data-logo-swapped]) img.site-logo { visibility: hidden; }
-/* Overlay-style scrollbar â€” when content does overflow, the scrollbar
+/* Overlay-style scrollbar ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â when content does overflow, the scrollbar
    appears as a thin 6px pill instead of the chunky 17px default. With
    overflow-y: auto (not scroll) + no scrollbar-gutter, the bar is also
    absent entirely on short pages where nothing overflows, so it doesn't
@@ -99,6 +99,12 @@ html::-webkit-scrollbar-thumb:active { background-color: rgba(91, 100, 114, 0.85
 [data-theme="dark"] html::-webkit-scrollbar-thumb { background-color: rgba(123, 134, 158, 0.55); }
 [data-theme="dark"] html::-webkit-scrollbar-thumb:hover { background-color: rgba(160, 172, 196, 0.9); }
 [data-theme="dark"] html::-webkit-scrollbar-thumb:active { background-color: rgba(200, 210, 230, 1); }
+/* Defensive cover for any stray reddish/maroon bleed at the very top of
+   the page above the navbar (warm-tinted hero photo edges, scrollbar
+   gutter artifacts, transient paint flashes). Painting a matching
+   --surface strip on <html> ensures the area above <body> always blends
+   with the navbar instead of letting any underlying color show through. */
+html { background-color: var(--surface); }
 body {
   margin: 0;
   font-family: var(--font-body);
@@ -162,8 +168,26 @@ ul { list-style: none; margin: 0; padding: 0; }
 .btn--primary { background: var(--navy); color: var(--white); box-shadow: var(--shadow-sm); }
 .btn--primary:hover { background: var(--navy-700); box-shadow: var(--shadow-md); }
 
-.btn--goldenrod { background: var(--goldenrod); color: var(--navy); box-shadow: var(--shadow-sm); }
-.btn--goldenrod:hover { background: var(--goldenrod-700); color: var(--white); box-shadow: var(--shadow-md); }
+.btn--goldenrod {
+  background: var(--goldenrod);
+  color: var(--navy);
+  box-shadow: var(--shadow-sm);
+  /* Site-wide hover pattern: lift -2px on hover so the CTA "Share
+     what you know. Help someone grow." button matches the lift
+     treatment already established on .featured-card, .discover-card,
+     .contributor-card, and .discover-badge. */
+  transition: background 0.25s var(--ease),
+              color 0.25s var(--ease),
+              box-shadow 0.25s var(--ease),
+              transform 0.25s var(--ease);
+}
+.btn--goldenrod:hover {
+  background: var(--goldenrod-700);
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.btn--goldenrod:active { transform: translateY(-1px); }
 
 #ctaContribBtn {
   background: var(--navy);
@@ -237,7 +261,7 @@ body.modal-open .footer {
 /* Side drawer uses its own body class so opening it locks page
    scroll (overflow:hidden) and disables pointer events on the
    background via the drawer's own backdrop, but does NOT blur
-   the page â€” the drawer is a navigation surface, not a focused
+   the page ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the drawer is a navigation surface, not a focused
    modal that needs the page dimmed. The default modal-open blur
    would make the rest of the site unreadable while the drawer
    is open. */
@@ -470,7 +494,7 @@ body.side-drawer-open #siteMain {
 
 /* =========================================================
    UPLOAD NOTES MODAL (uses .contrib-card / .contrib-form shared
-   with the now-removed contrib-modal â€” those classes stay because
+   with the now-removed contrib-modal ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â those classes stay because
    #uploadCard reuses them. Only the page-level .contrib-modal
    wrapper rules are gone.)
    ========================================================= */
@@ -521,7 +545,7 @@ body.side-drawer-open #siteMain {
   /* CSS Grid items default to min-width: auto, which sizes the track by
      the item's content min-width. .auth-field wraps inputs/selects with
      intrinsic content width (long placeholders, cselect__trigger text,
-     etc.) â€” without this, the grid track widens past the modal on
+     etc.) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â without this, the grid track widens past the modal on
      mobile even though the parent .contrib-form__grid is correctly
      1fr at the 640px breakpoint. Same min-width: 0 fix applied to
      .file-drop (a grandchild) was insufficient because the grid item's
@@ -594,8 +618,8 @@ body.side-drawer-open #siteMain {
 
 /* =========================================================
    CUSTOM SELECT (upload modal dropdowns)
-   Native <select> stays as the real data/value source â€”
-   visually hidden â€” while this layer renders the styled UI.
+   Native <select> stays as the real data/value source ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â
+   visually hidden ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â while this layer renders the styled UI.
    ========================================================= */
 .cselect {
   position: relative;
@@ -715,7 +739,7 @@ body.side-drawer-open #siteMain {
 
 /* Home-page search-card filters: when a .select wrapper becomes a
    .cselect, drop its own border/background so only the custom trigger
-   (which carries the same look) shows â€” no doubled outline. */
+   (which carries the same look) shows ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no doubled outline. */
 .select.cselect {
   padding: 0;
   border: none;
@@ -800,7 +824,7 @@ body.side-drawer-open #siteMain {
   display: flex;
   align-items: center;
   gap: 10px;
-  /* width: 100% + min-width: 0 â€” the flex container needs both because
+  /* width: 100% + min-width: 0 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the flex container needs both because
      flex items default to min-width: auto, which lets long intrinsic
      content (e.g. file-drop__text's nowrap text) override an explicit
      width. Without min-width: 0, .file-drop can grow past its grid cell
@@ -961,7 +985,7 @@ body.upload-modal-open .footer {
 }
 /* Scrolled state: shrink the inner bar AND the logo so the whole chrome
    tucks up together. Mobile override (@media max-width: 560px) applies
-   the smaller sizes â€” both transitions run, so the user sees a smooth
+   the smaller sizes ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â both transitions run, so the user sees a smooth
    collapse on phones too. */
 .navbar--scrolled .navbar__inner { height: 56px; }
 .navbar--scrolled .navbar__logo img { height: 32px; }
@@ -1143,17 +1167,19 @@ body.upload-modal-open .footer {
    SIDE DRAWER
    ========================================================= */
 .side-drawer {
-  /* display:none (not visibility:hidden) when closed so the element
-     is fully removed from layout. visibility:hidden kept the wrapper
-     in the layout tree, and any intrinsic-width content (e.g. an
-     absolutely-positioned child with width:max-content) could still
-     bleed into the wrapper's computed box and force it past viewport
-     width â€” causing horizontal page overflow on mobile even when the
-     drawer was supposedly closed. With display:none the element
-     contributes nothing to layout until is-open is added.
-     max-width:100vw + box-sizing:border-box are belt-and-suspenders
-     guards in case an ancestor establishes a containing block. */
-  display: none;
+  /* The drawer is ALWAYS laid out (display:block) so the panel can
+     slide in/out via transform + the backdrop can fade in/out via
+     opacity. We previously used display:none + display:block to toggle
+     visibility, but that killed the transition because display:none
+     removes the element from the layout tree entirely — the panel
+     never had a "before" state to animate from. With visibility:hidden
+     (initial) + opacity:0 on the children, the wrapper itself stays
+     sized to 0 (children are absolutely positioned inside the fixed
+     inset:0 box, so the wrapper has no intrinsic content) and the
+     transitions can run cleanly. The mobile-overflow fix from the
+     Feb-2026 session is preserved: width:100vw + max-width:100vw +
+     box-sizing:border-box prevent any descendant from forcing the
+     wrapper past viewport width. */
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -1161,9 +1187,10 @@ body.upload-modal-open .footer {
   box-sizing: border-box;
   z-index: 1100;
   pointer-events: none;
+  visibility: hidden;
 }
 .side-drawer.is-open {
-  display: block;
+  visibility: visible;
   pointer-events: auto;
 }
 .side-drawer__backdrop {
@@ -1332,7 +1359,7 @@ body.upload-modal-open .footer {
   margin-right: auto;
   text-align: left;
 }
-/* Eyebrow pill above the title â€” matches the "For Students. By Students."
+/* Eyebrow pill above the title ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â matches the "For Students. By Students."
    cap badge from the design reference. Tucks the title down with breathing
    room above it. */
 .hero__eyebrow {
@@ -1396,7 +1423,7 @@ body.upload-modal-open .footer {
      white Featured Notes section below (background-color:
      var(--surface) on .featured-notes removed the previous
      gray-stripe contrast). The border needs to be dark enough to
-     read on a white background too â€” rgba(11,31,77,0.32) gives
+     read on a white background too ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â rgba(11,31,77,0.32) gives
      that visible separation without dominating the page. */
   border: 1.5px solid rgba(11, 31, 77, 0.32);
 }
@@ -1469,11 +1496,11 @@ body.upload-modal-open .footer {
   /* background-color was added so the 30px overlap region (where
      .search-card's margin-bottom:-70px pulls featured-notes up onto
      hero's bottom edge) no longer shows hero's dark navy through
-     transparency. Without a bg, the visible seam is: hero navy â†’
-     white search card â†’ 30px navy band (bleed-through) â†’ white body
-     â†’ h2 on white â€” which looks like the search card overlaps
-     Featured Notes. With this bg, the seam is: hero navy â†’ search
-     card â†’ clean white â†’ h2 on white. The overlap-composition
+     transparency. Without a bg, the visible seam is: hero navy ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢
+     white search card ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ 30px navy band (bleed-through) ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ white body
+     ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ h2 on white ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â which looks like the search card overlaps
+     Featured Notes. With this bg, the seam is: hero navy ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ search
+     card ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ clean white ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ h2 on white. The overlap-composition
      design is preserved (search card still floats over hero's bottom
      edge); only the bleed-through is eliminated. */
   background-color: var(--surface);
@@ -1559,7 +1586,7 @@ body.upload-modal-open .footer {
 }
 .featured-card__rank svg { flex-shrink: 0; }
 
-/* Gallery badge â€” shows on a feed card that collapsed a multi-image
+/* Gallery badge ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â shows on a feed card that collapsed a multi-image
    upload into one entry. Sits top-right next to the rank badge. */
 .featured-card__gallery {
   display: inline-flex;
@@ -1653,8 +1680,8 @@ body.upload-modal-open .footer {
 @media (max-width: 720px) {
   .featured-notes { padding-top: 56px; }
   .featured-notes__subtitle { margin-top: -16px; margin-bottom: 24px; }
-  /* Mobile: 2-column grid (not 1) â€” matches the schools/subjects
-     pattern. Cap is 4 so the grid divides cleanly into 2Ã—2 with no
+  /* Mobile: 2-column grid (not 1) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â matches the schools/subjects
+     pattern. Cap is 4 so the grid divides cleanly into 2ÃƒÆ’Ã¢â‚¬â€2 with no
      orphan row. Tighten card padding/font so more fits per screen. */
   .featured-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .featured-card { padding: 14px; gap: 10px; }
@@ -1668,170 +1695,6 @@ body.upload-modal-open .footer {
   .featured-card__stats .stat { font-size: 0.78rem; }
 }
 
-/* =========================================================
-   FEATURES STRIP â€” dark full-bleed "why OlongNotes" panel
-   ========================================================= */
-.features-strip {
-  position: relative;
-  overflow: hidden;
-  padding: 88px 0;
-  background:
-    linear-gradient(160deg, rgba(141, 157, 196, 0.93) 0%, rgba(18,48,105,0.91) 55%, rgba(22,58,122,0.88) 100%),
-    url('https://images.unsplash.com/photo-1653324101493-254c64719ba9?auto=format&fit=crop&w=1800&q=80') center / cover no-repeat;
-  background-blend-mode: normal;
-}
-
-.features-strip__glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  pointer-events: none;
-  z-index: 0;
-}
-.features-strip__glow--one {
-  width: 420px;
-  height: 420px;
-  top: -160px;
-  left: -120px;
-  background: radial-gradient(circle, rgba(47,111,237,0.35) 0%, rgba(47,111,237,0) 70%);
-}
-.features-strip__glow--two {
-  width: 380px;
-  height: 380px;
-  bottom: -180px;
-  right: -100px;
-  background: radial-gradient(circle, rgba(218,165,32,0.28) 0%, rgba(218,165,32,0) 70%);
-}
-
-.features-strip__head {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  max-width: 620px;
-  margin: 0 auto 48px;
-}
-.features-strip__eyebrow {
-  display: inline-block;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--goldenrod);
-  margin-bottom: 14px;
-}
-.features-strip__head h2 {
-  color: var(--white);
-  font-size: clamp(1.5rem, 2.6vw, 2rem);
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.features-strip__grid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 22px;
-}
-
-.features-strip__card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 14px;
-  text-align: left;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-md);
-  padding: 30px 26px;
-  backdrop-filter: blur(6px);
-  transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
-  /* One-time page-load entrance â€” staggered fade + small translateY
-     settle. Fires once on initial page load only (NOT scroll-
-     triggered). Total sequence â‰ˆ530ms (4 cards Ã— 60ms stagger +
-     350ms duration). animation-fill-mode: backwards keeps each card
-     invisible until its delay elapses. prefers-reduced-motion below
-     disables it entirely. */
-  animation: features-card-in 0.35s var(--ease) backwards;
-}
-.features-strip__card:nth-child(1) { animation-delay: 0ms; }
-.features-strip__card:nth-child(2) { animation-delay: 60ms; }
-.features-strip__card:nth-child(3) { animation-delay: 120ms; }
-.features-strip__card:nth-child(4) { animation-delay: 180ms; }
-.features-strip__card:hover,
-.features-strip__card:active {
-  /* Card hover (per established polish spec): translateY(-2px) +
-     shadow deepens, 0.2s ease. The strip is a dark panel so the spec's
-     light-context shadow alphas (0.08 â†’ 0.12) wouldn't read â€” adapted
-     to 0.18 â†’ 0.32 here for visibility on the navy backdrop. The
-     border + background brightness shift adds the equivalent of a
-     light-context shadow deepening for a dark panel. The icon circle
-     gets a small scale(1.06) as a natural extension of the card lift.
-     :active mirrors hover so touch devices still get tactile feedback
-     on tap (hover sticks on touch otherwise). */
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.24);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32);
-}
-.features-strip__card:hover .features-strip__icon,
-.features-strip__card:active .features-strip__icon {
-  transform: scale(1.06);
-}
-
-.features-strip__icon {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--white);
-  transition: transform 0.2s var(--ease);
-}
-.features-strip__icon--blue {
-  background: var(--accent-blue);
-}
-.features-strip__icon--gold {
-  background: var(--goldenrod);
-}
-
-/* One-time page-load entrance for the four cards â€” staggered fade +
-   small translateY settle. Fires once on initial page load only,
-   under the existing polish rule (NOT scroll-triggered). Total
-   sequence â‰ˆ530ms (4 cards Ã— 60ms stagger + 350ms duration).
-   animation-fill-mode: backwards keeps each card invisible until its
-   delay elapses, so the first paint doesn't show all four at once.
-   prefers-reduced-motion disables it entirely. */
-@keyframes features-card-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .features-strip__card { animation: none; }
-}
-
-.features-strip__card h3 {
-  color: var(--white);
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-.features-strip__card p {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.68);
-}
-
-@media (max-width: 1080px) {
-  .features-strip__grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 640px) {
-  .features-strip { padding: 64px 0; }
-  .features-strip__grid { grid-template-columns: 1fr; }
-  .features-strip__card { padding: 26px 22px; }
-}
 
 /* =========================================================
    ABOUT OLONGNOTES
@@ -1987,9 +1850,21 @@ body.upload-modal-open .footer {
   border-bottom: 1px solid var(--gray-100);
   overflow: hidden;
   background-color: #a8b7cf;
+  /* Defensive: keep marquee content inside its own paint layer so
+     the row's mask-image fade doesn't bleed across the section
+     boundary into the discover section below. isolation + z-index
+     > 0 establishes a new stacking context. */
+  isolation: isolate;
+  z-index: 1;
 }
 [data-theme="dark"] .marquee-strip {
   background-color: #2a3752;
+  /* The default --gray-100 border-bottom blends into the dark
+     discover section underneath (--gray-50 dark = #16203c, almost
+     identical to --gray-100 dark = #1c2745) so users can't tell
+     where the marquee ends. Bump the border to --gray-200 (#2a375c)
+     in dark mode so the section boundary is unambiguous. */
+  border-bottom-color: var(--gray-200);
 }
 
 .marquee-row {
@@ -2058,12 +1933,21 @@ body.upload-modal-open .footer {
 @media (max-width: 640px) {
   /* On phones the marquee used to collapse into a wrapped static
      grid (animation: none), which looked broken. Keep the animation
-     alive here â€” just slow it down for readability and let the
+     alive here — just slow it down for readability and let the
      row's mask-image edge fade handle the entry/exit. */
   .marquee-strip { padding: 36px 0; }
   .marquee-row {
     padding: 12px 0;
     overflow: hidden;
+    /* The base mask-image fades 10% on each side. At 360px viewport
+       that's 36px of fade on each edge — large enough that the first
+       ~14px of text content (item padding is 22px) is partially or
+       fully transparent, so readable text starts mid-word ("r every"
+       instead of "for every"). Narrow the fade to ~5% on each side
+       (18px on 360px) so it sits inside the item's own padding and
+       characters near the edge stay fully opaque. */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
   }
   .marquee-row--ltr .marquee-track {
     animation: marquee-scroll 56s linear infinite reverse;
@@ -2090,179 +1974,358 @@ body.upload-modal-open .footer {
 }
 
 /* =========================================================
-   DISCOVER / LEARN / INTERACT
+   DISCOVER / LEARN / INTERACT (3-card grid)
+
+   Replaces the previous auto-rotating carousel with a Boeing-
+   style "Our Commitment" row: 3 side-by-side cards, each with a
+   full-bleed background image, a permanent dark navy gradient
+   overlay at the bottom, and bottom-aligned eyebrow / title /
+   subhead / body copy + a CTA arrow link.
+
+   Hover effect (matches the reference):
+   - background image blurs (filter: blur(4px)) + darkens
+     (overlay opacity deepens)
+   - text content sharpens in contrast + lifts
+     (translateY(-4px) on the body block)
+   - ~0.3s ease transition; cancels under prefers-reduced-motion
+
+   On <=1100px: 3-column grid stays in place but cards get shorter.
+   On <=720px: cards stack single-column, badges below.
+
+   Stat pill row (.discover-badge-list) lives below the cards,
+   unchanged from the previous build.
    ========================================================= */
 .discover {
   position: relative;
   background: var(--gray-50);
+  /* Generous top padding so the typewriter heading has clear
+     breathing room below the marquee strip above. Bottom padding
+     tightened 88→8 to match the contributors section below — the
+     standard .section rhythm (88px discover bottom + 88px
+     contributors top = 176px above the "Top Contributors" heading)
+     made the gap above Top Contributors wildly inconsistent with
+     the gap below the contributor cards. Both now 8px for
+     visual rhythm. Bumped 120→160→220 after the heading read as
+     too close to the marquee on the dark-theme background and
+     again after the marquee and discover backgrounds blended
+     together (both dark navy) so 160px felt visually like 0. */
+  /* Desktop audit 2026-08-11: marquee (30px bottom padding) +
+     discover top padding should sum to the 96px "fully distinct
+     page sections" midpoint (80-120px range on the 8-point scale).
+     Previous 220 was overshooting — visual blend with marquee above
+     made even 160px read as 0, but 220 was too generous once the
+     blend was fixed. 66 + 30 = 96 sits at the midpoint. */
+  padding: 66px 0 8px;
+  /* Defensive isolation: the marquee strip above uses a hard
+     border-bottom + opaque background, but the row's mask-image
+     fade (transparent at left/right) can still look like it's
+     bleeding into the discover section. A solid background here
+     + z-index relative to the marquee above ensures the boundary
+     is crisp no matter what GPU compositor does with transforms. */
+  isolation: isolate;
+  z-index: 0;
 }
 
-.discover-scroll {
-  position: relative;
-  /* 100vh: matches the sticky content height (calc(100vh - 96px)),
-     so there's effectively no empty scroll-through between this
-     section and the next. The 3 scroll-pinned items still swap as
-     the user scrolls past â€” just with very tight scroll distances
-     per item. Was 260vh â†’ 180vh â†’ 120vh â†’ 100vh as we iteratively
-     trimmed the visible white gap. */
-  height: 100vh;
-}
-
-.discover-sticky {
-  position: sticky;
-  top: 96px;
-  height: calc(100vh - 96px);
+/* ---- Discover section heading (typewriter title) ---- */
+.discover-frame__head {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(247, 248, 250, 0.94), rgba(247, 248, 250, 0.96)),
-    url('https://images.unsplash.com/photo-1644030692588-f881527358e2?auto=format&fit=crop&w=1800&q=80') center / cover no-repeat;
-  transition: background 0.25s var(--ease);
+  text-align: center;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
 }
-/* Same photo, dark overlay instead of the light one, so the
-   (now light-colored) text stays readable in dark mode. */
-[data-theme="dark"] .discover-sticky {
-  background:
-    linear-gradient(180deg, rgba(11, 20, 42, 0.90), rgba(11, 20, 42, 0.94)),
-    url('https://images.unsplash.com/photo-1644030692588-f881527358e2?auto=format&fit=crop&w=1800&q=80') center / cover no-repeat;
+
+.discover-heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.55rem, 2.8vw, 2.1rem);
+  line-height: 1.25;
+  color: var(--text-heading);
+  margin: 0;
+  /* Reserve a min-height so the heading block doesn't shift
+     layout as characters are added by the typewriter JS. */
+  min-height: 1.25em;
+  /* Heading text-fringe fix: Poppins bold (#EEF2FB in dark mode)
+     on dark navy (#16203c) renders with visible sub-pixel red/cyan
+     ghosting on Windows + some macOS GPU configurations because
+     each browser picks its own font-smoothing strategy. Lock the
+     heading to a single explicit rendering path: optimizeLegibility
+     turns on kerning + ligatures (font-feature-settings below), and
+     -webkit-font-smoothing: antialiased overrides the default
+     subpixel rendering that produces the colored fringe on bold
+     weights. Mirrors the body's global smoothing (style.css:114). */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1;
+}
+
+/* Visually-hidden copy of the full heading for screen readers /
+   no-JS users. The JS writes the typed-out text into
+   .discover-heading__text, and the cursor is appended after it.
+   We mirror the visible text's style so the SR-only copy doesn't
+   need to be styled — it's only there as a fallback. */
+.discover-heading__sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.discover-heading__cursor {
+  display: inline-block;
+  margin-left: 1px;
+  color: var(--accent-blue);
+  font-weight: 500;
+  /* step-end keeps the cursor visible for the full interval —
+     abrupt on/off instead of fading. Pair with opacity fade
+     via @keyframes so the final state can settle to opacity:0. */
+  animation: discover-cursor-blink 1s step-end infinite;
+}
+
+@keyframes discover-cursor-blink {
+  0%, 50%   { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* Once typing completes, JS adds .is-typed — fade the cursor out. */
+.discover-heading.is-typed .discover-heading__cursor {
+  animation: discover-cursor-fade 320ms var(--ease) forwards;
+}
+@keyframes discover-cursor-fade {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Typewriter shouldn't reserve vertical space and shift content when
+   the visible text is empty (before JS starts). Make the typed span
+   inline so it sizes to content; pre-typing the heading block is still
+   min-height: 1.25em tall so layout doesn't shift mid-typing. */
+.discover-heading__text:empty::before {
+  content: "\200B"; /* zero-width space — keeps the line box from collapsing */
 }
 
 .discover-frame {
   position: relative;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 64px;
+  flex-direction: column;
+  align-items: stretch;
+  /* Desktop audit 2026-08-11: heading → content-group falls in the
+     48-64px "section heading and the content group under it"
+     midpoint of the 8-point scale. 56px is the midpoint value.
+     The same gap applies between the cards and the stat-pill row
+     below, which also reads as a "closely-related block boundary"
+     in the same scale band. Mobile overrides (≤1100px: 32, ≤720px: 28)
+     tighten for small screens. */
+  gap: 56px;
 }
 
-.discover-copy {
-  flex: 1;
-  max-width: 480px;
-  text-align: left;
+/* ---- 3-card grid container ---- */
+.discover-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 100%;
 }
 
-.discover-eyebrow {
+.discover-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 420px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--gray-100);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
+  color: var(--white);
+  isolation: isolate;
+  transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.discover-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+.discover-card:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: 3px;
+}
+
+/* The photo layer. nth-child maps each card to its background. */
+.discover-card__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(1.04);
+  transition: filter 0.3s var(--ease), transform 0.3s var(--ease);
+  z-index: 0;
+}
+.discover-card:nth-child(1) .discover-card__bg { background-image: url('../img/discover-1.jpg'); }
+.discover-card:nth-child(2) .discover-card__bg { background-image: url('../img/discover-2.jpg'); }
+.discover-card:nth-child(3) .discover-card__bg { background-image: url('../img/discover-3.jpg'); }
+
+/* Permanent dark navy gradient overlay (fades transparent at top). */
+.discover-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(11, 31, 77, 0.92) 0%,
+    rgba(11, 31, 77, 0.75) 35%,
+    rgba(11, 31, 77, 0.18) 70%,
+    rgba(11, 31, 77, 0.05) 100%
+  );
+  transition: background 0.3s var(--ease);
+  z-index: 1;
+}
+.discover-card:hover .discover-card__overlay {
+  background: linear-gradient(
+    to top,
+    rgba(11, 31, 77, 0.96) 0%,
+    rgba(11, 31, 77, 0.85) 35%,
+    rgba(11, 31, 77, 0.32) 70%,
+    rgba(11, 31, 77, 0.12) 100%
+  );
+}
+
+/* Hover: blur + slight extra zoom on the photo. */
+.discover-card:hover .discover-card__bg {
+  filter: blur(4px);
+  transform: scale(1.08);
+}
+
+/* Bottom-aligned body block. Lifts on hover for a "focus" cue. */
+.discover-card__body {
+  position: relative;
+  z-index: 2;
+  padding: 28px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.3s var(--ease);
+}
+.discover-card:hover .discover-card__body {
+  transform: translateY(-4px);
+}
+
+.discover-card__eyebrow {
   display: inline-block;
-  font-size: 0.76rem;
+  align-self: flex-start;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent-blue);
-  margin-bottom: 18px;
+  color: var(--goldenrod);
+  margin-bottom: 4px;
 }
 
-.discover-list {
-  position: relative;
-  width: 100%;
-  height: 168px;
-}
-
-.discover-item {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
-  pointer-events: none;
-}
-
-.discover-item__index {
-  display: none;
-}
-
-.discover-item__title {
-  font-size: clamp(2.1rem, 3.2vw, 2.6rem);
+.discover-card__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
   font-weight: 800;
-  color: var(--text-heading);
-  margin-bottom: 12px;
+  color: var(--white);
   letter-spacing: -0.01em;
+  line-height: 1.1;
 }
 
-.discover-item__subtitle {
-  font-size: 1.02rem;
+.discover-card__subtitle {
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--accent-blue);
-  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.92);
+  margin-top: 2px;
 }
 
-.discover-item__text {
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: var(--gray-600);
-  max-width: 420px;
+.discover-card__text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  margin-top: 6px;
+  max-width: 360px;
 }
 
-.discover-item.is-active {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+.discover-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: gap 0.3s var(--ease);
 }
-.discover-item.is-passed {
-  opacity: 0;
-  transform: translateY(-16px);
-}
-
-.discover-progress {
-  position: relative;
-  width: 120px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--gray-200);
-  margin-top: 24px;
-  overflow: hidden;
-}
-.discover-progress__fill {
-  position: absolute;
-  inset: 0;
-  width: 0%;
-  background: var(--accent-blue);
-  transition: width 0.2s linear;
+.discover-card:hover .discover-card__cta {
+  gap: 12px;
 }
 
+/* ---- Stat pill row (unchanged behavior, repositioned below cards) ---- */
 .discover-badge-list {
-  position: relative;
-  width: 230px;
-  height: 60px;
-  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 8px;
 }
 .discover-badge {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: var(--surface);
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  width: fit-content;
-}
-.discover-badge-item {
-  position: absolute;
-  top: 0;
-  left: 0;
+  /* Scroll-in entrance: hidden + 8px below until JS adds
+     .is-visible. JS staggers the class across the 3 badges
+     so they cascade in left-to-right. */
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
-  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 380ms var(--ease),
+              transform 380ms var(--ease),
+              box-shadow 0.25s var(--ease),
+              border-color 0.25s var(--ease),
+              background 0.25s var(--ease);
 }
-.discover-badge-item.is-active {
+.discover-badge.is-visible {
   opacity: 1;
   transform: translateY(0);
-  pointer-events: auto;
 }
-.discover-badge-item.is-passed {
-  opacity: 0;
-  transform: translateY(-14px);
+/* Hover: lift -2px + brighter bg/border + bigger shadow. Matches
+   the .featured-card hover treatment so the two surfaces feel
+   related. Icon circle also shifts to a brighter blue. */
+.discover-badge:hover,
+.discover-badge:focus-visible {
+  transform: translateY(-2px);
+  background: var(--surface);
+  border-color: var(--accent-blue);
+  box-shadow: 0 6px 18px rgba(11, 31, 77, 0.12);
+}
+.discover-badge:hover .discover-badge__icon,
+.discover-badge:active .discover-badge__icon,
+.discover-badge:focus-visible .discover-badge__icon {
+  background: var(--accent-blue);
+  color: var(--white);
+  transform: scale(1.06);
+}
+/* Touch: pressing the pill mirrors hover so the effect is visible
+   on mobile where there's no real hover state. */
+.discover-badge:active {
+  transform: translateY(-2px);
+  background: var(--surface);
+  border-color: var(--accent-blue);
+  box-shadow: 0 6px 18px rgba(11, 31, 77, 0.12);
 }
 .discover-badge__icon {
-  width: 34px;
-  height: 34px;
+  width: 34px; height: 34px;
   border-radius: 50%;
   background: var(--navy-100);
   color: var(--accent-blue);
@@ -2270,6 +2333,9 @@ body.upload-modal-open .footer {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: background 0.25s var(--ease),
+              color 0.25s var(--ease),
+              transform 0.25s var(--ease);
 }
 .discover-badge__text {
   display: flex;
@@ -2286,196 +2352,87 @@ body.upload-modal-open .footer {
   color: var(--gray-600);
 }
 
-/* =========================================================
-   DISCOVER VISUAL
-   ========================================================= */
-.discover-visual {
-  position: relative;
-  flex-shrink: 0;
-  width: 460px;
-  height: 380px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  perspective: 1400px;
+/* ---- Reduced motion: cancel hover blur + transform ---- */
+@media (prefers-reduced-motion: reduce) {
+  .discover-card,
+  .discover-card__bg,
+  .discover-card__overlay,
+  .discover-card__body,
+  .discover-card__cta {
+    transition: none;
+  }
+  .discover-card:hover { transform: none; }
+  .discover-card:hover .discover-card__bg { filter: none; transform: scale(1.04); }
+  .discover-card:hover .discover-card__body { transform: none; }
 }
 
-.discover-visual__ring {
-  position: absolute;
-  inset: -50px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--navy-100) 0%, rgba(231, 236, 247, 0) 70%);
-  z-index: 0;
-}
-
-.discover-visual__stack {
-  position: relative;
-  z-index: 1;
-  width: 150%;
-  height: 150%;
-  border-radius: 22px;
-  overflow: hidden;
-  background: var(--gray-100);
-  box-shadow: var(--shadow-lg);
-  transform-style: preserve-3d;
-  transform: rotateY(-8deg) rotateX(3deg);
-  transition: transform 0.4s var(--ease);
-}
-.discover-visual__stack:hover {
-  transform: rotateY(-3deg) rotateX(1deg);
-}
-
-.discover-visual-item {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: translateX(48px) scale(1.04);
-  transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
-  pointer-events: none;
-  z-index: 1;
-}
-.discover-visual-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  aspect-ratio: 16 / 10;
-}
-.discover-visual-item::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(11, 31, 77, 0) 55%, rgba(11, 31, 77, 0.5) 100%);
-}
-.discover-visual-item.is-active {
-  opacity: 1;
-  transform: translateX(0) scale(1);
-  pointer-events: auto;
-  z-index: 3;
-}
-.discover-visual-item.is-passed {
-  opacity: 0;
-  transform: translateX(-48px) scale(0.96);
-  z-index: 2;
-}
-
-.discover-visual__dot {
-  position: absolute;
-  border-radius: 50%;
-  z-index: 2;
-}
-.discover-visual__dot--1 {
-  width: 14px;
-  height: 14px;
-  background: var(--accent-blue);
-  top: 4%;
-  right: 0%;
-}
-.discover-visual__dot--2 {
-  width: 10px;
-  height: 10px;
-  background: #4C9A6A;
-  bottom: 6%;
-  right: 12%;
-}
-
+/* ---- Tablet / small laptop: cards a bit shorter, gap tightens ---- */
 @media (max-width: 1100px) {
-  /* Tablet & small-laptop: scroll-pinning feels awkward here because
-     the viewport is too short for 3 distinct pinned frames. Collapse
-     to a stacked flow instead. The 720px block below then tightens
-     spacing further for phones. */
-  .discover-scroll { height: auto; }
-  .discover-sticky {
-    position: static;
-    top: auto;
-    height: auto;
-    padding: 64px 0;
-    overflow: visible;
-  }
-  .discover-frame { flex-direction: column; gap: 40px; text-align: center; }
-  .discover-copy { max-width: 640px; text-align: center; align-items: center; }
-
-  .discover-list {
-    position: static;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 36px;
-  }
-  .discover-item {
-    position: static;
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-    align-items: center;
-    text-align: center;
-  }
-  .discover-progress { display: none; }
-
-  .discover-badge-list {
-    position: static;
-    height: auto;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .discover-badge-item {
-    position: static;
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-    left: auto;
-    margin: 0 auto 10px;
-  }
-
-  /* On stacked layout the layered discover-visual (with its 3D
-     transform and absolute-positioned swaps) becomes noise. Replace
-     it with a simple centered illustration: just show the first
-     discover image, statically, and let the badge list do the work
-     of indicating the 3 items. */
-  .discover-visual {
-    display: block;
-    position: relative;
-    width: min(100%, 460px);
-    height: auto;
-    aspect-ratio: 16 / 10;
-    margin: 0 auto;
-    perspective: none;
-  }
-  .discover-visual__ring { display: none; }
-  .discover-visual__stack {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform: none;
-    overflow: hidden;
-  }
-  .discover-visual-item {
-    position: absolute;
-    inset: 0;
-  }
-  .discover-visual-item:not([data-key="discover"]) { display: none; }
-}
-
-@media (max-width: 720px) {
-  /* Phones: keep the stacked flow but also hide the visual stack â€”
-     the page is too narrow for the layered illustrations to read. */
-  .discover-sticky { padding: 56px 0; }
+  /* Desktop audit 2026-08-11: marquee→discover target = 96px
+     (80-120px "distinct sections" midpoint). Marquee is fixed at
+     30px bottom padding; discover top scales proportionally with
+     desktop (220→66 ≈ 0.30 factor → 180→54). Same scale logic
+     applies at every breakpoint. */
+  .discover { padding: 54px 0 8px; }
   .discover-frame { gap: 32px; }
-  .discover-list { gap: 28px; }
-  .discover-copy { text-align: center; align-items: center; }
-
-  .discover-item__title { font-size: 1.85rem; }
-  .discover-item__subtitle { font-size: 0.95rem; }
-  .discover-item__text {
-    margin-left: auto;
-    margin-right: auto;
-    font-size: 0.88rem;
-  }
-
-  .discover-visual { display: none; }
+  .discover-cards { gap: 14px; }
+  .discover-card { min-height: 360px; }
+  .discover-card__body { padding: 24px 22px 28px; }
 }
 
+/* ---- Phones: stack single column ---- */
+@media (max-width: 720px) {
+  /* Extra top padding so the typewriter heading gets clear breathing
+     room below the marquee ticker above. Desktop audit 2026-08-11:
+     marquee→discover target = 96px (80-120px "distinct sections"
+     midpoint). Marquee is fixed at 30px bottom padding; discover
+     top is 54px here so the seam = 84px at every breakpoint
+     (54 ≤720px, 54 ≤1100px, 66 desktop = all in the 80-120
+     tier). Bottom tightened to 8px to match the stat-pills →
+     Top Contributors heading gap (56px) across all breakpoints. */
+  .discover { padding: 54px 0 8px; }
+  .discover-frame { gap: 28px; }
+  .discover-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .discover-card { min-height: 340px; border-radius: 14px; }
+  .discover-card__title { font-size: 1.7rem; }
+  .discover-card__subtitle { font-size: 0.92rem; }
+  .discover-card__text { font-size: 0.86rem; }
+  .discover-badge-list {
+    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 320px;
+    margin: 8px auto 0;
+  }
+  .discover-badge {
+    justify-content: center;
+    padding: 11px 14px;
+  }
+  .discover-badge__icon { width: 32px; height: 32px; }
+  .discover-badge__text strong { font-size: 0.95rem; }
+  .discover-badge__text small { font-size: 0.75rem; }
+}
+
+/* ---- Reduced motion: cancel typewriter + cursor animation ----
+   Under prefers-reduced-motion, show the full heading immediately
+   with the cursor invisible, and stop the cursor blink so users
+   with motion sensitivity don't see flickering elements. */
+@media (prefers-reduced-motion: reduce) {
+  .discover-heading__cursor {
+    animation: none;
+    opacity: 0;
+  }
+  /* Stat pills: show immediately, no fade-in. */
+  .discover-badge {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+}
 
 /* =========================================================
    TOP CONTRIBUTORS
@@ -2494,9 +2451,39 @@ body.upload-modal-open .footer {
   border: 1px solid var(--gray-100);
   border-radius: var(--radius-md);
   padding: 20px;
-  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease), background 0.2s var(--ease);
+  transition: box-shadow 0.25s var(--ease),
+              transform 0.25s var(--ease),
+              background 0.25s var(--ease),
+              border-color 0.25s var(--ease);
+  /* Mobile scroll-in entrance: hidden + 12px below until JS adds
+     .is-visible. JS staggers the class across the 4 cards so they
+     cascade in left-to-right (or top-to-bottom on mobile). The
+     transition above also covers the hover state — same curve for
+     both so the card never snaps between the two states. */
+  opacity: 0;
+  transform: translateY(12px);
 }
-.contributor-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); background: var(--surface); border-color: var(--accent-blue, #3d6bf0); }
+.contributor-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Hover: lift -2px + brighter bg/border + bigger shadow. Mirrors the
+   .featured-card / .discover-badge treatment so all three surfaces
+   feel related. Avatar circle scales up subtly for an extra layer
+   of feedback. */
+.contributor-card:hover,
+.contributor-card:focus-visible,
+.contributor-card:active {
+  box-shadow: 0 6px 18px rgba(11, 31, 77, 0.12);
+  transform: translateY(-2px);
+  background: var(--surface);
+  border-color: var(--accent-blue, #3d6bf0);
+}
+.contributor-card:hover .contributor-card__avatar,
+.contributor-card:focus-visible .contributor-card__avatar,
+.contributor-card:active .contributor-card__avatar {
+  transform: scale(1.06);
+}
 
 .contributor-card__avatar {
   width: 52px; height: 52px;
@@ -2508,6 +2495,9 @@ body.upload-modal-open .footer {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   font-size: 0.95rem;
+  /* Mirrors the .discover-badge__icon scale on hover — keeps all
+     circular avatars across the page on the same hover rhythm. */
+  transition: transform 0.25s var(--ease);
 }
 .contributor-card__body h3 { font-size: 0.98rem; font-weight: 600; }
 .contributor-card__school { font-size: 0.8rem; color: var(--gray-600); margin: 2px 0 6px; }
@@ -2522,10 +2512,73 @@ body.upload-modal-open .footer {
   border-radius: 20px;
 }
 
+/* ---- Reduced motion: cards appear in their final state with no
+   transform, and hover lifts are canceled. Mirrors the
+   .discover-card reduced-motion pattern just above. ---- */
+@media (prefers-reduced-motion: reduce) {
+  .contributor-card {
+    opacity: 1;
+    transform: none;
+  }
+  .contributor-card:hover,
+  .contributor-card:focus-visible,
+  .contributor-card:active {
+    transform: none;
+  }
+  .contributor-card:hover .contributor-card__avatar,
+  .contributor-card:focus-visible .contributor-card__avatar,
+  .contributor-card:active .contributor-card__avatar {
+    transform: none;
+  }
+}
+
+/* Desktop: skip the scroll-in entrance. Spec scopes the staggered
+   reveal to mobile only — on desktop the cards land in their final
+   position immediately, so a desktop user with JS disabled or slow
+   network never sees an empty grid. JS only drives the mobile path
+   (see the @media block in script.js). */
+@media (min-width: 769px) {
+  .contributor-card {
+    opacity: 1;
+    transform: none;
+  }
+  .contributor-card:hover,
+  .contributor-card:focus-visible,
+  .contributor-card:active {
+    transform: translateY(-2px);
+  }
+  .contributor-card:hover .contributor-card__avatar,
+  .contributor-card:focus-visible .contributor-card__avatar,
+  .contributor-card:active .contributor-card__avatar {
+    transform: scale(1.06);
+  }
+}
+
 /* =========================================================
    CTA
    ========================================================= */
-.cta { padding-top: 50px; padding-bottom: 50px; }
+/* The .section above already adds 88px bottom padding, so the CTA
+   section collapses its own top padding to near-zero. A single-card
+   "call to action" doesn't need the same breathing room as a grid —
+   anything more than ~12px reads as dead space between the last row
+   of contributor cards and the CTA card. */
+/* Gap arithmetic on desktop:
+   - Stat-pill row bottom -> "Top Contributors" heading gap
+     = .discover padding-bottom (8px) + .contributors padding-top (48px)
+     = 56px
+   - Contributor cards bottom -> CTA card top gap
+     = .contributors padding-bottom (8px) + .cta padding-top (48px)
+     = 56px
+   Both gaps = 56px, matching the 8-point spacing scale midpoint
+   (48-64px range). Previous 8/8 was too tight — top gap visually
+   read larger than the math because the empty whitespace between
+   the dark-navy stat-pills row and the white contributors section
+   read as dead space without a clear anchor. 56/56 keeps both
+   seams intentional and consistent at desktop. The ≤720px mobile
+   override below tightens both to 4px for the smaller-screen
+   rhythm. */
+.contributors { padding-top: 48px; padding-bottom: 8px; }
+.cta { padding-top: 48px; padding-bottom: 50px; }
 .cta__card {
   background: var(--navy-100);
   border-radius: var(--radius-lg);
@@ -2535,6 +2588,15 @@ body.upload-modal-open .footer {
   justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
+  /* Light mode: card sits on the page's var(--surface) (white). The
+     navy card reads cleanly without a border. Dark mode adds a subtle
+     border so the card doesn't blur into the page surface (--gray-50
+     dark = #16203c is close enough to --navy-100 dark = #1b2748 to
+     lose the edge). */
+  border: 1px solid transparent;
+}
+[data-theme="dark"] .cta__card {
+  border-color: var(--gray-200);
 }
 .cta__text { display: flex; align-items: flex-start; gap: 18px; max-width: 560px; }
 .cta__icon {
@@ -2566,10 +2628,39 @@ body.upload-modal-open .footer {
 .navbar__tagline--light { color: rgba(255,255,255,0.55); }
 .footer__desc { font-size: 0.88rem; max-width: 240px; line-height: 1.5; }
 
-.footer__col { display: flex; flex-direction: column; gap: 12px; }
+/* Tighter 10px (was 12px) so the link stack reads as a clean column
+   rhythm. The h4 → first link gap still uses margin-bottom: 4px on
+   the h4 below, keeping the heading visually detached from the links. */
+.footer__col { display: flex; flex-direction: column; gap: 10px; }
 .footer__col h4 { color: var(--white); font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
-.footer__col a { font-size: 0.88rem; transition: color 0.18s var(--ease); }
+/* Footer column link underline-grow on hover. Modern SaaS-landing
+   pattern: 1px line scales from 0 → 100% width along the bottom edge
+   on hover, anchored to the left so it animates like a cursor sweep.
+   Inline-block + fit-content so the underline only spans the link's
+   own width, not the full grid cell. */
+.footer__col a {
+  font-size: 0.88rem;
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+  transition: color 0.18s var(--ease);
+}
+.footer__col a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease);
+}
 .footer__col a:hover { color: var(--white); }
+.footer__col a:hover::after { transform: scaleX(1); }
+.footer__col a:active { color: var(--white); }
+.footer__col a:active::after { transform: scaleX(1); }
 .footer__col--connect p { font-size: 0.88rem; margin-bottom: 4px; }
 
 .footer__socials { display: flex; gap: 12px; margin-top: 6px; }
@@ -2578,15 +2669,36 @@ body.upload-modal-open .footer {
   border-radius: 50%;
   background: rgba(255,255,255,0.08);
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.18s var(--ease), transform 0.18s var(--ease);
+  color: rgba(255,255,255,0.85);
+  transition: background 0.18s var(--ease),
+              color 0.18s var(--ease),
+              transform 0.18s var(--ease);
 }
-.footer__socials a:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+/* Social icon hover: lift + accent-blue tint. Mirrors the discover-badge
+   icon hover treatment so the two circle-icon surfaces feel related. */
+.footer__socials a:hover,
+.footer__socials a:active {
+  background: rgba(47, 111, 237, 0.25);
+  color: var(--accent-blue);
+  transform: translateY(-2px);
+}
 
 .footer__bottom {
   text-align: center;
   padding: 22px 0;
   font-size: 0.82rem;
   color: rgba(255,255,255,0.55);
+}
+
+/* Reduced-motion safety for footer treatments. The global 0.01ms
+   override at style.css:140 cancels transitions globally but the
+   .footer__col a::after scaleX transform needs explicit cancellation
+   so it doesn't animate in place under reduced-motion. Mirrors the
+   per-component reduced-motion blocks throughout this file. */
+@media (prefers-reduced-motion: reduce) {
+  .footer__col a::after { transition: none; }
+  .footer__socials a:hover,
+  .footer__socials a:active { transform: none; }
 }
 
 /* =========================================================
@@ -2621,7 +2733,7 @@ body.upload-modal-open .footer {
      the desktop Log In / Sign Up buttons + guest-action group collapse
      so only the profile affordance survives next to the hamburger + logo.
      The drawer carries the full nav + theme toggle + auth CTA. Only the
-     TOP-BAR toggle is hidden â€” the drawer's own .theme-toggle stays. */
+     TOP-BAR toggle is hidden ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the drawer's own .theme-toggle stays. */
   .navbar__actions .theme-toggle { display: none; }
   .navbar__guest-actions { display: none; }
   .navbar__actions .btn--sm { display: none; }
@@ -2630,7 +2742,7 @@ body.upload-modal-open .footer {
 @media (max-width: 560px) {
   /* Mobile nav: shrink every chrome element so the bar reads as light,
      modern, and never overflows at 360-430px. Mirrors modern app chrome
-     (compact hamburger 36Ã—36, slim brand mark, slimmer header bar). */
+     (compact hamburger 36ÃƒÆ’Ã¢â‚¬â€36, slim brand mark, slimmer header bar). */
   .navbar__brand { margin-right: 10px; gap: 10px; }
   .navbar__logo img { height: 48px; }
   .navbar__title { font-size: 1rem; }
@@ -2648,9 +2760,9 @@ body.upload-modal-open .footer {
 
   /* Mobile scrolled state: shrink the bar further so the slide effect
      is visible on phones too. Without these, the inner height (64px) and
-     burger (40Ã—40) wouldn't change on scroll â€” only the logo would
+     burger (40ÃƒÆ’Ã¢â‚¬â€40) wouldn't change on scroll ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only the logo would
      shrink to 32px, which is a subtle 16px change. With these, the bar
-     collapses from 64px â†’ 48px and the burger from 40Ã—40 â†’ 32Ã—32, so
+     collapses from 64px ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ 48px and the burger from 40ÃƒÆ’Ã¢â‚¬â€40 ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ 32ÃƒÆ’Ã¢â‚¬â€32, so
      the scroll effect is visible without making the touch target too
      small. (0,3,0) beats (0,2,0) so the value sticks at this breakpoint. */
   .navbar--scrolled .navbar__inner { height: 48px; }
@@ -2660,7 +2772,7 @@ body.upload-modal-open .footer {
 
 @media (max-width: 720px) {
   /* Tighter top padding so the eyebrow pill ("For Students. By Students.")
-     sits closer to the navbar â€” keeps mobile chrome compact and modern. */
+     sits closer to the navbar ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â keeps mobile chrome compact and modern. */
   .hero { padding-top: 108px; padding-bottom: 50px; }
   .hero__content {
     margin-left: 0;
@@ -2679,14 +2791,25 @@ body.upload-modal-open .footer {
   .subject-grid { grid-template-columns: repeat(2, 1fr); }
   .notes-grid { grid-template-columns: 1fr; }
   .contributors-grid { grid-template-columns: 1fr; }
-  .cta__card { flex-direction: column; align-items: flex-start; }
+  /* Mobile: collapse the seam between the last contributor card and
+     the CTA banner to 0 so the two read as one cohesive block on
+     phones. Previous value was 4px (still visible as dead space on
+     small viewports). The dark-navy CTA card visually flows from the
+     white contributor card without a gap. Also drop the contributors
+     section's top padding from 48 to 24 so the gap above the
+     "Top Contributors" heading matches the rest of the page on
+     small viewports (the 48px desktop rhythm reads as excessive
+     whitespace on phones where vertical real estate is tight). */
+  .contributors { padding-top: 24px; padding-bottom: 0; }
+  .cta { padding-top: 0; padding-bottom: 24px; }
+  .cta__card { flex-direction: column; align-items: flex-start; padding: 28px 24px; }
   .cta__card .btn { width: 100%; }
   .footer__grid { grid-template-columns: 1fr; gap: 24px; }
   .section { padding: 60px 0; }
   .navbar__tagline { display: none; }
 }
 
-/* Defensive mobile footer lock â€” at 375-430px phones the .footer__grid
+/* Defensive mobile footer lock ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â at 375-430px phones the .footer__grid
    must stay single-column and inside the viewport. The base footer
    already has width:100% + box-sizing:border-box + overflow:hidden, but
    we also collapse any 2-column inheritance from the 1080px breakpoint
@@ -2696,7 +2819,10 @@ body.upload-modal-open .footer {
   .footer { padding: 48px 0 0; }
   .footer__grid {
     grid-template-columns: 1fr;
-    gap: 28px;
+    /* Harmonized to 24px so the mobile footer column gap matches the
+       720px breakpoint value above (was 28px, which created a
+       "wider gap here than at 720px" inconsistency on small phones). */
+    gap: 24px;
     padding-bottom: 36px;
   }
   .footer__col { gap: 10px; }
@@ -2709,18 +2835,18 @@ body.upload-modal-open .footer {
 }
 
 /* =========================================================
-   UPLOAD NOTES MODAL â€” MOBILE BOTTOM SHEET (modern iOS/Android style)
+   UPLOAD NOTES MODAL ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â MOBILE BOTTOM SHEET (modern iOS/Android style)
    Placed last so source order wins over the unguarded
    .upload-modal rules above, regardless of specificity ties.
 
    Design notes:
    - Sheet pinned to bottom, full viewport width, rounded top corners only
-   - Drag-handle bar at the top (CSS-only), centered, 36Ã—4 pill
+   - Drag-handle bar at the top (CSS-only), centered, 36ÃƒÆ’Ã¢â‚¬â€4 pill
    - Bigger 56px sticky submit button with safe-area-inset padding
    - Single-column compact form layout
    - Safe-area-inset-bottom for iOS notch/home-bar
    - Bouncy spring entry (cubic-bezier overshoot)
-   - Hide the desktop close (Ã—) â€” tapping the dim backdrop dismisses
+   - Hide the desktop close (ÃƒÆ’Ã¢â‚¬â€) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â tapping the dim backdrop dismisses
 ========================================================= */
 @media (max-width: 640px) {
   /* Backdrop: stronger dim + slight tint to draw focus to the sheet */
@@ -2759,7 +2885,7 @@ body.upload-modal-open .footer {
     transform: translateY(0);
   }
 
-  /* Drag handle bar â€” modern iOS/Android pattern, sits at the top of
+  /* Drag handle bar ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â modern iOS/Android pattern, sits at the top of
      the sheet. CSS-only so no JS needed. */
   .upload-modal .contrib-card::before {
     content: '';
@@ -2772,8 +2898,8 @@ body.upload-modal-open .footer {
     flex-shrink: 0;
   }
 
-  /* Push the corner close (Ã—) below the drag handle so they don't
-     overlap. Stays visible â€” it's the primary dismiss affordance
+  /* Push the corner close (ÃƒÆ’Ã¢â‚¬â€) below the drag handle so they don't
+     overlap. Stays visible ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it's the primary dismiss affordance
      on mobile, sitting next to the drag handle for one-tap access. */
   .upload-modal .auth-card__close {
     top: 14px;
@@ -2783,7 +2909,7 @@ body.upload-modal-open .footer {
     z-index: 2;
   }
 
-  /* Header: tighter, padding-right leaves room for the floating close (Ã—) */
+  /* Header: tighter, padding-right leaves room for the floating close (ÃƒÆ’Ã¢â‚¬â€) */
   .contrib-card__head {
     align-items: center;
     gap: 12px;
@@ -2859,7 +2985,7 @@ body.upload-modal-open .footer {
     gap: 12px;
   }
 
-  /* Notice above the submit button â€” slightly understated on mobile */
+  /* Notice above the submit button ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â slightly understated on mobile */
   .contrib-form__note {
     font-size: 0.72rem;
     line-height: 1.4;
