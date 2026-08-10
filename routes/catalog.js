@@ -145,10 +145,33 @@ try {
 // subject/likes/downloads) plus an `imageCount` field so the feed can
 // show a gallery badge. Single notes are returned as-is (imageCount 1).
 //
+// Selection strategy: there is no admin-curated "is_featured" column
+// in the schema, so the homepage teaser picks the most-engaged notes
+// instead. The popularity metric reuses the same numbers already shown
+// on each card (likes_count + download_count) — no new metric invented.
+// Multi-image group_members are summed so a 5-image upload counts as 1
+// ranked entry, not 5.
+//
+// Source query fetches the top 50 by popularity (DESC) so that grouping
+// by group_id doesn't shrink the final feed below the requested size,
+// then we slice to the FEATURED_LIMIT (4) final entries.
+//
+// Limit is 4, not 5: the homepage grid is 2 columns on mobile (≤720px)
+// and 2 columns in the mid-range (≤1080px). 5 items leaves an orphan
+// card alone on a row at every breakpoint — 4 divides cleanly into 2×2.
+//
 // The response is explicitly no-cache. The frontend also appends a
 // ?t=<timestamp> cache-buster, but the header guarantees the browser /
 // any intermediary never serves a stale featured list.
 // ─────────────────────────────────────────────
+
+// Homepage teaser cap. Group-collapse may merge multi-image uploads,
+// so we fetch a larger window from the DB and slice the final array.
+const FEATURED_LIMIT = 4
+// Source-row fetch window — must be large enough that after grouping
+// by group_id we still have at least FEATURED_LIMIT entries left.
+const FEATURED_SOURCE_ROWS = 50
+
 router.get('/featured', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -169,8 +192,16 @@ router.get('/featured', async (req, res) => {
         subjects ( subject_name )
       `)
       .eq('status', 'published')
+      // PostgREST doesn't allow ordering by an expression — sort by
+      // the dominant engagement signal (likes_count) first, with
+      // download_count as the tiebreaker so equally-liked notes
+      // rank by downloads. ties resolve on created_at DESC (newest
+      // first) so two notes with identical engagement don't render
+      // in undefined order between requests.
+      .order('likes_count', { ascending: false })
+      .order('download_count', { ascending: false })
       .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(FEATURED_SOURCE_ROWS)
 
     if (error) {
       console.error('Fetch featured notes error:', error)
@@ -188,7 +219,7 @@ router.get('/featured', async (req, res) => {
       groupMap.get(key).push(n)
     })
 
-    const featured = []
+    const grouped = []
     groupMap.forEach((members) => {
       const rep = members[0]
       const isImage = (rep.file_type || '').startsWith('image/')
@@ -198,7 +229,7 @@ router.get('/featured', async (req, res) => {
       const multiImages = members.filter((m) => (m.file_type || '').startsWith('image/'))
       const imageCount = isImage ? multiImages.length : 1
 
-      featured.push({
+      grouped.push({
         id: rep.id,
         title: rep.title || 'Untitled',
         school: (rep.schools && rep.schools.school_name) || 'Unknown school',
@@ -210,6 +241,11 @@ router.get('/featured', async (req, res) => {
         imageCount,
       })
     })
+
+    // Slice to the homepage cap. The source-row window is wider than
+    // this so a heavy group_id cluster doesn't shrink the final feed
+    // below 5 cards.
+    const featured = grouped.slice(0, FEATURED_LIMIT)
 
     // No-cache so the feed always reflects the latest published notes.
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')

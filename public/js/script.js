@@ -85,8 +85,12 @@ async function fetchFeaturedNotes() {
     // GET /api/featured already returns notes grouped by group_id
     // (multi-image uploads collapsed into one entry with `imageCount`).
     // We pass a cache-buster timestamp so the browser/any intermediary
-    // never serves a stale featured list after a new upload.
-    const data = await ON.api.get(`/featured?t=${Date.now()}`);
+    // never serves a stale featured list after a new upload. The
+    // `limit=4` query param matches the server's FEATURED_LIMIT and
+    // documents the contract — server-side limit avoids over-fetching.
+    // 4 (not 5) divides cleanly into the 2-col mobile grid so there's
+    // never an orphan row at any breakpoint.
+    const data = await ON.api.get(`/featured?limit=4&t=${Date.now()}`);
     const featured = Array.isArray(data) ? data : [];
 
     // The backend already shapes each item with the fields the renderer
@@ -395,6 +399,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (themeToggle) {
       themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
     }
+    // Swap every .site-logo to the variant that has contrast against
+    // the current theme. The original logo is dark-on-light; the
+    // white version is for dark mode. We iterate every instance so
+    // navbar + side-drawer + footer (and every page that shares the
+    // markup) flip in one place. Called both on initial load and on
+    // toggle click, so the correct variant is showing before paint
+    // (no flash of the wrong-colored logo on page load in dark mode).
+    document.querySelectorAll('img.site-logo').forEach((img) => {
+      img.src = theme === 'dark' ? 'img/olongnotesW.png' : 'img/olongnotes.png';
+    });
   };
 
   const getStoredTheme = () => {

@@ -353,6 +353,33 @@
 }
 
 /* ---------------------------------------------------------
+   ALL NOTES PAGE (notes.html — "View All" destination)
+   ---------------------------------------------------------
+   Notes page borrows the same doc-grid layout but adds a
+   load-more control + a count line so the page can grow
+   beyond the homepage teases' 5-card cap.
+--------------------------------------------------------- */
+.notes-page__more {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.notes-page__count {
+  font-size: 0.85rem;
+  color: var(--gray-600, #8891a0);
+  margin: 0;
+}
+
+/* "Back to Home" pill on notes.html. Inherits link-arrow styling
+   from style.css but flips the icon order so the arrow points left. */
+.link-arrow--back svg { margin-right: 2px; }
+@media (max-width: 560px) {
+  .notes-page__more .btn { width: 100%; }
+}
+
+/* ---------------------------------------------------------
    Responsive
 --------------------------------------------------------- */
 @media (max-width: 900px) {
