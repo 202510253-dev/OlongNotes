@@ -16,16 +16,17 @@
   const esc = ON.escapeHtml || ((s) => String(s ?? ''));
 
   // ---------- Activity recorder ----------
-  // Fire-and-forget POST to /api/activities. The backend writes the same
-  // row directly from routes/notes.js for upload/delete (and now GET
-  // views/likes/bookmarks too), so the client POST is a fallback / safety
-  // net. Failures are silent — the activity log is best-effort metadata
-  // and must never break the user's action.
+  // Backend-owned writes — routes/notes.js writes activity_log rows
+  // inside toggleInteraction (like/bookmark), the report endpoint,
+  // the GET :id handler (view), and the upload handler (note_uploaded).
+  // Because the backend already records every viewer-visible event, the
+  // client must NOT also POST to /api/activities — doing so produces
+  // TWO activity_log rows per user action (visible as a duplicated card
+  // in Recent Activities). recordActivity() is kept here as a no-op
+  // shim so the four existing call sites (like / bookmark / report /
+  // view) still resolve without an undefined-reference error.
   function recordActivity(noteId, type) {
-    if (!api || !ON.getToken || !ON.getToken()) return;
-    api
-      .post('/activities', { note_id: noteId, activity_type: type }, { auth: true })
-      .catch((e) => console.debug('[activities] record skipped:', e && e.message));
+    void noteId; void type; // intentionally a no-op; backend owns the write
   }
 
   // ---------- Helpers ----------
