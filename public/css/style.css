@@ -1738,11 +1738,40 @@ body.upload-modal-open .footer {
 @media (max-width: 900px) {
   .about-strip { padding: 64px 0; }
   .about-strip__inner { grid-template-columns: 1fr; gap: 40px; }
+  /* The visual's two children are position: absolute on desktop, which
+     removes them from normal flow so they contribute nothing to the
+     parent's intrinsic width. At narrow widths that collapses the grid
+     item to 0 wide and the photos disappear. Switch to a stacked
+     layout (option a): both photos become position: relative / static,
+     full-width, stacked above the text. */
   .about-strip__visual {
-    height: 320px;
+    width: 100%;
     max-width: 460px;
     margin: 0 auto;
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: auto;
+  }
+  .about-strip__img--primary,
+  .about-strip__img--secondary {
     position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+  }
+  .about-strip__img--secondary {
+    /* Pulled up slightly over the primary photo to preserve a hint of
+       the desktop collage feel without the awkward cramped overlap. */
+    margin-top: -8px;
+    width: 92%;
+    align-self: flex-end;
   }
   .about-strip__content { text-align: center; }
   .about-strip__text { margin-left: auto; margin-right: auto; }
@@ -1752,12 +1781,9 @@ body.upload-modal-open .footer {
   .about-strip { padding: 48px 0 56px; }
   .about-strip__inner { gap: 32px; }
   .about-strip__visual {
-    height: 240px;
     max-width: min(100%, 360px);
-    margin: 0 auto;
-    position: relative;
   }
-  .about-strip__img--secondary { border-width: 4px; }
+  .about-strip__img--secondary { border-width: 4px; width: 88%; }
   .about-strip__heading { font-size: 1.55rem; line-height: 1.22; margin-bottom: 18px; }
   .about-strip__text { font-size: 0.92rem; line-height: 1.7; margin-bottom: 26px; }
   .about-strip__content .btn { width: 100%; justify-content: center; }
