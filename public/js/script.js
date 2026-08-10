@@ -495,17 +495,18 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
   /* ---------------- Sticky navbar shadow ---------------- */
+  // Toggles `.navbar--scrolled` once the page has scrolled past the
+  // top 8px. CSS handles the actual shadow deepening (var(--shadow-md)
+  // vs var(--shadow-sm)). Toggling a class beats inline styles because
+  // it composes cleanly with theme switches and any future per-page
+  // overrides, and the listener is passive so it doesn't block scroll.
   const navbar = document.getElementById('navbar');
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (!navbar) return;
-      navbar.style.boxShadow = window.scrollY > 8
-        ? '0 4px 16px rgba(11, 31, 77, 0.10)'
-        : '0 2px 8px rgba(11, 31, 77, 0.06)';
-    },
-    { passive: true }
-  );
+  const updateNavbarScrollState = () => {
+    if (!navbar) return;
+    navbar.classList.toggle('navbar--scrolled', window.scrollY > 8);
+  };
+  window.addEventListener('scroll', updateNavbarScrollState, { passive: true });
+  updateNavbarScrollState();
 
   /* ---------------- Populate filter dropdowns on page load ---------------- */
   async function populateFilters() {

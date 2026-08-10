@@ -506,3 +506,57 @@
     margin-top: 2px;
   }
 }
+
+/* ---------- Dark mode ----------
+   The screenshot bug: .recent-card background is var(--white) (constant)
+   but .recent-card__title is var(--text-heading) which flips to #EEF2FB
+   in dark mode — light text on white card = invisible. The card itself
+   needs to go dark, so the title (which is correctly using the
+   text-heading token) becomes readable again. Most other text on the
+   card is hardcoded dark greys (#6b7283, #475063, #8a92a5) that are
+   designed for light surfaces — they need bright replacements in dark. */
+[data-theme="dark"] .recent-card {
+  background: var(--surface);
+  border-color: var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-heading);
+}
+[data-theme="dark"] .recent-card:hover {
+  background: var(--navy-100);
+  border-color: var(--accent-blue, #3d6bf0);
+}
+[data-theme="dark"] .recent-card__title {
+  color: var(--text-heading);
+}
+[data-theme="dark"] .recent-card__meta {
+  color: var(--gray-600);
+}
+[data-theme="dark"] .recent-card__verb {
+  color: var(--gray-600);
+}
+[data-theme="dark"] .recent-card__time {
+  color: var(--gray-600);
+}
+
+/* ---------- Show more (pagination) ----------
+   Lives inside #recentFeed as the last child after the rendered cards.
+   The button reuses the site-wide .btn .btn--outline .btn--sm classes
+   so the visual language matches the rest of the app — only the
+   layout (centered) and the surrounding breathing room are scoped
+   here. .recent-feed__cap is the soft "no more rows" hint shown once
+   the user has paginated through everything. */
+.recent-feed__more {
+  display: block;
+  margin: 20px auto 4px;
+  min-width: 220px;
+}
+.recent-feed__more:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+.recent-feed__cap {
+  margin: 18px 0 4px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--gray-600, #8891a0);
+}

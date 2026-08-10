@@ -13,12 +13,15 @@
 // Phase 2 per design direction. The page is now single-column.
 //
 // Flow:
-//   1. Page load → fetch /api/activities (auth, 50 most recent rows).
+//   1. Page load → fetch /api/activities?limit=20 (auth, first page).
 //   2. Initial render: stack = [], feed shows all rows, "All Activity"
 //      bubble is active, breadcrumb hidden.
 //   3. Tap a bubble (e.g. "Liked") → push {kind:'type', type:'note_liked'}
-//      → breadcrumb shows "Liked", feed re-renders filtered.
-//   4. Tap breadcrumb "back" → pop stack → back to all rows.
+//      → re-fetch with ?type=note_liked, breadcrumb shows "Liked", feed
+//      re-renders filtered.
+//   4. Tap breadcrumb "back" → pop stack → re-fetch without type filter.
+//   5. If pagination.has_more is true, a "Show more (N more)" button
+//      is appended to the feed. Clicking it appends the next page.
 //
 // UX/UI notes:
 //   - Anonymous viewer (no token) → "Log in to see your activity" CTA
@@ -63,11 +66,22 @@
   //   type: 'note_viewed' | 'note_liked' | 'note_bookmarked' |
   //         'note_uploaded' | 'note_reported' | 'note_deleted'
   // Empty stack = "All Activity" (no filter applied).
+  //
+  // Pagination: initial fetch is limited to PAGE_LIMIT rows (matches
+  // subjects.js). When the server response includes pagination.has_more,
+  // a "Show more" button is appended to the feed. Clicking it advances
+  // offset by PAGE_LIMIT and appends the next page to state.activities.
+  // Reset on filter change so the offset doesn't leak across types.
+  const PAGE_LIMIT = 20;
   const state = {
     stack: [],
-    activities: [],   // raw rows from /api/activities (max 50)
+    activities: [],     // accumulated rows from /api/activities
     loading: false,
+    loadingMore: false, // distinct from loading: append-path in-flight
     endpointLive: false,
+    offset: 0,
+    hasMore: false,
+    total: 0,
   };
 
   // Bubble id → { label, type } mapping for the active-bubble logic.
@@ -175,12 +189,27 @@
   }
 
   function pushType(type) {
+    const prevType = activeType();
     const def = BUBBLES[type];
     if (!def || type === 'all') {
       // Clicking the "All" bubble is equivalent to clearing the stack.
       state.stack = [];
     } else {
       state.stack = [{ kind: 'type', label: def.label, type }];
+    }
+    // Filter change → reset pagination so the next load starts fresh.
+    // Re-fetch from the server with the new filter so the rows actually
+    // match the active bubble (server-side filter via ?type=).
+    const newType = activeType();
+    if (prevType !== newType) {
+      state.offset = 0;
+      state.hasMore = false;
+      state.total = 0;
+      state.activities = [];
+      renderBreadcrumb();
+      renderBubbleActiveState();
+      loadActivities();
+      return;
     }
     renderBreadcrumb();
     renderBubbleActiveState();
@@ -190,9 +219,16 @@
   function popStack() {
     if (state.stack.length === 0) return;
     state.stack.pop();
+    // Rewinding the breadcrumb also resets pagination — the user is
+    // asking for a different slice of the data, so re-fetch with the
+    // new filter (or no filter when stack is empty).
+    state.offset = 0;
+    state.hasMore = false;
+    state.total = 0;
+    state.activities = [];
     renderBreadcrumb();
     renderBubbleActiveState();
-    renderFeed();
+    loadActivities();
   }
 
   // ---------- Feed rendering ----------
@@ -265,6 +301,32 @@
     }
 
     feedEl.innerHTML = filtered.map(renderActivityCard).join('');
+
+    // Append the "Show more" button (or a "Showing all" cap) when the
+    // server tells us more rows exist beyond the current page. The
+    // button lives inside #recentFeed so it travels with the rest of
+    // the rendered output and is automatically removed on the next
+    // full re-render (filter change, login-required state, etc.).
+    if (state.hasMore) {
+      const remaining = Math.max(state.total - state.activities.length, 0);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn--outline btn--sm recent-feed__more';
+      btn.id = 'recentFeedMoreBtn';
+      btn.disabled = state.loadingMore;
+      btn.textContent = state.loadingMore
+        ? 'Loading…'
+        : `Show more (${remaining} more)`;
+      btn.addEventListener('click', () => loadActivities({ append: true }));
+      feedEl.appendChild(btn);
+    } else if (state.activities.length > 0 && state.total > 0) {
+      // No more rows, but the user did paginate at least once — show a
+      // soft cap so it's obvious the list is complete (not just cut off).
+      const cap = document.createElement('p');
+      cap.className = 'recent-feed__cap';
+      cap.textContent = `Showing all ${state.total} activities.`;
+      feedEl.appendChild(cap);
+    }
   }
 
   // ---------- Filter wiring ----------
@@ -287,7 +349,22 @@
   }
 
   // ---------- Data loading ----------
-  async function loadActivities() {
+  // opts.append — when true, fetch the next page (offset += PAGE_LIMIT)
+  // and APPEND to state.activities instead of replacing. Used by the
+  // "Show more" button. Re-renders the feed once the page lands so the
+  // button reflects the new hasMore state.
+  //
+  // On filter change (pushType / popStack / initial load), state.offset
+  // resets to 0 and state.activities is replaced wholesale so we never
+  // show a stale mix of filtered + unfiltered rows.
+  //
+  // The active bubble filter (from state.stack) is sent as a `type`
+  // query param so the server-side fetch is already filtered. The
+  // client-side filter() in renderFeed is a safety net for the case
+  // where the user opens the page with a filter active in some future
+  // deep-link flow (e.g. URL ?type=liked).
+  async function loadActivities(opts = {}) {
+    const append = opts.append === true;
     if (!api || !hasToken) {
       // api.js didn't load OR user isn't logged in → render the
       // appropriate state and bail.
@@ -295,12 +372,49 @@
       return;
     }
 
+    if (append) {
+      state.loadingMore = true;
+      // Re-render so the button label flips to "Loading…"
+      renderFeed();
+    }
+
+    const params = new URLSearchParams({ limit: PAGE_LIMIT, offset: state.offset });
+    const filterType = activeType();
+    if (filterType && filterType !== 'all') params.set('type', filterType);
+
     try {
-      const data = await api.get('/activities?limit=50', { auth: true });
+      const data = await api.get(`/activities?${params.toString()}`, { auth: true });
+      // Two response shapes: legacy (array) and paginated ({activities,
+      // pagination: { total, limit, offset, has_more }}). Handle both.
       const rows = Array.isArray(data)
         ? data
         : (data && Array.isArray(data.activities) ? data.activities : []);
-      state.activities = rows;
+      const pagination = (data && data.pagination) || null;
+
+      if (append) {
+        // Append, preserving order. Dedupe defensively in case the
+        // server returns a row we already have (offset edge cases).
+        const known = new Set(state.activities.map((r) => r.id));
+        const fresh = rows.filter((r) => !known.has(r.id));
+        state.activities = state.activities.concat(fresh);
+        state.offset += PAGE_LIMIT;
+      } else {
+        state.activities = rows;
+        state.offset = rows.length;
+      }
+
+      if (pagination) {
+        state.total = pagination.total || rows.length;
+        state.hasMore = Boolean(pagination.has_more);
+      } else {
+        // Legacy endpoint (no pagination metadata). Treat "we got a full
+        // page" as "there might be more" — clicking Show more would
+        // re-fetch the same page, so suppress the button to avoid a
+        // duplicate-row mess. The next backend deploy will publish the
+        // new shape and pagination will resume.
+        state.total = state.activities.length;
+        state.hasMore = rows.length >= PAGE_LIMIT && !append;
+      }
       state.endpointLive = true;
     } catch (err) {
       // Endpoint not yet built (404) or backend down. Foundation handles
@@ -315,134 +429,42 @@
       }
       console.warn('[recent-activities] /api/activities not available yet —', err);
       state.activities = [];
+    } finally {
+      if (append) state.loadingMore = false;
     }
 
     renderFeed();
   }
 
-  // ---------- Side-drawer wiring (parity with other pages) ----------
-  function bindSideDrawer() {
-    const burger   = document.getElementById('navBurger');
-    const drawer   = document.getElementById('sideDrawer');
-    const backdrop = document.getElementById('sideDrawerBackdrop');
-    const closeBtn = document.getElementById('sideDrawerClose');
-    if (!burger || !drawer || !backdrop || !closeBtn) return;
-
-    // CSS (style.css:867) uses the `.is-open` class as the visible-open
-    // trigger for the drawer. We also flip aria-hidden for screen
-    // readers — script.js's sideDrawer factory does the same. This
-    // matches every other page's drawer open/close behaviour.
-    const isOpen = () => drawer.classList.contains('is-open');
-
-    const open = () => {
-      drawer.classList.add('is-open');
-      drawer.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-    };
-    const close = () => {
-      drawer.classList.remove('is-open');
-      drawer.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-    };
-
-    burger.addEventListener('click', () => (isOpen() ? close() : open()));
-    closeBtn.addEventListener('click', close);
-    backdrop.addEventListener('click', close);
+  // ---------- Drawer auto-close on nav-link click ----------
+  // script.js (loaded above) now owns the drawer open/close logic — it
+  // was added to this page in d9b9bef to fix the dark-mode logo swap.
+  // What script.js DOESN'T do is auto-close the drawer when the user
+  // picks a destination link inside the panel, so the destination page
+  // doesn't open with the drawer still visible for one frame. A single
+  // delegated click handler on the drawer handles that one case.
+  function bindDrawerAutoClose() {
+    const drawer = document.getElementById('sideDrawer');
+    if (!drawer) return;
     drawer.addEventListener('click', (e) => {
-      // Close when any nav link inside the panel is clicked (so the
-      // destination page doesn't open with the drawer still open).
-      if (e.target.closest('.side-drawer__link')) close();
+      if (e.target.closest('.side-drawer__link')) {
+        const isOpen = drawer.classList.contains('is-open');
+        if (isOpen) {
+          drawer.classList.remove('is-open');
+          drawer.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('side-drawer-open');
+          document.body.style.overflow = '';
+        }
+      }
     });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isOpen()) close();
-    });
-  }
-
-  // ---------- Navbar auth buttons (parity with other pages) ----------
-  // On pages with the full script.js stack, `applyRole()` decides
-  // navbar visibility. This page doesn't load script.js, so we replicate
-  // the relevant pieces:
-  //   - Hide Log In / Sign Up buttons when a token is present
-  //   - Show the profile-icon button when a token is present
-  //   - On click, route to index.html where the auth modal lives
-  //
-  // Re-runs whenever the `olongnotes:auth-changed` event fires so a
-  // login from another tab keeps the navbar in sync.
-  function bindNavbarAuth() {
-    const ON = window.OlongNotes || {}
-    const getToken = ON.getToken || (() => null)
-    const loginBtn  = document.getElementById('navLoginBtn')
-    const signupBtn = document.getElementById('navSignupBtn')
-    const profileIcon = document.querySelector('.profile-icon')
-
-    const apply = () => {
-      const isAuthed = !!getToken()
-      if (loginBtn)    loginBtn.hidden    = isAuthed
-      if (signupBtn)   signupBtn.hidden   = isAuthed
-      if (profileIcon) profileIcon.hidden = !isAuthed
-    }
-    apply()
-    window.addEventListener('olongnotes:auth-changed', apply)
-    window.addEventListener('storage', apply)  // cross-tab sync
-
-    // The auth modal lives on index.html only — we don't replicate
-    // the 90-line modal markup on every page. Clicking either button
-    // takes the viewer to the landing page where the modal opens via
-    // the existing `?auth=signin|signup` query-string hook.
-    const goAuth = (mode) => (e) => {
-      e.preventDefault()
-      window.location.href = `index.html?auth=${mode}`
-    }
-    loginBtn ?.addEventListener('click', goAuth('signin'))
-    signupBtn?.addEventListener('click', goAuth('signup'))
-  }
-
-  // ---------- Theme toggle (parity with other pages) ----------
-  // Reads a saved preference from localStorage; falls back to OS-level
-  // prefers-color-scheme. Sets `data-theme="dark"` on <html> — every
-  // dark-mode override in style.css is scoped to `[data-theme="dark"]`,
-  // so this one attribute flips the whole site. Kept in this file
-  // (instead of pulled from script.js) so this page doesn't need to
-  // load the entire landing-page script just to flip themes.
-  function bindThemeToggle() {
-    const THEME_KEY = 'olongnotes-theme'
-    const root = document.documentElement
-    const themeToggle = document.getElementById('themeToggle')
-
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)')
-
-    const getStored = () => {
-      try { return localStorage.getItem(THEME_KEY) } catch (_) { return null }
-    }
-    const store = (theme) => {
-      try { localStorage.setItem(THEME_KEY, theme) } catch (_) {}
-    }
-    const apply = (theme) => {
-      if (theme === 'dark') root.setAttribute('data-theme', 'dark')
-      else root.removeAttribute('data-theme')
-      if (themeToggle) themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false')
-    }
-
-    apply(getStored() || (systemPrefersDark.matches ? 'dark' : 'light'))
-
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => {
-        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
-        apply(next)
-        store(next)
-      })
-    }
-    // Follow the OS preference live until the user picks one explicitly.
-    systemPrefersDark.addEventListener('change', (e) => {
-      if (!getStored()) apply(e.matches ? 'dark' : 'light')
-    })
   }
 
   // ---------- Bootstrap ----------
+  // script.js handles drawer open/close, navbar auth buttons (applyRole),
+  // and theme toggle. We only add a small bridge for drawer auto-close
+  // on link click, then wire the page-specific bubble/breadcrumb/feed.
   function init() {
-    bindSideDrawer();
-    bindNavbarAuth();
-    bindThemeToggle();
+    bindDrawerAutoClose();
     bindBubbles();
     bindBreadcrumb();
     renderBreadcrumb();

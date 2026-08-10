@@ -926,3 +926,23 @@
   }
 }
 
+/* ---------- Dark mode ----------
+   Like the other page CSS, most rules already tokenize through
+   --surface / --text-heading / --gray-600 / --navy-100 which flip in
+   style.css's [data-theme="dark"] block. The rules below cover the
+   few hardcoded color spots that don't — the curriculum pill text
+   colors need a brighter pastel for legibility on dark navy, and the
+   modal backdrop wants a touch more depth on dark so it doesn't
+   blend with the page surface. */
+[data-theme="dark"] .question-row__curriculum--k10 { background: #2e9e5b; }
+[data-theme="dark"] .question-row__curriculum--senior_high { background: #c98930; }
+[data-theme="dark"] .question-row__curriculum--college { background: #7d4fd6; }
+
+[data-theme="dark"] .report-option:hover {
+  background: rgba(224, 178, 60, 0.2);
+}
+[data-theme="dark"] .report-option.is-selected {
+  color: var(--text-heading);
+  background: rgba(224, 178, 60, 0.22);
+}
+

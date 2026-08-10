@@ -611,6 +611,12 @@
   padding: 14px 22px 14px 18px;
   box-shadow: var(--shadow-md);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  /* Defensive: keep the FAB strictly inside the viewport even if a
+     parent has weird box-sizing or a long label pushes the width.
+     At 52×52 + right:24px the button sits at column (vw - 76)..(vw - 24)
+     which always leaves at least 24px of clear space on the right. */
+  max-width: calc(100vw - 48px);
+  box-sizing: border-box;
 }
 
 .ask-question-fab:hover {
@@ -629,10 +635,26 @@
 }
 
 @media (max-width: 640px) {
+  /* Modern floating-action-button on mobile: round, icon-only, lifts
+     above the page content with safe-area-inset awareness so iPhone
+     notch/home bar never overlap it. The desktop pill shape (with
+     "Ask a Question" label) is collapsed to just the pencil icon. */
   .ask-question-fab {
-    right: 16px;
-    bottom: 16px;
-    padding: 13px 18px 13px 15px;
+    /* Min 48×48 touch target without enlarging the visual diameter.
+       box-sizing:border-box ensures the 52×52 declared size is exactly
+       that — important because the .ask-question-fab:hover transform
+       (translateY(-2px)) and the box-shadow both render outside the box. */
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+    box-sizing: border-box;
+    /* Match the desktop FAB inset (24px) so the mobile button reads as
+       a "centered" affordance rather than a pill hung off the edge.
+       18px felt too close to the viewport edge at 360-430px. */
+    right: 24px;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   }
 
   .ask-question-fab__label {
@@ -1128,4 +1150,50 @@
     overflow-x: auto;
     gap: 16px;
   }
+}
+
+/* ---------- Dark mode ----------
+   Same pattern as the other Q&A files: most rules tokenize through
+   --surface / --text-heading / --gray-600 which flip in style.css's
+   [data-theme="dark"] block. This section covers what doesn't — the
+   pastel pill text colors need a brighter shade for contrast on dark
+   navy, the leaderboard rank badges need to keep their gold/silver/
+   bronze identity without becoming muted, and the modal backdrop
+   wants a touch more opacity so it sits above the dark surface. */
+[data-theme="dark"] .question-row__curriculum--k10 { background: #2e9e5b; }
+[data-theme="dark"] .question-row__curriculum--senior_high { background: #c98930; }
+[data-theme="dark"] .question-row__curriculum--college { background: #7d4fd6; }
+
+[data-theme="dark"] .answer-context__pill--k10 {
+  color: #6cd49a;
+  background: rgba(46, 158, 91, 0.22);
+}
+[data-theme="dark"] .answer-context__pill--senior_high {
+  color: #f0b56e;
+  background: rgba(224, 151, 60, 0.22);
+}
+[data-theme="dark"] .answer-context__pill--college {
+  color: #b89cff;
+  background: rgba(139, 92, 246, 0.22);
+}
+
+[data-theme="dark"] .rank-badge--1 {
+  background: #d8a937;
+  color: #1a1a1a;
+}
+[data-theme="dark"] .rank-badge--2 {
+  background: #c3c8d4;
+  color: #1a1a1a;
+}
+[data-theme="dark"] .rank-badge--3 {
+  background: #cc7a3d;
+  color: #1a1a1a;
+}
+
+[data-theme="dark"] .ask-modal__backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+[data-theme="dark"] .community-hero {
+  background: linear-gradient(155deg, #0a1530 0%, #131e44 100%);
 }

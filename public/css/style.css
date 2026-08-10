@@ -1,5 +1,5 @@
 /* =========================================================
-   OlongNotes — Landing Page Styles
+   OlongNotes â€” Landing Page Styles
    ========================================================= */
 
 /* ----- Design tokens ----- */
@@ -46,7 +46,7 @@
 /* ----- Dark mode token overrides -----
    Toggled by script.js setting data-theme="dark" on <html> (or
    <body>). Only tokens that are safe to flip site-wide are
-   redefined here — see the comment above for why --navy/--white
+   redefined here â€” see the comment above for why --navy/--white
    are deliberately excluded. */
 [data-theme="dark"] {
   --surface: #101a34;
@@ -78,7 +78,7 @@ html {
    stamp is set, hide .site-logo so users don't see a flash of the
    wrong-theme logo between paint and JS execution. */
 html:not([data-logo-swapped]) img.site-logo { visibility: hidden; }
-/* Overlay-style scrollbar — when content does overflow, the scrollbar
+/* Overlay-style scrollbar â€” when content does overflow, the scrollbar
    appears as a thin 6px pill instead of the chunky 17px default. With
    overflow-y: auto (not scroll) + no scrollbar-gutter, the bar is also
    absent entirely on short pages where nothing overflows, so it doesn't
@@ -103,17 +103,8 @@ body {
   margin: 0;
   font-family: var(--font-body);
   color: var(--gray-800);
-  overflow-x: hidden;
   min-height: 100vh;
   background-color: var(--surface);
-  background-image: repeating-linear-gradient(
-    90deg,
-    var(--gray-200) 0,
-    var(--gray-200) 1px,
-    transparent 1px,
-    transparent 280px
-  );
-  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.25s var(--ease), color 0.25s var(--ease);
 }
@@ -192,7 +183,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 .btn--sm { padding: 9px 18px; font-size: 0.88rem; }
 .btn--lg { padding: 15px 28px; font-size: 1rem; }
-.btn--block { width: 100%; margin-top: 14px; }
+.btn--block { width: 100%; margin-top: 12px; }
 
 .link-arrow {
   color: var(--accent-blue);
@@ -246,7 +237,7 @@ body.modal-open .footer {
 /* Side drawer uses its own body class so opening it locks page
    scroll (overflow:hidden) and disables pointer events on the
    background via the drawer's own backdrop, but does NOT blur
-   the page — the drawer is a navigation surface, not a focused
+   the page â€” the drawer is a navigation surface, not a focused
    modal that needs the page dimmed. The default modal-open blur
    would make the rest of the site unreadable while the drawer
    is open. */
@@ -479,7 +470,7 @@ body.side-drawer-open #siteMain {
 
 /* =========================================================
    UPLOAD NOTES MODAL (uses .contrib-card / .contrib-form shared
-   with the now-removed contrib-modal — those classes stay because
+   with the now-removed contrib-modal â€” those classes stay because
    #uploadCard reuses them. Only the page-level .contrib-modal
    wrapper rules are gone.)
    ========================================================= */
@@ -487,13 +478,13 @@ body.side-drawer-open #siteMain {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 560px;
+  max-width: 460px;
   max-height: calc(100vh - 48px);
   overflow-y: auto;
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  padding: 44px 40px 36px;
+  padding: 28px 28px 24px;
   transform: translateY(12px) scale(0.98);
   opacity: 0;
   transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
@@ -502,13 +493,13 @@ body.side-drawer-open #siteMain {
 .contrib-card__head {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 26px;
+  gap: 12px;
+  margin-bottom: 18px;
   text-align: left;
 }
 .contrib-card__icon {
   flex-shrink: 0;
-  width: 42px; height: 42px;
+  width: 36px; height: 36px;
   border-radius: 50%;
   background: var(--goldenrod);
   display: flex;
@@ -516,30 +507,43 @@ body.side-drawer-open #siteMain {
   justify-content: center;
   box-shadow: var(--shadow-sm);
 }
-.contrib-card__head h2 { font-size: 1.25rem; margin-bottom: 6px; }
-.contrib-card__head p { font-size: 0.86rem; color: var(--gray-600); line-height: 1.5; }
+.contrib-card__head h2 { font-size: 1.12rem; margin-bottom: 4px; }
+.contrib-card__head p { font-size: 0.82rem; color: var(--gray-600); line-height: 1.4; }
 
 .contrib-form { text-align: left; }
 .contrib-form__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
 }
-.contrib-form .auth-field { grid-column: span 1; }
+.contrib-form .auth-field {
+  grid-column: span 1;
+  /* CSS Grid items default to min-width: auto, which sizes the track by
+     the item's content min-width. .auth-field wraps inputs/selects with
+     intrinsic content width (long placeholders, cselect__trigger text,
+     etc.) â€” without this, the grid track widens past the modal on
+     mobile even though the parent .contrib-form__grid is correctly
+     1fr at the 640px breakpoint. Same min-width: 0 fix applied to
+     .file-drop (a grandchild) was insufficient because the grid item's
+     own default min-width overrides constraints set deeper in its
+     descendants. This was the real cause of the upload-modal overflow
+     on 360px viewports (every field clipped at the same right edge). */
+  min-width: 0;
+}
 .contrib-form .auth-field--file { grid-column: 1 / -1; }
 
 #uploadCollegeFields {
   display: none;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
 }
 
 .auth-field__label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--gray-800);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .contrib-form select,
@@ -549,9 +553,9 @@ body.side-drawer-open #siteMain {
   background: var(--gray-50);
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-sm);
-  padding: 12px 14px;
+  padding: 10px 12px;
   font-family: inherit;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: var(--gray-800);
   outline: none;
   transition: border-color 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease);
@@ -590,8 +594,8 @@ body.side-drawer-open #siteMain {
 
 /* =========================================================
    CUSTOM SELECT (upload modal dropdowns)
-   Native <select> stays as the real data/value source —
-   visually hidden — while this layer renders the styled UI.
+   Native <select> stays as the real data/value source â€”
+   visually hidden â€” while this layer renders the styled UI.
    ========================================================= */
 .cselect {
   position: relative;
@@ -711,7 +715,7 @@ body.side-drawer-open #siteMain {
 
 /* Home-page search-card filters: when a .select wrapper becomes a
    .cselect, drop its own border/background so only the custom trigger
-   (which carries the same look) shows — no doubled outline. */
+   (which carries the same look) shows â€” no doubled outline. */
 .select.cselect {
   padding: 0;
   border: none;
@@ -796,6 +800,17 @@ body.side-drawer-open #siteMain {
   display: flex;
   align-items: center;
   gap: 10px;
+  /* width: 100% + min-width: 0 â€” the flex container needs both because
+     flex items default to min-width: auto, which lets long intrinsic
+     content (e.g. file-drop__text's nowrap text) override an explicit
+     width. Without min-width: 0, .file-drop can grow past its grid cell
+     and the .file-drop__text ellipsis never kicks in (it just clips
+     after the parent overflows). box-sizing: border-box so the 14px
+     padding on each side is counted inside the 100% width, not added
+     on top. */
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background: var(--gray-50);
   border: 1.5px dashed var(--gray-200);
   border-radius: var(--radius-sm);
@@ -826,6 +841,12 @@ body.side-drawer-open #siteMain {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* As a flex child of .file-drop, needs min-width: 0 so its nowrap
+     text doesn't force .file-drop to grow past the grid cell. Paired
+     with .file-drop's min-width: 0, this lets the text element shrink
+     and the ellipsis actually show up. */
+  flex: 1;
+  min-width: 0;
 }
 .file-drop__count {
   display: inline-block;
@@ -878,7 +899,7 @@ body.side-drawer-open #siteMain {
   backdrop-filter: blur(2px);
 }
 .upload-modal .contrib-card {
-  max-width: 620px;
+  max-width: 460px;
   transform: translateY(12px) scale(0.98);
   opacity: 0;
   transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
@@ -909,13 +930,42 @@ body.upload-modal-open .footer {
   z-index: 100;
   background: var(--surface);
   box-shadow: var(--shadow-sm);
-  transition: background-color 0.25s var(--ease);
+  transition: background-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+/* When the user has scrolled past the very top of the page, deepen
+   the navbar's shadow so it visually separates from the content
+   underneath. Triggered by script.js adding .navbar--scrolled once
+   window.scrollY > 8. Keeps the navbar clearly "stuck" on phones
+   where the eye can lose the bar against busy hero backgrounds. */
+.navbar--scrolled {
+  box-shadow: var(--shadow-md);
 }
 .navbar__inner {
   display: flex;
   align-items: center;
-  height: 76px;
+  height: 84px;
+  /* Shrink-on-scroll transition: the navbar itself is taller at the very
+     top of the page (gives the hero more breathing room above the eyebrow
+     pill) and shrinks once the user scrolls past 8px (gain vertical space
+     for content). The .navbar--scrolled class below is the scrolled state.
+     transition covers both height + logo size so the chrome collapses in
+     one smooth motion. */
+  transition: height 0.25s var(--ease);
 }
+.navbar__logo img {
+  display: block;
+  width: auto;
+  height: 52px;
+  max-width: 100%;
+  transition: height 0.25s var(--ease);
+}
+/* Scrolled state: shrink the inner bar AND the logo so the whole chrome
+   tucks up together. Mobile override (@media max-width: 560px) applies
+   the smaller sizes â€” both transitions run, so the user sees a smooth
+   collapse on phones too. */
+.navbar--scrolled .navbar__inner { height: 56px; }
+.navbar--scrolled .navbar__logo img { height: 32px; }
+.navbar--scrolled .navbar__burger { width: 36px; height: 36px; }
 
 .navbar__burger {
   display: flex;
@@ -931,7 +981,8 @@ body.upload-modal-open .footer {
   padding: 6px;
   margin-right: 18px;
   flex-shrink: 0;
-  transition: background 0.18s var(--ease), border-color 0.18s var(--ease);
+  transition: background 0.18s var(--ease), border-color 0.18s var(--ease),
+              width 0.25s var(--ease), height 0.25s var(--ease);
 }
 .navbar__burger:hover { background: var(--gray-100); border-color: var(--gray-600); }
 .navbar__burger:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
@@ -955,7 +1006,7 @@ body.upload-modal-open .footer {
 .navbar__logo img {
   display: block;
   width: auto;
-  height: 70px;
+  height: 44px;
   max-width: 100%;
 }
 .navbar__brand--footer .navbar__logo img {
@@ -1092,14 +1143,27 @@ body.upload-modal-open .footer {
    SIDE DRAWER
    ========================================================= */
 .side-drawer {
+  /* display:none (not visibility:hidden) when closed so the element
+     is fully removed from layout. visibility:hidden kept the wrapper
+     in the layout tree, and any intrinsic-width content (e.g. an
+     absolutely-positioned child with width:max-content) could still
+     bleed into the wrapper's computed box and force it past viewport
+     width â€” causing horizontal page overflow on mobile even when the
+     drawer was supposedly closed. With display:none the element
+     contributes nothing to layout until is-open is added.
+     max-width:100vw + box-sizing:border-box are belt-and-suspenders
+     guards in case an ancestor establishes a containing block. */
+  display: none;
   position: fixed;
   inset: 0;
+  width: 100vw;
+  max-width: 100vw;
+  box-sizing: border-box;
   z-index: 1100;
-  visibility: hidden;
   pointer-events: none;
 }
 .side-drawer.is-open {
-  visibility: visible;
+  display: block;
   pointer-events: auto;
 }
 .side-drawer__backdrop {
@@ -1240,7 +1304,7 @@ body.upload-modal-open .footer {
    ========================================================= */
 .hero {
   position: relative;
-  padding-top: 110px;
+  padding-top: 130px;
   padding-bottom: 60px;
   color: var(--white);
   overflow: hidden;
@@ -1268,7 +1332,7 @@ body.upload-modal-open .footer {
   margin-right: auto;
   text-align: left;
 }
-/* Eyebrow pill above the title — matches the "For Students. By Students."
+/* Eyebrow pill above the title â€” matches the "For Students. By Students."
    cap badge from the design reference. Tucks the title down with breathing
    room above it. */
 .hero__eyebrow {
@@ -1332,7 +1396,7 @@ body.upload-modal-open .footer {
      white Featured Notes section below (background-color:
      var(--surface) on .featured-notes removed the previous
      gray-stripe contrast). The border needs to be dark enough to
-     read on a white background too — rgba(11,31,77,0.32) gives
+     read on a white background too â€” rgba(11,31,77,0.32) gives
      that visible separation without dominating the page. */
   border: 1.5px solid rgba(11, 31, 77, 0.32);
 }
@@ -1405,11 +1469,11 @@ body.upload-modal-open .footer {
   /* background-color was added so the 30px overlap region (where
      .search-card's margin-bottom:-70px pulls featured-notes up onto
      hero's bottom edge) no longer shows hero's dark navy through
-     transparency. Without a bg, the visible seam is: hero navy →
-     white search card → 30px navy band (bleed-through) → white body
-     → h2 on white — which looks like the search card overlaps
-     Featured Notes. With this bg, the seam is: hero navy → search
-     card → clean white → h2 on white. The overlap-composition
+     transparency. Without a bg, the visible seam is: hero navy â†’
+     white search card â†’ 30px navy band (bleed-through) â†’ white body
+     â†’ h2 on white â€” which looks like the search card overlaps
+     Featured Notes. With this bg, the seam is: hero navy â†’ search
+     card â†’ clean white â†’ h2 on white. The overlap-composition
      design is preserved (search card still floats over hero's bottom
      edge); only the bleed-through is eliminated. */
   background-color: var(--surface);
@@ -1495,7 +1559,7 @@ body.upload-modal-open .footer {
 }
 .featured-card__rank svg { flex-shrink: 0; }
 
-/* Gallery badge — shows on a feed card that collapsed a multi-image
+/* Gallery badge â€” shows on a feed card that collapsed a multi-image
    upload into one entry. Sits top-right next to the rank badge. */
 .featured-card__gallery {
   display: inline-flex;
@@ -1589,8 +1653,8 @@ body.upload-modal-open .footer {
 @media (max-width: 720px) {
   .featured-notes { padding-top: 56px; }
   .featured-notes__subtitle { margin-top: -16px; margin-bottom: 24px; }
-  /* Mobile: 2-column grid (not 1) — matches the schools/subjects
-     pattern. Cap is 4 so the grid divides cleanly into 2×2 with no
+  /* Mobile: 2-column grid (not 1) â€” matches the schools/subjects
+     pattern. Cap is 4 so the grid divides cleanly into 2Ã—2 with no
      orphan row. Tighten card padding/font so more fits per screen. */
   .featured-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .featured-card { padding: 14px; gap: 10px; }
@@ -1605,7 +1669,7 @@ body.upload-modal-open .footer {
 }
 
 /* =========================================================
-   FEATURES STRIP — dark full-bleed "why OlongNotes" panel
+   FEATURES STRIP â€” dark full-bleed "why OlongNotes" panel
    ========================================================= */
 .features-strip {
   position: relative;
@@ -1682,9 +1746,9 @@ body.upload-modal-open .footer {
   padding: 30px 26px;
   backdrop-filter: blur(6px);
   transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
-  /* One-time page-load entrance — staggered fade + small translateY
+  /* One-time page-load entrance â€” staggered fade + small translateY
      settle. Fires once on initial page load only (NOT scroll-
-     triggered). Total sequence ≈530ms (4 cards × 60ms stagger +
+     triggered). Total sequence â‰ˆ530ms (4 cards Ã— 60ms stagger +
      350ms duration). animation-fill-mode: backwards keeps each card
      invisible until its delay elapses. prefers-reduced-motion below
      disables it entirely. */
@@ -1698,8 +1762,8 @@ body.upload-modal-open .footer {
 .features-strip__card:active {
   /* Card hover (per established polish spec): translateY(-2px) +
      shadow deepens, 0.2s ease. The strip is a dark panel so the spec's
-     light-context shadow alphas (0.08 → 0.12) wouldn't read — adapted
-     to 0.18 → 0.32 here for visibility on the navy backdrop. The
+     light-context shadow alphas (0.08 â†’ 0.12) wouldn't read â€” adapted
+     to 0.18 â†’ 0.32 here for visibility on the navy backdrop. The
      border + background brightness shift adds the equivalent of a
      light-context shadow deepening for a dark panel. The icon circle
      gets a small scale(1.06) as a natural extension of the card lift.
@@ -1733,10 +1797,10 @@ body.upload-modal-open .footer {
   background: var(--goldenrod);
 }
 
-/* One-time page-load entrance for the four cards — staggered fade +
+/* One-time page-load entrance for the four cards â€” staggered fade +
    small translateY settle. Fires once on initial page load only,
    under the existing polish rule (NOT scroll-triggered). Total
-   sequence ≈530ms (4 cards × 60ms stagger + 350ms duration).
+   sequence â‰ˆ530ms (4 cards Ã— 60ms stagger + 350ms duration).
    animation-fill-mode: backwards keeps each card invisible until its
    delay elapses, so the first paint doesn't show all four at once.
    prefers-reduced-motion disables it entirely. */
@@ -1994,7 +2058,7 @@ body.upload-modal-open .footer {
 @media (max-width: 640px) {
   /* On phones the marquee used to collapse into a wrapped static
      grid (animation: none), which looked broken. Keep the animation
-     alive here — just slow it down for readability and let the
+     alive here â€” just slow it down for readability and let the
      row's mask-image edge fade handle the entry/exit. */
   .marquee-strip { padding: 36px 0; }
   .marquee-row {
@@ -2038,8 +2102,8 @@ body.upload-modal-open .footer {
   /* 100vh: matches the sticky content height (calc(100vh - 96px)),
      so there's effectively no empty scroll-through between this
      section and the next. The 3 scroll-pinned items still swap as
-     the user scrolls past — just with very tight scroll distances
-     per item. Was 260vh → 180vh → 120vh → 100vh as we iteratively
+     the user scrolls past â€” just with very tight scroll distances
+     per item. Was 260vh â†’ 180vh â†’ 120vh â†’ 100vh as we iteratively
      trimmed the visible white gap. */
   height: 100vh;
 }
@@ -2394,7 +2458,7 @@ body.upload-modal-open .footer {
 }
 
 @media (max-width: 720px) {
-  /* Phones: keep the stacked flow but also hide the visual stack —
+  /* Phones: keep the stacked flow but also hide the visual stack â€”
      the page is too narrow for the layered illustrations to read. */
   .discover-sticky { padding: 56px 0; }
   .discover-frame { gap: 32px; }
@@ -2487,13 +2551,15 @@ body.upload-modal-open .footer {
 /* =========================================================
    FOOTER
    ========================================================= */
-.footer { background: var(--navy); color: rgba(255,255,255,0.75); padding: 64px 0 0; }
+.footer { background: var(--navy); color: rgba(255,255,255,0.75); padding: 64px 0 0; width: 100%; box-sizing: border-box; overflow: hidden; }
 .footer__grid {
   display: grid;
   grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
   gap: 32px;
   padding-bottom: 48px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+  box-sizing: border-box;
 }
 .navbar__brand--footer { margin-bottom: 14px; }
 .navbar__title--light { color: var(--white); }
@@ -2555,7 +2621,7 @@ body.upload-modal-open .footer {
      the desktop Log In / Sign Up buttons + guest-action group collapse
      so only the profile affordance survives next to the hamburger + logo.
      The drawer carries the full nav + theme toggle + auth CTA. Only the
-     TOP-BAR toggle is hidden — the drawer's own .theme-toggle stays. */
+     TOP-BAR toggle is hidden â€” the drawer's own .theme-toggle stays. */
   .navbar__actions .theme-toggle { display: none; }
   .navbar__guest-actions { display: none; }
   .navbar__actions .btn--sm { display: none; }
@@ -2564,27 +2630,38 @@ body.upload-modal-open .footer {
 @media (max-width: 560px) {
   /* Mobile nav: shrink every chrome element so the bar reads as light,
      modern, and never overflows at 360-430px. Mirrors modern app chrome
-     (compact hamburger 36×36, slim brand mark, slimmer header bar). */
+     (compact hamburger 36Ã—36, slim brand mark, slimmer header bar). */
   .navbar__brand { margin-right: 10px; gap: 10px; }
-  .navbar__logo img { height: 40px; }
+  .navbar__logo img { height: 48px; }
   .navbar__title { font-size: 1rem; }
-  .navbar__inner { height: 56px; }
+  .navbar__inner { height: 64px; }
   .navbar__burger {
     margin-right: 8px;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
   }
   .navbar__burger span { width: 18px; }
   .navbar__actions { gap: 8px; }
   .navbar__profile-chip { width: 32px; height: 32px; }
   .navbar__profile-avatar { width: 32px; height: 32px; font-size: 0.78rem; }
+
+  /* Mobile scrolled state: shrink the bar further so the slide effect
+     is visible on phones too. Without these, the inner height (64px) and
+     burger (40Ã—40) wouldn't change on scroll â€” only the logo would
+     shrink to 32px, which is a subtle 16px change. With these, the bar
+     collapses from 64px â†’ 48px and the burger from 40Ã—40 â†’ 32Ã—32, so
+     the scroll effect is visible without making the touch target too
+     small. (0,3,0) beats (0,2,0) so the value sticks at this breakpoint. */
+  .navbar--scrolled .navbar__inner { height: 48px; }
+  .navbar--scrolled .navbar__burger { width: 32px; height: 32px; }
+  .navbar--scrolled .navbar__logo img { height: 32px; }
 }
 
 @media (max-width: 720px) {
   /* Tighter top padding so the eyebrow pill ("For Students. By Students.")
-     sits closer to the navbar — keeps mobile chrome compact and modern. */
-  .hero { padding-top: 76px; padding-bottom: 50px; }
+     sits closer to the navbar â€” keeps mobile chrome compact and modern. */
+  .hero { padding-top: 108px; padding-bottom: 50px; }
   .hero__content {
     margin-left: 0;
     margin-right: 0;
@@ -2604,9 +2681,26 @@ body.upload-modal-open .footer {
   .contributors-grid { grid-template-columns: 1fr; }
   .cta__card { flex-direction: column; align-items: flex-start; }
   .cta__card .btn { width: 100%; }
-  .footer__grid { grid-template-columns: 1fr; }
+  .footer__grid { grid-template-columns: 1fr; gap: 24px; }
   .section { padding: 60px 0; }
   .navbar__tagline { display: none; }
+}
+
+/* Defensive mobile footer lock â€” at 375-430px phones the .footer__grid
+   must stay single-column and inside the viewport. The base footer
+   already has width:100% + box-sizing:border-box + overflow:hidden, but
+   we also collapse any 2-column inheritance from the 1080px breakpoint
+   to a single column so the 4 footer columns stack vertically and the
+   email/social row never widens the page past the viewport. */
+@media (max-width: 640px) {
+  .footer { padding: 48px 0 0; }
+  .footer__grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-bottom: 36px;
+  }
+  .footer__col { gap: 10px; }
+  .footer__desc { max-width: 100%; }
 }
 
 @media (max-width: 460px) {
@@ -2615,78 +2709,173 @@ body.upload-modal-open .footer {
 }
 
 /* =========================================================
-   UPLOAD NOTES MODAL — MOBILE BOTTOM SHEET
+   UPLOAD NOTES MODAL â€” MOBILE BOTTOM SHEET (modern iOS/Android style)
    Placed last so source order wins over the unguarded
    .upload-modal rules above, regardless of specificity ties.
-   ========================================================= */
+
+   Design notes:
+   - Sheet pinned to bottom, full viewport width, rounded top corners only
+   - Drag-handle bar at the top (CSS-only), centered, 36Ã—4 pill
+   - Bigger 56px sticky submit button with safe-area-inset padding
+   - Single-column compact form layout
+   - Safe-area-inset-bottom for iOS notch/home-bar
+   - Bouncy spring entry (cubic-bezier overshoot)
+   - Hide the desktop close (Ã—) â€” tapping the dim backdrop dismisses
+========================================================= */
 @media (max-width: 640px) {
+  /* Backdrop: stronger dim + slight tint to draw focus to the sheet */
   .upload-modal {
     padding: 0;
     align-items: flex-end;
+    /* Cancel the desktop center-align stack so the sheet slides from
+       the bottom edge with no leftover flex offset. */
   }
+  .upload-modal__backdrop {
+    background: rgba(8, 16, 38, 0.55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+
   .upload-modal .contrib-card {
     max-width: 100%;
     width: 100%;
+    /* Slide up from the bottom edge of the viewport. 92vh keeps a small
+       peek of dim backdrop above so users see they're in a modal sheet
+       (and have somewhere to tap to dismiss). */
     max-height: 92vh;
-    border-radius: 20px 20px 0 0;
-    padding: 24px 20px 22px;
-    transform: translateY(24px);
+    border-radius: 22px 22px 0 0;
+    padding: 0;
+    /* Sheet itself becomes a flex column so the form body scrolls
+       while header and sticky submit footer stay pinned. */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(105%);
+    transition: transform 0.4s var(--ease);
+    /* Soft top shadow so the sheet reads as floating above the page */
+    box-shadow: 0 -10px 40px rgba(11, 31, 77, 0.18);
   }
   .upload-modal.is-open .contrib-card {
     transform: translateY(0);
   }
 
+  /* Drag handle bar â€” modern iOS/Android pattern, sits at the top of
+     the sheet. CSS-only so no JS needed. */
+  .upload-modal .contrib-card::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--gray-200);
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+
+  /* Push the corner close (Ã—) below the drag handle so they don't
+     overlap. Stays visible â€” it's the primary dismiss affordance
+     on mobile, sitting next to the drag handle for one-tap access. */
+  .upload-modal .auth-card__close {
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    z-index: 2;
+  }
+
+  /* Header: tighter, padding-right leaves room for the floating close (Ã—) */
   .contrib-card__head {
+    align-items: center;
     gap: 12px;
-    margin-bottom: 20px;
+    margin: 6px 18px 0;
+    padding: 12px 38px 14px 0;
+    border-bottom: 1px solid var(--gray-100);
+    text-align: left;
+    flex-shrink: 0;
   }
   .contrib-card__icon {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
   .contrib-card__head h2 {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    margin-bottom: 2px;
   }
   .contrib-card__head p {
-    font-size: 0.82rem;
-    line-height: 1.45;
+    font-size: 0.8rem;
+    line-height: 1.4;
   }
 
+  /* Form body: the scroll region between header and sticky footer */
+  .contrib-form {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 18px 20px;
+  }
   .contrib-form__grid {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
   }
+  .auth-field { margin: 0; }
   .auth-field__label {
     font-size: 0.78rem;
+    margin-bottom: 6px;
+  }
+  .auth-field__hint {
+    font-size: 0.72rem;
   }
 
+  /* Form fields: 48px touch targets + iOS-friendly 16px font (prevents
+     iOS Safari zoom-on-focus). Slightly rounded corners for the
+     modern "filled-field" look. */
   .contrib-form select,
   .contrib-form input[type="text"],
   .contrib-form input[list],
   .contrib-form textarea {
     font-size: 16px;
     padding: 13px 14px;
+    border-radius: 12px;
+    background: var(--gray-50);
+  }
+  .contrib-form textarea {
+    min-height: 72px;
+    resize: none;
   }
 
+  /* File drop: full-width pill-shaped drop zone */
   .file-drop {
-    padding: 15px 14px;
+    padding: 18px 14px;
+    border-radius: 12px;
   }
   .file-drop__text {
     font-size: 0.82rem;
+    line-height: 1.4;
   }
 
   #uploadCollegeFields {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
   }
 
+  /* Notice above the submit button â€” slightly understated on mobile */
   .contrib-form__note {
-    font-size: 0.75rem;
-    margin-top: 14px;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    margin-top: 12px;
+    margin-bottom: 0;
   }
 
+  /* Submit button: full-width, modern 14px-radius pill, generous
+     16px vertical padding so it's an easy thumb target. Safe-area-
+     inset for iOS home bar. */
   .btn--block {
-    padding: 14px 20px;
+    padding: 16px 18px;
     font-size: 0.98rem;
+    border-radius: 14px;
+    /* Sit below the safe area so the iOS home bar never overlaps
+       the button. */
+    margin-bottom: env(safe-area-inset-bottom, 0px);
   }
 }

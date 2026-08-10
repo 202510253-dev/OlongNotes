@@ -651,8 +651,11 @@ const res = await api.patch(
 
   // ---------- My Notes loader ----------
 
-  // Renders the user's published notes. Each card mirrors the
-  // prototype's .note-card markup so the existing CSS keeps working.
+  // Renders the user's published notes. Each card uses the same
+  // .doc-card markup as the View All notes grid (notes.html) so My
+  // Notes reads as part of the same family as every other notes
+  // surface on the site — vertical layout, file-type badge,
+  // like/download stats, Open File button.
   async function loadMyNotes() {
     if (!currentTargetId || !api) return;
     setEmpty(els.notesList, 'Loading notes…');
@@ -684,39 +687,65 @@ const res = await api.patch(
   function renderNotes(notes) {
     if (!els.notesList) return;
     // Per-file-type icon (PDF / PPTX / DOCX / XLSX / IMG) — shared by
-    // every page that renders document cards. Falls back to the generic
-    // NOTE_ICON_SVG below if file-type-icons.js failed to load. We pass
-    // "note-card__icon" as the parent class so profile.css continues
-    // to size / round the badge the same way (40×40, gray fallback),
-    // while the shared module drives color + inner glyph by MIME.
+    // every page that renders document cards. Falls back to a generic
+    // document badge if file-type-icons.js failed to load. We pass
+    // "doc-card__file-icon" as the parent class so the new .doc-card
+    // grid (matches notes.html View All style) sizes / rounds the
+    // badge consistently with the rest of the site, while the shared
+    // module drives color + inner glyph by MIME.
     const fileIconHtml = (window.OlongNotes && window.OlongNotes.fileIconMarkup)
-      || ((ft) => '<span class="note-card__icon" aria-hidden="true">' + NOTE_ICON_SVG + '</span>');
+      || ((ft) => '<span class="doc-card__file-icon" aria-hidden="true">' + DOC_ICON_SVG + '</span>');
+    const badgeText = (window.OlongNotes && window.OlongNotes.fileTypeBadge)
+      || ((ft) => (ft && ft.includes('pdf')) ? 'PDF' : (ft && ft.includes('image/')) ? 'IMG' : 'FILE');
+
+    // Heart + download SVG icons — same icons used by notes.html so
+    // stats read consistently between My Notes and View All.
+    const heartIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 21s-7-4.5-9.5-9.2C.6 7.8 2.7 4 6.3 4c2 0 3.5 1 4.7 2.6C12.2 5 13.7 4 15.7 4c3.6 0 5.7 3.8 3.8 7.8C19 16.5 12 21 12 21z"/></svg>';
+    const downloadIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>';
+
     const cards = notes.map((n) => {
       const subject = (n.subjects && n.subjects.subject_name) || 'General';
       const school = (n.schools && n.schools.school_name) || '';
       const updated = n.updated_at || n.created_at;
-      const meta = [subject, n.grade_level].filter(Boolean).join(' · ');
-      const schoolMeta = school ? `<span>·</span> ${escapeHtml(school)}` : '';
-      const fileType = (n.file_type || '').split('/').pop() || '';
-      const desc = n.annotation
-        || (fileType ? `Uploaded as ${escapeHtml(fileType.toUpperCase())}.` : 'Uploaded note.');
+      const fileType = n.file_type || '';
+      const description = n.annotation
+        || (fileType ? `Uploaded as ${escapeHtml(fileType.split('/').pop().toUpperCase())}.` : 'Uploaded note.');
+      const likes = typeof n.likes_count === 'number' ? n.likes_count : 0;
+      const downloads = typeof n.download_count === 'number' ? n.download_count : 0;
 
       return (
-        '<article class="note-card" data-note-id="' + escapeHtml(String(n.id)) + '">' +
-          fileIconHtml(n.file_type, 'note-card__icon') +
-          '<div class="note-card__body">' +
-            '<div class="note-card__head">' +
-              '<h3>' + escapeHtml(n.title || 'Untitled') + '</h3>' +
-              '<span class="note-card__updated">' + escapeHtml(joinedLabel(updated)) + '</span>' +
-            '</div>' +
-            '<p class="note-card__meta">' + escapeHtml(meta) + schoolMeta + '</p>' +
-            '<p class="note-card__desc">' + escapeHtml(desc) + '</p>' +
+        '<article class="doc-card" data-note-id="' + escapeHtml(String(n.id)) + '">' +
+          '<div class="doc-card__top">' +
+            fileIconHtml(fileType, 'doc-card__file-icon') +
+            '<span class="doc-card__badge">' + escapeHtml(badgeText(fileType)) + '</span>' +
           '</div>' +
+          '<p class="doc-card__title">' + escapeHtml(n.title || 'Untitled') + '</p>' +
+          '<p class="doc-card__caption">' + escapeHtml(description) + '</p>' +
+          '<div class="doc-card__tags">' +
+            (subject ? '<span class="doc-card__tag">' + escapeHtml(subject) + '</span>' : '') +
+            (n.grade_level ? '<span class="doc-card__tag">' + escapeHtml(n.grade_level) + '</span>' : '') +
+          '</div>' +
+          '<div class="doc-card__stats">' +
+            '<span class="doc-card__stat doc-card__stat--likes">' + heartIcon + ' ' + escapeHtml(String(likes)) + '</span>' +
+            '<span class="doc-card__stat doc-card__stat--downloads">' + downloadIcon + ' ' + escapeHtml(String(downloads)) + ' downloads</span>' +
+          '</div>' +
+          '<button class="btn btn--outline btn--sm doc-card__open" type="button" data-open-note="' + escapeHtml(String(n.id)) + '">Open File</button>' +
         '</article>'
       );
     }).join('');
 
     els.notesList.innerHTML = cards;
+
+    // Wire each card's "Open File" button to the same handler the
+    // row-level click uses (routes to document-viewer.html). The card
+    // itself is also clickable via the delegated handler below.
+    els.notesList.querySelectorAll('[data-open-note]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-open-note');
+        if (id) window.location.href = 'document-viewer.html?id=' + encodeURIComponent(id);
+      });
+    });
   }
 
   function renderNotesSidebar(notes) {
@@ -742,7 +771,7 @@ const res = await api.patch(
       '</div>';
   }
 
-  const NOTE_ICON_SVG =
+  const DOC_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 2H16l4 4v16H6.5A1.5 1.5 0 0 1 5 20.5v-17A1.5 1.5 0 0 1 6.5 2Z"/><path d="M16 2v4h4M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/></svg>';
 
   // ---------- "+ New Note" button → Upload Notes modal ----------
@@ -785,7 +814,7 @@ const res = await api.patch(
     if (!els.notesSearch) return;
     els.notesSearch.addEventListener('input', () => {
       const q = els.notesSearch.value.trim().toLowerCase();
-      const cards = els.notesList ? els.notesList.querySelectorAll('.note-card') : [];
+      const cards = els.notesList ? els.notesList.querySelectorAll('.doc-card') : [];
       let visible = 0;
       cards.forEach((card) => {
         const text = card.textContent.toLowerCase();
@@ -823,13 +852,13 @@ const res = await api.patch(
       // Ignore clicks on interactive/actionable elements so they don't
       // also trigger navigation. This covers buttons, links, inputs,
       // any element marked [data-no-navigate], and future action areas
-      // like a "..." menu (e.g. .note-card__actions / .actions).
+      // like a "..." menu (e.g. .doc-card__actions / .actions).
       const target = e.target;
-      if (target.closest('button, a, input, select, textarea, [data-no-navigate], .actions, .note-card__actions, .note-card__menu')) {
+      if (target.closest('button, a, input, select, textarea, [data-no-navigate], .actions, .doc-card__actions, .doc-card__menu')) {
         return;
       }
 
-      const card = target.closest('.note-card');
+      const card = target.closest('.doc-card');
       if (!card) return;
       const id = card.dataset.noteId;
       if (!id) return;
@@ -1170,7 +1199,7 @@ const res = await api.patch(
       tab.addEventListener('click', () => activate(tab.dataset.tab));
     });
 
-    // Settings sub-nav, search filter, note-card navigation, new-note
+    // Settings sub-nav, search filter, doc-card navigation, new-note
     // button, save button, logout button.
     bindSettingsNav();
     bindNotesSearch();

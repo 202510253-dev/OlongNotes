@@ -290,3 +290,28 @@
   width: 100%;
 }
 
+/* ---------- Dark mode ----------
+   Most rules above already reference --surface / --text-heading /
+   --gray-600 / --navy-100 which flip via style.css's [data-theme="dark"]
+   token block. This section covers the few cases that don't: pastel pill
+   text on rgba backgrounds, the curriculum badge text contrast, and
+   making sure the composer field border + toolbar feel right when the
+   background goes dark navy. The blue tint colors (#2F6FED family) stay
+   identical — they're already designed for dark surfaces. */
+[data-theme="dark"] .answer-context__pill--k10 {
+  color: #6cd49a;
+  background: rgba(46, 158, 91, 0.22);
+}
+[data-theme="dark"] .answer-context__pill--senior_high {
+  color: #f0b56e;
+  background: rgba(224, 151, 60, 0.22);
+}
+[data-theme="dark"] .answer-context__pill--college {
+  color: #b89cff;
+  background: rgba(139, 92, 246, 0.22);
+}
+
+[data-theme="dark"] .quit-modal__backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+

@@ -468,84 +468,167 @@
   padding: 2px 10px;
 }
 
-/* ---- Note card ---- */
-.note-card {
-  display: flex;
-  gap: 14px;
-  padding: 16px 18px;
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
+/* ---- doc-card (My Notes vertical card — matches View All notes) ----
+   Mirrors the .doc-card design from school-profile.css so My Notes
+   on the profile page reads as part of the same family as the View
+   All notes grid on notes.html. Auto-fill grid + minmax(220px, 1fr)
+   keeps cards comfortable from 1-up at 320px up to 4-up at 1200px+.
+   Hover lift, accent border, shadow-md match every other card type
+   on the site. */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+/* When the only child of the grid is a status/empty <p> (loading,
+   empty, error), let it span the full width so it doesn't stretch
+   to a single 220px column. */
+.doc-grid > .profile-card__empty,
+.doc-grid > .doc-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 10px;
+}
+
+.doc-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 18px 16px;
   box-shadow: var(--shadow-sm);
-  cursor: pointer;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
               background-color 0.18s var(--ease), border-color 0.18s var(--ease);
 }
-.note-card:hover {
+.doc-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  background-color: var(--gray-50);
   border-color: var(--accent-blue, #3d6bf0);
 }
-.note-card__icon {
+
+.doc-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.doc-card__file-icon {
   flex-shrink: 0;
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--icon-bg, var(--gray-50));
+  background: var(--icon-bg, var(--accent-blue, #3d6bf0));
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: var(--shadow-sm);
 }
-.note-card__body { flex: 1; min-width: 0; }
-.note-card__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-.note-card__head h3 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.92rem;
+
+.doc-card__badge {
+  font-size: 0.66rem;
   font-weight: 700;
-  color: var(--navy);
+  letter-spacing: 0.02em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--navy-100, #f2f4f8);
+  color: var(--text-heading, #1f2937);
+  white-space: nowrap;
+}
+
+.doc-card__title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-heading);
   margin: 0;
-  /* Long note titles can otherwise push the date out of the row
-     on narrow viewports. min-width:0 lets h3 shrink past its
-     content; overflow-wrap:break-word wraps long single tokens;
-     the ellipsis gives a clean cut when there's no other choice.
-     Combined with the date's flex-shrink:0 + white-space:nowrap,
-     the title gracefully yields space to the date instead of
-     overflowing. */
-  min-width: 0;
-  flex: 1;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.doc-card__caption {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-600, #5b6472);
+  line-height: 1.4;
+  margin: 4px 0 10px;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.doc-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.doc-card__tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--accent-blue, #3d6bf0);
+  background: rgba(61, 107, 240, 0.1);
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.note-card__updated {
+
+.doc-card__stats {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.75rem;
-  color: var(--gray-600);
-  white-space: nowrap;
+  gap: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
 }
-.note-card__meta {
-  font-family: 'Inter', sans-serif;
+
+.doc-card__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 0.78rem;
-  color: var(--gray-600);
-  margin: 5px 0 6px;
+  font-weight: 500;
+  color: var(--gray-600, #5b6472);
 }
-.note-card__meta span { margin: 0 4px; }
-.note-card__desc {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.82rem;
-  color: var(--gray-600);
-  line-height: 1.55;
-  margin: 0;
+
+.doc-card__stat--likes svg { color: #e0556f; }
+.doc-card__stat--downloads svg { color: var(--gray-600, #9aa2b1); }
+
+.doc-card__open {
+  margin-top: auto;
+  align-self: stretch;
+}
+
+/* Dark-mode adaptation — keep the card surface legible against the
+   dark page background, lift border to a subtle navy tone, and
+   preserve the accent-blue hover border. */
+[data-theme="dark"] .doc-card {
+  background: var(--surface);
+  border-color: var(--navy-700, #1f2a4a);
+}
+[data-theme="dark"] .doc-card:hover {
+  border-color: var(--accent-blue, #3d6bf0);
+  background: var(--navy-700, #1f2a4a);
+}
+[data-theme="dark"] .doc-card__badge {
+  background: var(--navy-700, #1f2a4a);
+  color: var(--text-heading);
 }
 
 /* ---- Activity ---- */
@@ -885,26 +968,6 @@
   border-color: var(--gray-200);
 }
 
-[data-theme="dark"] .note-card {
-  background: var(--surface);
-  border-color: var(--gray-200);
-}
-[data-theme="dark"] .note-card:hover {
-  /* Same translateY + shadow as the light-mode hover so the
-     animation timing stays consistent in dark mode. Border goes
-     gray (no accent-blue visible on the navy bg) and background
-     shifts to gray-100. */
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  background: var(--gray-100);
-  border-color: var(--gray-200);
-}
-[data-theme="dark"] .note-card__icon { background: var(--icon-bg, var(--gray-100)); }
-[data-theme="dark"] .note-card__head h3 { color: var(--text-heading); }
-[data-theme="dark"] .note-card__updated,
-[data-theme="dark"] .note-card__meta,
-[data-theme="dark"] .note-card__desc { color: var(--gray-600); }
-
 [data-theme="dark"] .activity-section__title h3 { color: var(--text-heading); }
 [data-theme="dark"] .activity-section__title p { color: var(--gray-600); }
 [data-theme="dark"] .activity-item { border-top-color: var(--gray-200); }
@@ -1159,20 +1222,12 @@
      banner's top-right, clear of the overlapping avatar/content below.
      min-height keeps it a ≥44px tap-friendly touch target on mobile. */
   .profile-hero__banner-edit { top: 12px; bottom: auto; right: 12px; min-height: 44px; }
-  /* My-notes cards: on phones the title + date row wants to wrap the
-     title onto 2 lines instead of ellipsizing, so the date doesn't
-     lose its visible space and users can see what each note is.
-     Also tighten card padding so the icon+body fit at 320-360px. */
-  .note-card { padding: 14px 14px; gap: 12px; }
-  .note-card__head h3 {
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    -webkit-line-clamp: 2;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-  }
+  /* Doc-card (My Notes) — at 320–360px width the auto-fill grid
+     collapses to a single column, which is already narrow enough
+     that no extra padding adjustment is needed. The .doc-grid
+     min-width:0 above is what lets long unbroken description text
+     ("Uploaded as VND.OPENXMLFORMATS-OFFICEDOCUMENT...") wrap inside
+     the card without pushing it past the viewport. */
 }
 @media (max-width: 600px) {
   .notes-toolbar__actions { width: 100%; }

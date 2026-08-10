@@ -40,25 +40,32 @@
 
 /* ---- ask-modal + edit-modal open/close ----
    Override the per-page display:none/flex rules in
-   browse-community.css:697-708 and question-detail.css:702-748 so
-   the transition has a chance to fire. display: flex !important is
-   needed to beat style.css:142 [hidden] { display: none !important }.
-   Visibility/opacity handle the "shown or not" state so the
-   transition actually has a from→to pair to interpolate. */
+   browse-community.css:720-733 and question-detail.css:702-748 so
+   the transition has a chance to fire.
+
+   transition-behavior: allow-discrete + @starting-style lets the
+   modal collapse to display: none when closed (no layout footprint,
+   no invisible click-blocker) while still animating the opacity/transform
+   fade. Chrome 117+, Firefox 129+, Safari 17.4+. Older browsers get the
+   instant toggle fallback below — still no permanent layout footprint. */
 .ask-modal {
-  display: flex !important;
-  visibility: hidden;
+  display: none;
   opacity: 0;
   pointer-events: none;
   transition: opacity 150ms var(--ease),
-              visibility 0s linear 150ms;
+              display 150ms allow-discrete;
+}
+@starting-style {
+  .ask-modal.is-open {
+    opacity: 0;
+  }
 }
 .ask-modal.is-open {
-  visibility: visible;
+  display: flex;
   opacity: 1;
   pointer-events: auto;
   transition: opacity 200ms var(--ease),
-              visibility 0s linear 0s;
+              display 200ms allow-discrete;
 }
 .ask-modal__backdrop {
   opacity: 0;
@@ -78,62 +85,90 @@
 }
 
 /* ---- kebab + dropdown-filter menus ----
-   Same display:!important trick to override style.css:142
-   [hidden] { display: none !important }. JS toggles menu.hidden
-   (HTML attribute); CSS keys off the attribute via [hidden] /
-   :not([hidden]) so the existing JS keeps working unchanged. */
-.kebab__menu[hidden],
-.dropdown-filter__menu[hidden] {
-  display: flex !important;
-  visibility: hidden;
+   JS toggles menu.hidden (HTML attribute); CSS keys off the attribute
+   via [hidden] / :not([hidden]) so the existing JS keeps working
+   unchanged. transition-behavior: allow-discrete + @starting-style
+   lets the menu collapse to display:none when [hidden] (no layout
+   footprint / no invisible click-blocker) while still animating the
+   opacity/transform fade. Chrome 117+, Firefox 129+, Safari 17.4+.
+   The hide-direction delay (120ms) gives the close fade a chance to
+   play before the menu disappears. */
+.kebab__menu,
+.dropdown-filter__menu {
+  /* The shared style.css [hidden] rule already sets display:none —
+     we only need to declare the transition behavior on the visible
+     state and the starting-style for the open animation. */
   opacity: 0;
-  pointer-events: none;
   transform: translateY(-4px) scale(0.98);
   transition: opacity 120ms var(--ease),
               transform 120ms var(--ease),
-              visibility 0s linear 120ms;
+              display 120ms allow-discrete;
+}
+@starting-style {
+  .kebab__menu:not([hidden]),
+  .dropdown-filter__menu:not([hidden]) {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
 }
 .kebab__menu:not([hidden]) {
-  visibility: visible;
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0) scale(1);
   transform-origin: top right;
   transition: opacity 140ms var(--ease),
               transform 140ms var(--ease),
-              visibility 0s linear 0s;
+              display 140ms allow-discrete;
 }
 .dropdown-filter__menu:not([hidden]) {
-  visibility: visible;
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0) scale(1);
   transform-origin: top left;
   transition: opacity 140ms var(--ease),
               transform 140ms var(--ease),
-              visibility 0s linear 0s;
+              display 140ms allow-discrete;
 }
 
+/* ---- Page-level entrance ----
+   Fade in the top-level children of <main> on every page so the
+   page "arrives" smoothly instead of snapping in. Targets the
+   direct children of <main>: welcome, schools, community,
+   profile, recent-activities, etc. — anything inside #siteMain.
+   Pairs with prefers-reduced-motion opt-out below. */
+main > section,
+main > .hero,
+main > .section {
+  animation: motion-fade-rise 320ms var(--ease) backwards;
+}
+main > *:nth-child(1)  { animation-delay:   0ms; }
+main > *:nth-child(2)  { animation-delay:  60ms; }
+main > *:nth-child(3)  { animation-delay: 120ms; }
+main > *:nth-child(4)  { animation-delay: 180ms; }
+main > *:nth-child(5)  { animation-delay: 240ms; }
+main > *:nth-child(6)  { animation-delay: 300ms; }
+main > *:nth-child(7)  { animation-delay: 360ms; }
+main > *:nth-child(8)  { animation-delay: 420ms; }
+main > *:nth-child(n+9) { animation-delay: 480ms; }
+
 /* ---- Reduced-motion safety (extends style.css:144) ----
-   Two cases the global 0.01ms override doesn't handle:
-   (1) animation-delay is not zeroed, so staggered items would be
-       invisible for the delay window under reduced motion.
-   (2) transition visibility-delay is not zeroed, so a closing
-       modal stays interactive for ~150ms after the fade starts.
-   Cancel both explicitly. */
+   The global 0.01ms transition override doesn't zero animation-delay,
+   so staggered items would be invisible for the delay window under
+   reduced motion. Cancel animation explicitly here. Modal/menu
+   transitions use transition-behavior: allow-discrete (not the old
+   visibility-delayed trick), so no extra safety override needed. */
 @media (prefers-reduced-motion: reduce) {
   .motion-enter,
-  .motion-enter-stagger > * {
+  .motion-enter-stagger > *,
+  main > section,
+  main > .hero,
+  main > .section {
     animation: none !important;
   }
   .ask-modal,
   .ask-modal.is-open,
   .kebab__menu,
-  .kebab__menu[hidden],
-  .kebab__menu:not([hidden]),
-  .dropdown-filter__menu,
-  .dropdown-filter__menu[hidden],
-  .dropdown-filter__menu:not([hidden]) {
+  .dropdown-filter__menu {
     transition: none !important;
   }
 }
