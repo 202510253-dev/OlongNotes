@@ -1,0 +1,1247 @@
+/* ============================================================
+   about.css
+   Page-scoped styles for /about.html. Inherits all design tokens
+   (--navy, --accent-blue, --goldenrod, --surface, --text-heading,
+   --gray-*, --radius-*, --shadow-*, --font-display, --font-body,
+   --ease) from public/css/style.css so light/dark + theme tokens
+   stay synchronized with the rest of the site.
+
+   All classes are prefixed `.about-*` to avoid colliding with the
+   global components the page reuses (nav, footer, cta__card, etc.).
+   ============================================================ */
+
+/* ---------- Section heading helpers (used by 4 sections) ---------- */
+.about-section__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 3vw + 0.5rem, 2.6rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-heading);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.about-section__subtitle {
+  font-size: 1.05rem;
+  color: var(--gray-600);
+  max-width: 60ch;
+  margin: 0.85rem auto 0;
+  line-height: 1.6;
+}
+
+.about-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.about-section__head .about-section__title {
+  text-align: left;
+  margin: 0;
+}
+
+.about-section__head .about-section__subtitle {
+  margin: 0.85rem 0 0;
+}
+
+/* ============================================================
+   HERO
+   - Full-bleed dark navy background so it always looks intentional
+     before the team photo lands.
+   - `.about-hero__media` is the bg-photo slot; once a real photo is
+     dropped at public/img/about-team.jpg, add:
+       background-image: url("../img/about-team.jpg");
+       background-size: cover;
+       background-position: center;
+   ============================================================ */
+.about-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(6rem, 12vh, 9rem) 0 clamp(4rem, 8vh, 6rem);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(47, 111, 237, 0.18), transparent 60%),
+    radial-gradient(900px 500px at 0% 100%, rgba(218, 165, 32, 0.10), transparent 60%),
+    linear-gradient(180deg, #0a1736 0%, #0b1f4d 100%);
+  color: var(--white);
+}
+
+.about-hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-color: transparent;
+  background-repeat: no-repeat;
+}
+
+.about-hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(10, 23, 54, 0.65) 0%, rgba(10, 23, 54, 0.85) 100%);
+}
+
+.about-hero__content {
+  max-width: 56rem;
+}
+
+.about-hero__content .breadcrumb {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.about-hero__content .breadcrumb a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+}
+
+.about-hero__content .breadcrumb a:hover {
+  color: var(--white);
+  text-decoration: underline;
+}
+
+.about-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw + 0.5rem, 3.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 1rem 0 1rem;
+  color: var(--white);
+}
+
+.about-hero__subtitle {
+  font-size: clamp(1.05rem, 1.4vw + 0.5rem, 1.3rem);
+  color: var(--goldenrod);
+  font-weight: 600;
+  margin: 0 0 1.25rem;
+}
+
+.about-hero__body {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 44rem;
+  margin: 0;
+}
+
+/* ============================================================
+   THREE-COLUMN INTRO
+   - Polished card grid replacing the draft's plain columns.
+   - Icons get a tinted circle that shifts on hover; cards lift
+     gently to read as interactive.
+   ============================================================ */
+.about-intro {
+  padding: clamp(4rem, 8vh, 6rem) 0;
+  background: var(--surface);
+}
+
+.about-intro__kicker {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  text-align: center;
+  margin: 0 0 2rem;
+}
+
+.about-intro__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.about-intro__card {
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 2rem 1.75rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+
+.about-intro__card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-blue);
+}
+
+.about-intro__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--navy-100);
+  color: var(--accent-blue);
+  margin: 0 auto 1.25rem;
+}
+
+.about-intro__card h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 0.75rem;
+}
+
+.about-intro__card p {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--gray-600);
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .about-intro__grid {
+    grid-template-columns: 1fr;
+    max-width: 32rem;
+    margin: 0 auto;
+  }
+}
+
+/* ============================================================
+   PULL QUOTE
+   - Slim section with a giant opening quotation mark + a navy
+     left rule.
+   ============================================================ */
+.about-quote {
+  padding: clamp(4rem, 8vh, 6rem) 0;
+  background:
+    linear-gradient(180deg, var(--surface) 0%, var(--gray-50) 100%);
+}
+
+.about-quote__inner {
+  max-width: 48rem;
+  text-align: center;
+  position: relative;
+}
+
+.about-quote__mark {
+  font-family: var(--font-display);
+  font-size: 6rem;
+  line-height: 0.5;
+  color: var(--accent-blue);
+  opacity: 0.25;
+  margin-bottom: 0.5rem;
+}
+
+.about-quote__text {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2.1rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--text-heading);
+  margin: 0 0 1.5rem;
+  position: relative;
+}
+
+.about-quote__text::before,
+.about-quote__text::after {
+  content: "";
+  display: inline-block;
+  width: 32px;
+  height: 2px;
+  background: var(--accent-blue);
+  vertical-align: middle;
+  margin: 0 0.75rem;
+  opacity: 0.6;
+}
+
+.about-quote__name {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.about-quote__role {
+  font-size: 0.92rem;
+  color: var(--gray-600);
+  margin: 0.25rem 0 0;
+}
+
+/* ============================================================
+   VALUES / TABBED BEHAVIORS
+   - Pure-CSS tabs (radio buttons + :checked sibling selector),
+     same technique as the draft, retuned to the repo's tokens.
+   - Active tab gets the accent-blue underline + bolder weight.
+   - Panels fade/slide in via opacity + transform on the active
+     panel only.
+   ============================================================ */
+.about-values {
+  padding: clamp(4rem, 8vh, 6rem) 0;
+  background: var(--surface);
+}
+
+.about-values__intro {
+  text-align: center;
+  max-width: 52rem;
+  margin: 0 auto 3rem;
+}
+
+.about-tabs {
+  --tab-gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.about-tabs__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.about-tabs__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--gray-200);
+  margin: 0 auto;
+  max-width: 56rem;
+}
+
+.about-tabs__nav label {
+  position: relative;
+  padding: 0.85rem 1.5rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: color 0.2s var(--ease);
+}
+
+.about-tabs__nav label::after {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent-blue);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s var(--ease);
+}
+
+.about-tabs__nav label:hover {
+  color: var(--text-heading);
+}
+
+#about-tab-1:checked ~ .about-tabs__nav label[for="about-tab-1"],
+#about-tab-2:checked ~ .about-tabs__nav label[for="about-tab-2"],
+#about-tab-3:checked ~ .about-tabs__nav label[for="about-tab-3"],
+#about-tab-4:checked ~ .about-tabs__nav label[for="about-tab-4"] {
+  color: var(--accent-blue);
+}
+
+#about-tab-1:checked ~ .about-tabs__nav label[for="about-tab-1"]::after,
+#about-tab-2:checked ~ .about-tabs__nav label[for="about-tab-2"]::after,
+#about-tab-3:checked ~ .about-tabs__nav label[for="about-tab-3"]::after,
+#about-tab-4:checked ~ .about-tabs__nav label[for="about-tab-4"]::after {
+  transform: scaleX(1);
+}
+
+.about-tabs__panels {
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.about-tabs__panel {
+  display: none;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 2.5rem;
+  animation: aboutTabFade 0.3s var(--ease);
+}
+
+#about-tab-1:checked ~ .about-tabs__panels .about-tabs__panel--1,
+#about-tab-2:checked ~ .about-tabs__panels .about-tabs__panel--2,
+#about-tab-3:checked ~ .about-tabs__panels .about-tabs__panel--3,
+#about-tab-4:checked ~ .about-tabs__panels .about-tabs__panel--4 {
+  display: block;
+}
+
+@keyframes aboutTabFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.about-tabs__panel h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 0.75rem;
+}
+
+.about-tabs__panel p {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--gray-600);
+  margin: 0 0 1.25rem;
+  max-width: 52ch;
+}
+
+.about-tabs__panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.about-tabs__panel li {
+  position: relative;
+  padding-left: 1.75rem;
+  font-size: 0.98rem;
+  color: var(--text-heading);
+  line-height: 1.5;
+}
+
+.about-tabs__panel li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+}
+
+/* ============================================================
+   ROADBLOCK CTA
+   - Reuses collegestu.jpg as a placeholder bg. Swap to a real
+     image by editing the background-image URL below.
+   ============================================================ */
+.about-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(4rem, 10vh, 7rem) 0;
+  color: var(--white);
+  text-align: center;
+}
+
+.about-cta__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: url("../img/collegestu.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.about-cta__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, rgba(11, 31, 77, 0.85) 0%, rgba(47, 111, 237, 0.75) 100%);
+}
+
+.about-cta__inner {
+  max-width: 42rem;
+}
+
+.about-cta__inner h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.5vw + 0.5rem, 2.6rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 1rem;
+  letter-spacing: -0.01em;
+}
+
+.about-cta__inner p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 2rem;
+}
+
+/* ============================================================
+   FEATURE BLOCKS (alternating)
+   - Two rows: Notes Repository, then Community Q&A (reverse).
+   - Image left, copy right (reverse on second row via flex order).
+   - Image gets a subtle goldenrod hairline accent that grows on
+     hover, matching the repo's polish language.
+   ============================================================ */
+.about-features {
+  padding: clamp(4rem, 8vh, 6rem) 0;
+  background: var(--gray-50);
+}
+
+.about-feature-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  margin-top: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.about-feature-block__visual {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+
+.about-feature-block__visual::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 3px;
+  background: var(--goldenrod);
+  transition: width 0.4s var(--ease);
+}
+
+.about-feature-block:hover .about-feature-block__visual::after {
+  width: 100%;
+}
+
+.about-feature-block__visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease);
+}
+
+.about-feature-block:hover .about-feature-block__visual img {
+  transform: scale(1.04);
+}
+
+.about-feature-block--reverse .about-feature-block__visual {
+  order: 2;
+}
+
+.about-feature-block--reverse .about-feature-block__copy {
+  order: 1;
+}
+
+.about-feature-block__eyebrow {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  margin-bottom: 0.75rem;
+}
+
+.about-feature-block__copy h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2vw + 0.5rem, 1.85rem);
+  font-weight: 700;
+  color: var(--text-heading);
+  line-height: 1.25;
+  margin: 0 0 0.85rem;
+}
+
+.about-feature-block__copy p {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--gray-600);
+  margin: 0 0 1.25rem;
+  max-width: 48ch;
+}
+
+.about-feature-block__bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.about-feature-block__bullets li {
+  position: relative;
+  padding-left: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--text-heading);
+}
+
+.about-feature-block__bullets li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--accent-blue);
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  .about-feature-block {
+    grid-template-columns: 1fr;
+  }
+  .about-feature-block--reverse .about-feature-block__visual {
+    order: 0;
+  }
+  .about-feature-block--reverse .about-feature-block__copy {
+    order: 1;
+  }
+}
+
+/* ============================================================
+   TEAM (5 cards)
+   - 5-up on desktop, 3-up on tablet, 2-up on small, 1-up on phone.
+   - Avatar is a tinted circle with initials (N1..N5); user uploads
+     real photos later, drop them into a <img> in place of the div.
+   ============================================================ */
+.about-team {
+  padding: clamp(4rem, 8vh, 6rem) 0;
+  background: var(--surface);
+}
+
+.about-team__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+/* ----- Universal card hover treatment (full effect) -----
+   -8px lift, gradient blue→goldenrod frame via ::before (no
+   overflow:hidden so the gradient ring renders), role pill flips
+   to filled, bio darkens to heading color. */
+.about-team__card {
+  position: relative;
+  background: var(--surface);
+  /* No `border` here — the gradient frame lives on ::before and
+     would otherwise fight a real border for the same pixel ring. */
+  border-radius: var(--radius-md);
+  padding: 1.75rem 1.25rem 1.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease);
+}
+
+/* Gradient border ring — sits behind the card background but in
+   its own paint layer (no isolation/z-index tricks, no clipping).
+   The ::before fills the card's full size; its mask punches out
+   the interior, leaving only a 1.5px gradient ring on the edge. */
+.about-team__card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--goldenrod) 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease);
+  pointer-events: none;
+}
+
+.about-team__card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 18px 40px rgba(11, 31, 77, 0.18),
+    0 6px 14px rgba(47, 111, 237, 0.10);
+}
+
+.about-team__card:hover::before {
+  opacity: 1;
+}
+
+/* The avatar sits on top of the ::before ring; everything inside
+   the card needs to be in its own stacking context to win that
+   paint order. We use `position: relative; z-index: 0` on direct
+   children via `.about-team__card > *`. */
+.about-team__card > * {
+  position: relative;
+  z-index: 0;
+}
+
+/* ----- Avatar ----- */
+.about-team__avatar {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, var(--navy-100), var(--accent-blue));
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(11, 31, 77, 0.18);
+  transition: box-shadow 0.4s var(--ease);
+}
+
+/* Halo ring that fades in around the avatar on hover.
+   Lives OUTSIDE the avatar's overflow:hidden (via negative inset)
+   so it's not clipped by the rounded mask. */
+.about-team__avatar::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-blue);
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.about-team__card:hover .about-team__avatar::after {
+  opacity: 0.6;
+  transform: scale(1);
+}
+
+.about-team__card:hover .about-team__avatar img {
+  transform: scale(1.08);
+  filter: brightness(1.05) contrast(1.05);
+}
+
+.about-team__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.5s var(--ease), filter 0.4s var(--ease);
+  position: relative;
+  z-index: 1;
+}
+
+/* ----- Name ----- */
+.about-team__card h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 0.5rem;
+  line-height: 1.25;
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-team__name {
+  position: relative;
+  display: inline-block;
+}
+
+.about-team__name-text {
+  display: inline-block;
+  position: relative;
+}
+
+/* ----- Role pill ----- */
+.about-team__role {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  background: var(--navy-100);
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  margin-bottom: 0.85rem;
+  transition: color 0.3s var(--ease), background-color 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.about-team__card:hover .about-team__role {
+  color: var(--white);
+  background: var(--accent-blue);
+  transform: translateY(-1px);
+}
+
+/* ----- Bio ----- */
+.about-team__bio {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--gray-600);
+  margin: 0;
+  transition: color 0.3s var(--ease);
+}
+
+.about-team__card:hover .about-team__bio {
+  color: var(--text-heading);
+}
+
+/* ============================================================
+   PER-CARD NAME ANIMATIONS
+   Each name uses data-text="..." on the <h3>; CSS pseudo-elements
+   + keyframes do the work. Hover-only, runs once per hover, settles.
+   Frontend/Designer cards need per-letter spans — added by the tiny
+   inline script at the end of about.html. If JS is off, those two
+   cards still show the name (just no animation).
+   ============================================================ */
+
+/* ----- 1. BACKEND — typewriter (your example) -----
+   The original name text shows at rest. On hover (or via
+   .is-intro from the scroll-in observer) the ::before overlay
+   re-types the name with a blinking caret. */
+.about-team__card--backend .about-team__name-text::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  color: var(--text-heading);
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid transparent;
+}
+
+.about-team__card--backend:hover .about-team__name-text::before {
+  animation:
+    aboutBackendType 1.4s steps(22, end) 0.05s forwards,
+    aboutCursorBlink 0.75s steps(2) 1.45s 2 forwards;
+}
+
+@keyframes aboutBackendType {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes aboutCursorBlink {
+  0%, 100% { border-color: var(--accent-blue); }
+  50%      { border-color: transparent; }
+}
+
+/* ----- 2. FRONTEND — karuta / glitch scramble per letter ----- */
+.about-team__card--frontend .about-team__name-text > span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.about-team__card--frontend:hover .about-team__name-text > span {
+  animation: aboutFrontendKaruta 0.55s var(--ease) forwards;
+}
+
+@keyframes aboutFrontendKaruta {
+  0%   { opacity: 0; transform: translateY(8px) skewX(-6deg); filter: blur(4px); }
+  35%  { opacity: 1; transform: translateY(-3px) skewX(2deg); filter: blur(0); }
+  60%  { transform: translateY(2px) skewX(-1deg); }
+  100% { opacity: 1; transform: translateY(0) skewX(0); filter: blur(0); }
+}
+
+/* ----- 3. UI/UX DESIGNER — pink flower bloom -----
+   The card adopts a pink gradient frame + pink halo + pink pill
+   on hover. The name gets a soft pink glow + a five-petal bloom
+   that scales in from the center of the name (CSS conic-gradient
+   petals rendered via stacked layer-mask tricks). No per-letter
+   splitter needed — the whole name animates as one block. */
+.about-team__card--designer .about-team__name-text {
+  position: relative;
+  color: var(--text-heading);
+  transition: color 0.45s var(--ease), text-shadow 0.55s var(--ease);
+}
+
+.about-team__card--designer:hover .about-team__name-text {
+  color: #c2185b;
+  text-shadow:
+    0 0 14px rgba(244, 143, 177, 0.55),
+    0 0 28px rgba(244, 143, 177, 0.35);
+}
+
+/* Flower bloom — five oval petals positioned around a center point
+   using stacked radial-gradient backgrounds. Each "petal" is a
+   soft pink oval offset from the center at 72° intervals (5 petals
+   = 360°/5). A small white-cream circle in the very center acts as
+   the flower core. Sits at opacity 0 at rest, scales + rotates in
+   on hover. The whole bloom sits behind the name (z-index: -1)
+   but in front of the card surface. */
+.about-team__card--designer .about-team__name-text::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%) scale(0.15) rotate(-18deg);
+  background:
+    /* cream flower core */
+    radial-gradient(circle at 50% 50%, #fff5f7 0 9%, transparent 11%),
+    /* petal 1 (top, 0°) */
+    radial-gradient(ellipse 16px 36px at 50% 28%, #f8bbd0 0 70%, transparent 72%),
+    /* petal 2 (top-right, 72°) */
+    radial-gradient(ellipse 16px 36px at 75% 44%, #f48fb1 0 70%, transparent 72%),
+    /* petal 3 (bottom-right, 144°) */
+    radial-gradient(ellipse 16px 36px at 66% 75%, #f8bbd0 0 70%, transparent 72%),
+    /* petal 4 (bottom-left, 216°) */
+    radial-gradient(ellipse 16px 36px at 34% 75%, #f48fb1 0 70%, transparent 72%),
+    /* petal 5 (top-left, 288°) */
+    radial-gradient(ellipse 16px 36px at 25% 44%, #f8bbd0 0 70%, transparent 72%);
+  filter: drop-shadow(0 0 14px rgba(244, 143, 177, 0.6));
+  opacity: 0;
+  transition: opacity 0.55s var(--ease);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.about-team__card--designer:hover .about-team__name-text::before {
+  animation: aboutFlowerBloom 0.95s var(--ease) forwards;
+}
+
+@keyframes aboutFlowerBloom {
+  0%   { opacity: 0;    transform: translate(-50%, -50%) scale(0.15) rotate(-18deg); }
+  55%  { opacity: 1;    transform: translate(-50%, -50%) scale(1.15) rotate(8deg); }
+  80%  { transform: translate(-50%, -50%) scale(0.96) rotate(-4deg); }
+  100% { opacity: 0.95; transform: translate(-50%, -50%) scale(1.0)  rotate(0deg); }
+}
+
+/* ----- Designer-specific pink accents for the universal hover ----- */
+.about-team__card--designer::before {
+  background: linear-gradient(135deg, #f06292 0%, #f8bbd0 50%, #ec407a 100%);
+}
+
+.about-team__card--designer:hover .about-team__avatar::after {
+  border-color: #ec407a;
+  opacity: 0.85;
+  box-shadow: 0 0 18px rgba(244, 143, 177, 0.55);
+}
+
+.about-team__card--designer:hover .about-team__role {
+  color: var(--white);
+  background: #ec407a;
+  box-shadow: 0 4px 12px rgba(236, 64, 122, 0.35);
+}
+
+/* ----- 4. DATABASE — typewriter + persistent gold caret -----
+   Like backend: text visible at rest, ::before overlay re-types
+   with a persistent gold caret on hover. */
+.about-team__card--database .about-team__name-text::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  color: var(--text-heading);
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid transparent;
+}
+
+.about-team__card--database:hover .about-team__name-text::before {
+  animation:
+    aboutDatabaseType 1.4s steps(18, end) 0.05s forwards,
+    aboutCursorBlinkGold 0.85s steps(2) 1.45s infinite;
+}
+
+@keyframes aboutDatabaseType {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes aboutCursorBlinkGold {
+  0%, 100% { border-color: var(--goldenrod); }
+  50%      { border-color: transparent; }
+}
+
+/* ----- 5. SECURITY — scan-in + blur-out reveal ----- */
+.about-team__card--security .about-team__name-text {
+  display: inline-block;
+  filter: blur(8px);
+  opacity: 0.55;
+  transition: filter 0.7s var(--ease), opacity 0.7s var(--ease);
+}
+
+.about-team__card--security:hover .about-team__name-text {
+  filter: blur(0);
+  opacity: 1;
+}
+
+.about-team__card--security .about-team__name::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(47, 111, 237, 0.45) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+}
+
+.about-team__card--security:hover .about-team__name::before {
+  animation: aboutSecurityScan 0.9s var(--ease) forwards;
+}
+
+@keyframes aboutSecurityScan {
+  0%   { left: -120%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: 160%; opacity: 0; }
+}
+
+/* ============================================================
+   SCROLL-IN INTRO (.is-intro added by JS IntersectionObserver)
+   Mirrors the per-card hover animation but fires on scroll-in,
+   once per card, with a 140ms stagger between cards. Hover
+   takes over once the intro finishes (same keyframes).
+   ============================================================ */
+
+/* 1. BACKEND intro — typewriter + caret, caret stays blinking
+   until hover ends (transparent border at rest). */
+.about-team__card--backend.is-intro .about-team__name-text::before {
+  animation:
+    aboutBackendType 1.4s steps(22, end) 0.15s forwards,
+    aboutCursorBlink 0.75s steps(2) 1.55s 2 forwards;
+}
+
+/* 2. FRONTEND intro — karuta on the per-letter spans */
+.about-team__card--frontend.is-intro .about-team__name-text > span {
+  animation: aboutFrontendKaruta 0.55s var(--ease) forwards;
+}
+
+/* 3. DESIGNER intro — bloom + pink glow */
+.about-team__card--designer.is-intro .about-team__name-text {
+  animation: aboutDesignerBloomIn 0.9s var(--ease) forwards;
+}
+
+.about-team__card--designer.is-intro .about-team__name-text::before {
+  animation: aboutFlowerBloom 0.9s var(--ease) forwards;
+}
+
+@keyframes aboutDesignerBloomIn {
+  0%   { color: var(--text-heading); text-shadow: none; }
+  60%  { color: #c2185b; text-shadow: 0 0 14px rgba(244, 143, 177, 0.55), 0 0 28px rgba(244, 143, 177, 0.35); }
+  100% { color: var(--text-heading); text-shadow: none; }
+}
+
+/* 4. DATABASE intro — typewriter + persistent gold caret */
+.about-team__card--database.is-intro .about-team__name-text::before {
+  animation:
+    aboutDatabaseType 1.4s steps(18, end) 0.15s forwards,
+    aboutCursorBlinkGold 0.85s steps(2) 1.55s infinite;
+}
+
+/* 5. SECURITY intro — blur sharpens + scan-line sweep */
+.about-team__card--security.is-intro .about-team__name-text {
+  animation: aboutSecurityReveal 0.8s var(--ease) forwards;
+}
+.about-team__card--security.is-intro .about-team__name::before {
+  animation: aboutSecurityScan 0.9s var(--ease) 0.2s forwards;
+}
+
+@keyframes aboutSecurityReveal {
+  from { filter: blur(8px); opacity: 0.55; }
+  to   { filter: blur(0);   opacity: 1; }
+}
+
+/* ---- Card lift-in stagger (one-time, in addition to name anim) ----
+   Progressive enhancement pattern:
+   - Cards are VISIBLE by default (no JS = no animation, cards show).
+   - The `<html>` gets `.js-anim` set by an inline head script the
+     instant the page parses (synchronous, before paint), so this
+     hidden-start state only applies when JS is available.
+   - The IntersectionObserver then adds `.is-intro` to each card
+     as the section scrolls into view, removing the hidden state. */
+.js-anim .about-team__card {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease),
+    opacity 0.6s var(--ease);
+}
+
+.js-anim .about-team__card.is-intro {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* When the user hovers a card that's been intro'd, the hover
+   transform (-8px) needs to win over the intro state. */
+.js-anim .about-team__card.is-intro:hover {
+  transform: translateY(-8px);
+}
+
+@media (max-width: 1024px) {
+  .about-team__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .about-team__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 460px) {
+  .about-team__grid {
+    grid-template-columns: 1fr;
+    max-width: 22rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ============================================================
+   FEATURED STORIES
+   - Big visual left, list of 3 right.
+   ============================================================ */
+.about-stories {
+  padding: clamp(4rem, 8vh, 6rem) 0;
+  background: var(--gray-50);
+}
+
+.about-stories__grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.about-stories__feature {
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.about-stories__visual {
+  flex: 1;
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(47, 111, 237, 0.18), transparent 60%),
+    linear-gradient(135deg, var(--navy-100), var(--gray-200));
+  min-height: 220px;
+  margin-bottom: 1.25rem;
+}
+
+.about-stories__feature h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 0.75rem;
+  line-height: 1.35;
+}
+
+.about-stories__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
+.about-stories__list li a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--text-heading);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.98rem;
+  transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.about-stories__list li a:hover {
+  transform: translateX(4px);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.about-stories__arrow {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--accent-blue);
+  white-space: nowrap;
+}
+
+.about-stories__note {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  margin: 2rem 0 0;
+  font-style: italic;
+}
+
+@media (max-width: 800px) {
+  .about-stories__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Dark mode adjustments — about-specific overrides on top of the
+   token system already defined in style.css.
+   ============================================================ */
+[data-theme="dark"] .about-hero {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(47, 111, 237, 0.22), transparent 60%),
+    radial-gradient(900px 500px at 0% 100%, rgba(218, 165, 32, 0.10), transparent 60%),
+    linear-gradient(180deg, #08122a 0%, #0a1736 100%);
+}
+
+[data-theme="dark"] .about-cta__overlay {
+  background: linear-gradient(135deg, rgba(8, 18, 42, 0.92) 0%, rgba(26, 49, 105, 0.85) 100%);
+}
+
+[data-theme="dark"] .about-tabs__nav {
+  border-bottom-color: var(--gray-200);
+}
+
+[data-theme="dark"] .about-quote {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--gray-50) 100%);
+}
+
+/* prefers-reduced-motion: disable all hover/scale transitions on
+   the about page only — matches the repo-wide standard. */
+@media (prefers-reduced-motion: reduce) {
+  .about-intro__card,
+  .about-team__card,
+  .about-feature-block__visual img,
+  .about-stories__list li a,
+  .about-tabs__nav label::after {
+    transition: none !important;
+  }
+}

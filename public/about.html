@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About - OlongNotes</title>
+  <meta name="description" content="OlongNotes is a free, community-driven notes-sharing and Q&A platform built by BSIT-2 students at Gordon College for students in Olongapo City." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/motion.css" />
+  <link rel="stylesheet" href="css/about.css" />
+  <script>document.documentElement.classList.add('js-anim');</script>
+  <script>(function(){try{var s=localStorage.getItem("olongnotes-theme");var d=s?s==="dark":window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;var src=d?"img/olongnotesW.png":"img/olongnotes.png";var reveal=function(){var n=document.querySelectorAll("img.site-logo");for(var i=0;i<n.length;i++){n[i].src=src}document.documentElement.setAttribute("data-logo-swapped","1")};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",reveal)}else{reveal()}}catch(e){}})();</script>
+</head>
+<!--
+  about.html: ROLE stays "viewer" as default (script.js resolves the
+  real role on load). Same body scaffolding as index.html so all the
+  global styles / modals / drawer / theme toggle apply unchanged.
+-->
+<body data-role="viewer">
+
+  <!-- ===================== AUTH MODAL (login / signup) =====================
+       Mirrored verbatim from index.html so the auth flow works without
+       a second copy. On about.html the modal is still viewer-only; the
+       viewer auto-prompt behavior is suppressed here because this page
+       is not the home entry point. -->
+  <div class="auth-modal" id="authModal" aria-hidden="true">
+    <div class="auth-modal__backdrop" id="authBackdrop"></div>
+
+    <div class="auth-card" id="authCard" role="dialog" aria-modal="true" aria-labelledby="authCardTitle">
+      <button class="auth-card__close" id="authClose" type="button" aria-label="Close and continue browsing">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+
+      <span id="authCardTitle" class="sr-only">Log in or create an OlongNotes account</span>
+
+      <div class="auth-form-container auth-form-container--signin">
+        <form class="auth-form" novalidate>
+          <h2>Log In</h2>
+          <div class="auth-form__socials">
+            <button type="button" class="auth-social" aria-label="Continue with Facebook">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 8.5h2.5V5.3S15 5 13.4 5C10.9 5 9.2 6.5 9.2 9.2v2.3H6.5V15h2.7v6h3.1v-6h2.6l.4-3.5h-3v-1.9c0-.9.3-1.1 1.2-1.1Z"/></svg>
+            </button>
+            <button type="button" class="auth-social" aria-label="Continue with Google">
+              <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.7 3.9-5.5 3.9-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.9 1.5l2.6-2.5C16.9 3.3 14.7 2.3 12 2.3 6.9 2.3 2.7 6.5 2.7 11.6S6.9 21 12 21c5.6 0 8.6-3.9 8.6-8.4 0-.6-.1-1.1-.1-1.5H12Z"/><path fill="none" d="M0 0h24v24H0z"/></svg>
+            </button>
+            <button type="button" class="auth-social" aria-label="Continue with Discord">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7.5 16.5c3 1.4 6 1.4 9 0M8.3 8.3c-2.4.6-3.6 2-4 4.3-.4 2.7 0 4.6 1.7 6 1 .8 2.1 1.2 2.1 1.2l.8-1.3M15.7 8.3c2.4.6 3.6 2 4 4.3.4 2.7 0 4.6-1.7 6-1 .8-2.1 1.2-2.1 1.2l-.8-1.3"/><circle cx="9.3" cy="13.2" r="1.1"/><circle cx="14.7" cy="13.2" r="1.1"/></svg>
+            </button>
+          </div>
+          <span class="auth-form__divider">or log in with your email</span>
+          <label class="auth-field">
+            <span class="sr-only">Email</span>
+            <input type="email" placeholder="Email" autocomplete="email" required />
+          </label>
+          <label class="auth-field">
+            <span class="sr-only">Password</span>
+            <input type="password" placeholder="Password" autocomplete="current-password" required />
+          </label>
+          <a href="#" class="auth-form__forgot">Forgot your password?</a>
+          <button type="submit" class="btn btn--primary btn--block">Log In</button>
+        </form>
+      </div>
+
+      <div class="auth-form-container auth-form-container--signup">
+        <form class="auth-form" novalidate>
+          <h2>Create Account</h2>
+          <div class="auth-form__socials">
+            <button type="button" class="auth-social" aria-label="Sign up with Facebook">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 8.5h2.5V5.3S15 5 13.4 5C10.9 5 9.2 6.5 9.2 9.2v2.3H6.5V15h2.7v6h3.1v-6h2.6l.4-3.5h-3v-1.9c0-.9.3-1.1 1.2-1.1Z"/></svg>
+            </button>
+            <button type="button" class="auth-social" aria-label="Sign up with Google">
+              <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.7 3.9-5.5 3.9-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.9 1.5l2.6-2.5C16.9 3.3 14.7 2.3 12 2.3 6.9 2.3 2.7 6.5 2.7 11.6S6.9 21 12 21c5.6 0 8.6-3.9 8.6-8.4 0-.6-.1-1.1-.1-1.5H12Z"/><path fill="none" d="M0 0h24v24H0z"/></svg>
+            </button>
+            <button type="button" class="auth-social" aria-label="Sign up with Discord">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7.5 16.5c3 1.4 6 1.4 9 0M8.3 8.3c-2.4.6-3.6 2-4 4.3-.4 2.7 0 4.6 1.7 6 1 .8 2.1 1.2 2.1 1.2l.8-1.3M15.7 8.3c2.4.6 3.6 2 4 4.3.4 2.7 0 4.6-1.7 6-1 .8-2.1 1.2-2.1 1.2l-.8-1.3"/><circle cx="9.3" cy="13.2" r="1.1"/><circle cx="14.7" cy="13.2" r="1.1"/></svg>
+            </button>
+          </div>
+          <span class="auth-form__divider">or use your school email</span>
+          <label class="auth-field">
+            <span class="sr-only">Full name</span>
+            <input type="text" placeholder="Full name" autocomplete="name" required />
+          </label>
+          <label class="auth-field">
+            <span class="sr-only">Email</span>
+            <input type="email" placeholder="Email" autocomplete="email" required />
+          </label>
+          <label class="auth-field">
+            <span class="sr-only">Password</span>
+            <input type="password" placeholder="Password" autocomplete="new-password" required />
+          </label>
+          <button type="submit" class="btn btn--primary btn--block">Sign Up</button>
+        </form>
+      </div>
+
+      <div class="auth-overlay-container" id="authOverlayContainer">
+        <div class="auth-overlay">
+          <div class="auth-overlay-panel auth-overlay-panel--left">
+            <h3>Already One of Us?</h3>
+            <p>Sign back in and your saved notes, follows, and uploads are right where you left them.</p>
+            <button type="button" class="btn btn--ghost auth-overlay__btn" id="authGoSignIn">Log In</button>
+          </div>
+          <div class="auth-overlay-panel auth-overlay-panel--right">
+            <h3>New to OlongNotes?</h3>
+            <p>Make a free account to bookmark reviewers, follow your subjects, and start sharing your own notes.</p>
+            <button type="button" class="btn btn--ghost auth-overlay__btn" id="authGoSignUp">Sign Up</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SIDE DRAWER MENU ===================== -->
+  <div class="side-drawer" id="sideDrawer" aria-hidden="true">
+    <div class="side-drawer__backdrop" id="sideDrawerBackdrop"></div>
+
+    <nav class="side-drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+      <div class="side-drawer__head">
+        <a href="index.html" class="side-drawer__brand">
+          <img class="site-logo" src="img/olongnotes.png" alt="" />
+          <span class="side-drawer__brand-title">OlongNotes</span>
+        </a>
+        <button class="side-drawer__close" id="sideDrawerClose" type="button" aria-label="Close menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+        </button>
+      </div>
+
+      <div class="side-drawer__nav">
+        <a class="side-drawer__link" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5a1 1 0 0 0 1 1h3.5v-6h3v6H17a1 1 0 0 0 1-1V10"/></svg>
+          Home
+        </a>
+        <a class="side-drawer__link" href="community.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          Q&amp;A
+        </a>
+        <a class="side-drawer__link" href="schools.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
+          Schools
+        </a>
+        <a class="side-drawer__link" href="subjects.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+          Subjects
+        </a>
+        <a class="side-drawer__link" href="contributors.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8" r="3"/><path d="M2.5 19c1-3 3.3-4.6 6-4.6s5 1.6 6 4.6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.3 14.6c2.1.3 3.7 1.7 4.4 3.9"/></svg>
+          Top Contributors
+        </a>
+        <a class="side-drawer__link" data-requires-auth href="recent-activities.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+          Recent Activities
+        </a>
+        <a class="side-drawer__link side-drawer__link--active" href="about.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          About
+        </a>
+      </div>
+
+      <div class="side-drawer__theme">
+        <span class="side-drawer__theme-label">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+          Dark Mode
+        </span>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme" aria-pressed="false">
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <span class="theme-toggle__track"><span class="theme-toggle__thumb"></span></span>
+          <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+        </button>
+      </div>
+
+      <div class="side-drawer__foot">© 2026 OlongNotes</div>
+    </nav>
+  </div>
+
+  <!-- ===================== NAVIGATION BAR =====================
+       Same component as index.html. The About link points to about.html
+       (was "#about" on the home page) and is marked aria-current="page"
+       so the active state shows. -->
+  <header class="navbar" id="navbar">
+    <div class="navbar__inner container">
+      <button class="navbar__burger" id="navBurger" type="button" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <a href="index.html" class="navbar__brand">
+        <span class="navbar__logo" aria-hidden="true">
+          <img class="site-logo" src="img/olongnotes.png" alt="OlongNotes logo" />
+        </span>
+        <span class="navbar__title-group">
+          <span class="navbar__title">OlongNotes</span>
+          <span class="navbar__tagline">Knowledge shared, Future shared</span>
+        </span>
+      </a>
+
+      <nav class="navbar__links" id="navLinks" aria-label="Primary">
+        <a href="community.html">Q&amp;A</a>
+        <a href="schools.html">Schools</a>
+        <a href="subjects.html">Subjects</a>
+        <a href="about.html" aria-current="page" class="is-active">About</a>
+      </nav>
+
+      <div class="navbar__search">
+        <label class="navbar__search-field">
+          <span class="sr-only">Search notes, schools, and subjects</span>
+          <input type="search" placeholder="Search" aria-label="Search notes, schools, subjects" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </label>
+      </div>
+
+      <div class="navbar__actions">
+        <div class="navbar__guest-actions" id="navGuestActions">
+          <button class="btn btn--outline btn--sm" type="button" id="navLoginBtn">Log In</button>
+          <button class="btn btn--primary btn--sm" type="button" id="navSignupBtn">Sign Up</button>
+        </div>
+
+        <button class="navbar__profile-chip" id="navProfileChip" type="button" hidden>
+          <span class="navbar__profile-avatar" id="navProfileAvatar" aria-hidden="true">JD</span>
+          <span class="navbar__profile-name" id="navProfileName">Juan Dela Cruz</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="siteMain">
+
+    <!-- ===================== HERO =====================
+         Team/group photo slot is intentionally left empty — drop the
+         real photo at public/img/about-team.jpg and add `background-image:
+         url("img/about-team.jpg")` to `.about-hero__media` in about.css.
+         Until then, the section shows the same navy gradient as the rest
+         of the site's dark surfaces so it never looks broken. -->
+    <section class="about-hero">
+      <div class="about-hero__media" aria-hidden="true"></div>
+      <div class="about-hero__overlay" aria-hidden="true"></div>
+
+      <div class="about-hero__content container">
+        <p class="breadcrumb">
+          <a href="index.html">Home</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">About</span>
+        </p>
+
+        <span class="hero__eyebrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
+          About OlongNotes
+        </span>
+
+        <h1 class="about-hero__title">Built by students. For students. From Olongapo.</h1>
+        <p class="about-hero__subtitle">Our purpose is driven by the students who use it.</p>
+        <p class="about-hero__body">
+          OlongNotes is a free, community-driven notes-sharing and Q&amp;A platform for students in
+          Olongapo City, built by four BSIT-2 students at Gordon College who wanted knowledge to
+          outlive a school year, not disappear at the end of one.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== THREE-COLUMN INTRO ===================== -->
+    <section class="about-intro">
+      <div class="container">
+        <p class="about-intro__kicker">Why We Built This</p>
+        <div class="about-intro__grid">
+          <article class="about-intro__card">
+            <span class="about-intro__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 4l9 6-9 6-9-6Z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/></svg>
+            </span>
+            <h3>Teacher-Subject Mismatch</h3>
+            <p>Many teachers in Olongapo are assigned subjects outside their specialization due to staffing shortages. Students feel the gap, and we built a way to help bridge it.</p>
+          </article>
+
+          <article class="about-intro__card">
+            <span class="about-intro__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+            </span>
+            <h3>Learning Gaps Left Behind</h3>
+            <p>Students are promoted without mastering prior grade material, creating compounding gaps over time. OlongNotes gives every student access to notes from those who already passed the same subject.</p>
+          </article>
+
+          <article class="about-intro__card">
+            <span class="about-intro__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+            </span>
+            <h3>Knowledge That Disappears</h3>
+            <p>A graduating student's reviewers and notes vanish the moment they leave. We built a place where that effort stays, searchable, shareable, and useful forever.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PULL QUOTE ===================== -->
+    <section class="about-quote">
+      <div class="container about-quote__inner">
+        <div class="about-quote__mark" aria-hidden="true">&ldquo;</div>
+        <p class="about-quote__text">Knowledge shared today becomes success for tomorrow.</p>
+        <p class="about-quote__name">Elijah Josh V. Opriasa</p>
+        <p class="about-quote__role">Project Lead, OlongNotes</p>
+      </div>
+    </section>
+
+    <!-- ===================== VALUES (intro + tabbed behaviors) ===================== -->
+    <section class="about-values">
+      <div class="container">
+        <div class="about-values__intro">
+          <h2 class="about-section__title">OlongNotes is shaped by what students actually need.</h2>
+          <p class="about-section__subtitle">We set four things we wanted this platform to stand for. They define how we built it, and how the community around it should feel.</p>
+        </div>
+
+        <div class="about-tabs">
+          <input type="radio" name="about-value-tab" id="about-tab-1" class="about-tabs__input" checked>
+          <input type="radio" name="about-value-tab" id="about-tab-2" class="about-tabs__input">
+          <input type="radio" name="about-value-tab" id="about-tab-3" class="about-tabs__input">
+          <input type="radio" name="about-value-tab" id="about-tab-4" class="about-tabs__input">
+
+          <div class="about-tabs__nav" role="tablist">
+            <label for="about-tab-1" role="tab">Accessibility</label>
+            <label for="about-tab-2" role="tab">Collaboration</label>
+            <label for="about-tab-3" role="tab">Trust</label>
+            <label for="about-tab-4" role="tab">Community</label>
+          </div>
+
+          <div class="about-tabs__panels">
+            <div class="about-tabs__panel about-tabs__panel--1">
+              <h3>Accessibility</h3>
+              <p>Every student should be able to learn from the ones who came before them, without paying for it.</p>
+              <ul>
+                <li>Free to browse</li>
+                <li>Free to upload</li>
+                <li>No hidden paywalls</li>
+              </ul>
+            </div>
+
+            <div class="about-tabs__panel about-tabs__panel--2">
+              <h3>Collaboration</h3>
+              <p>Seniors already did the work of understanding a subject. That effort shouldn't disappear after finals.</p>
+              <ul>
+                <li>Notes shared across grade levels</li>
+                <li>Answers from real peers</li>
+                <li>Everyone teaches, everyone learns</li>
+              </ul>
+            </div>
+
+            <div class="about-tabs__panel about-tabs__panel--3">
+              <h3>Trust</h3>
+              <p>A place to ask the question you're embarrassed to ask in class, without judgment.</p>
+              <ul>
+                <li>Respectful by default</li>
+                <li>Organized, not chaotic</li>
+                <li>Built for real students, not bots</li>
+              </ul>
+            </div>
+
+            <div class="about-tabs__panel about-tabs__panel--4">
+              <h3>Community</h3>
+              <p>Not a generic platform. Every school, subject, and grade level in Olongapo City, in one place.</p>
+              <ul>
+                <li>Local first</li>
+                <li>Built by Gordon College students</li>
+                <li>Made for our own city</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ROADBLOCK CTA =====================
+         Reuses the existing img/collegestu.jpg as a placeholder until a
+         dedicated image lands. "Browse Notes" links to notes.html (the
+         All Files page), not index.html. -->
+    <section class="about-cta">
+      <div class="about-cta__bg" aria-hidden="true"></div>
+      <div class="about-cta__overlay" aria-hidden="true"></div>
+
+      <div class="container about-cta__inner">
+        <h2>Together, we're building something worth sharing.</h2>
+        <p>Every note you upload becomes a resource for someone who needs it next. That's the whole idea.</p>
+        <a class="btn btn--accent-blue btn--lg" href="notes.html">Browse Notes</a>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURE BLOCKS =====================
+         Two alternating rows. Notes Repository uses img/notes-studying.jpg,
+         Community Q&A uses img/qa-raising-hand.jpg. The "See All Subjects"
+         link points to subjects.html, not index.html. Learn More is a real
+         <a> element with a working href (#) — placeholder destination for
+         the spec, structurally live. -->
+    <section class="about-features">
+      <div class="container">
+        <div class="about-section__head">
+          <h2 class="about-section__title">Built for how students in Olongapo actually study.</h2>
+          <a href="subjects.html" class="link-arrow">See All Subjects <span aria-hidden="true">&rarr;</span></a>
+        </div>
+
+        <article class="about-feature-block">
+          <div class="about-feature-block__visual">
+            <img src="img/notes-studying.jpg" alt="Students studying together at a desk" />
+          </div>
+          <div class="about-feature-block__copy">
+            <span class="about-feature-block__eyebrow">Notes Repository</span>
+            <h3>One shared library for every school in the city.</h3>
+            <p>Upload and browse class notes, reviewers, and problem sets organized by school, grade level, and subject. What a senior understood becomes a head start for a junior.</p>
+            <ul class="about-feature-block__bullets">
+              <li>78 schools in Olongapo City</li>
+              <li>Organized by grade &amp; subject</li>
+              <li>Free. Always.</li>
+            </ul>
+            <a href="notes.html" class="link-arrow">Learn More <span aria-hidden="true">&rarr;</span></a>
+          </div>
+        </article>
+
+        <article class="about-feature-block about-feature-block--reverse">
+          <div class="about-feature-block__visual">
+            <img src="img/qa-raising-hand.jpg" alt="Student raising hand to ask a question" />
+          </div>
+          <div class="about-feature-block__copy">
+            <span class="about-feature-block__eyebrow">Community Q&amp;A</span>
+            <h3>Ask the question. Get an answer from someone who gets it.</h3>
+            <p>Every school has its own quirks, its own teachers, its own gaps. OlongNotes lets students ask and answer questions specific to their own school, grade, and subject.</p>
+            <ul class="about-feature-block__bullets">
+              <li>Peer-to-peer answers</li>
+              <li>School-specific threads</li>
+              <li>No account needed to browse</li>
+            </ul>
+            <a href="community.html" class="link-arrow">Learn More <span aria-hidden="true">&rarr;</span></a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===================== TEAM (5 cards, BSIT-2) ===================== -->
+    <section class="about-team">
+      <div class="container">
+        <div class="about-values__intro">
+          <h2 class="about-section__title">The Team Behind OlongNotes</h2>
+          <p class="about-section__subtitle">Four second-year BSIT students from Gordon College, Olongapo City, building for our community.</p>
+        </div>
+
+        <div class="about-team__grid">
+          <article class="about-team__card about-team__card--backend">
+            <div class="about-team__avatar"><img src="img/ELIJAH%20JOSH%20V.%20OPRIASA-Backend%20Developer.png" alt="Photo of Elijah Josh V. Opriasa" /></div>
+            <h3 class="about-team__name" data-text="Elijah Josh V. Opriasa"><span class="about-team__name-text">Elijah Josh V. Opriasa</span></h3>
+            <span class="about-team__role">Backend Developer</span>
+            <p class="about-team__bio">BSIT-2 student at Gordon College, Olongapo City.</p>
+          </article>
+
+          <article class="about-team__card about-team__card--frontend">
+            <div class="about-team__avatar"><img src="img/LAWRENZE%20JAMES%20ROJAS-Frontend%20Developer.png" alt="Photo of Lawrenze James Rojas" /></div>
+            <h3 class="about-team__name" data-text="Lawrenze James Rojas"><span class="about-team__name-text">Lawrenze James Rojas</span></h3>
+            <span class="about-team__role">Frontend Developer</span>
+            <p class="about-team__bio">BSIT-2 student at Gordon College, Olongapo City.</p>
+          </article>
+
+          <article class="about-team__card about-team__card--designer">
+            <div class="about-team__avatar"><img src="img/JUSTINE%20CLAIRE%20CINCO-UIUX%20Designerpng" alt="Photo of Justine Claire Cinco" /></div>
+            <h3 class="about-team__name" data-text="Justine Claire Cinco"><span class="about-team__name-text">Justine Claire Cinco</span></h3>
+            <span class="about-team__role">UI/UX Designer</span>
+            <p class="about-team__bio">BSIT-2 student at Gordon College, Olongapo City.</p>
+          </article>
+
+          <article class="about-team__card about-team__card--database">
+            <div class="about-team__avatar"><img src="img/DENVER%20JOHN%20CARIAS-Database%20%26%20Documentation.png" alt="Photo of Denver John Carias" /></div>
+            <h3 class="about-team__name" data-text="Denver John Carias"><span class="about-team__name-text">Denver John Carias</span></h3>
+            <span class="about-team__role">Database &amp; Documentation</span>
+            <p class="about-team__bio">BSIT-2 student at Gordon College, Olongapo City.</p>
+          </article>
+
+          <article class="about-team__card about-team__card--security">
+            <div class="about-team__avatar"><img src="img/KRISTOPHER%20ANGELO%20EDORA-Security%20%26%20Maintenance.png" alt="Photo of Kristopher Angelo Edora" /></div>
+            <h3 class="about-team__name" data-text="Kristopher Angelo Edora"><span class="about-team__name-text">Kristopher Angelo Edora</span></h3>
+            <span class="about-team__role">Security &amp; Maintenance</span>
+            <p class="about-team__bio">BSIT-2 student at Gordon College, Olongapo City. </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURED STORIES =====================
+         Visual block left empty as a placeholder; drop the real
+         image into about.css via `.about-stories__visual` background. -->
+    <section class="about-stories">
+      <div class="container">
+        <div class="about-section__head">
+          <h2 class="about-section__title">Featured Stories</h2>
+        </div>
+
+        <div class="about-stories__grid">
+          <article class="about-stories__feature">
+            <div class="about-stories__visual" aria-hidden="true"></div>
+            <h3>From a classroom problem to a hackathon build</h3>
+            <a href="#" class="link-arrow">Read More <span aria-hidden="true">&rarr;</span></a>
+          </article>
+
+          <ul class="about-stories__list">
+            <li><a href="#">Why we started with Olongapo City <span class="about-stories__arrow" aria-hidden="true">Read more &rarr;</span></a></li>
+            <li><a href="#">Meet the team behind OlongNotes <span class="about-stories__arrow" aria-hidden="true">Read more &rarr;</span></a></li>
+            <li><a href="#">What's next for OlongNotes <span class="about-stories__arrow" aria-hidden="true">Read more &rarr;</span></a></li>
+          </ul>
+        </div>
+
+        <p class="about-stories__note">Story links are placeholders, to be swapped in for real posts once they're written.</p>
+      </div>
+    </section>
+
+    <!-- ===================== CTA BANNER (real upload-notes button) =====================
+         Same button as index.html. script.js wires #ctaContribBtn based on
+         the resolved role: viewer -> auth modal in signup mode, user ->
+         the Upload Notes modal (verified/admin/limited only). -->
+    <section class="section cta">
+      <div class="container">
+        <div class="cta__card">
+          <div class="cta__text">
+            <span class="cta__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0B1F4D" stroke-width="1.8"><path d="M12 6.5C10.5 5 8 4.2 5.5 4.2v13.6c2.5 0 5 .8 6.5 2.3 1.5-1.5 4-2.3 6.5-2.3V4.2c-2.5 0-5 .8-6.5 2.3Z"/><path d="M12 6.5v13.6"/></svg>
+            </span>
+            <div>
+              <h2>Share what you know. Help someone grow.</h2>
+              <p>Your notes today can be their guide tomorrow.</p>
+            </div>
+          </div>
+          <button class="btn btn--goldenrod btn--lg" type="button" id="ctaContribBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 19h16"/></svg>
+            Upload Notes
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== FOOTER =====================
+       Reuses the exact footer markup from index.html so styling, links,
+       and socials stay consistent. -->
+  <footer class="footer" id="about-footer">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__brand navbar__brand--footer">
+          <span class="navbar__logo" aria-hidden="true">
+            <img class="site-logo" src="img/olongnotes.png" alt="OlongNotes logo" />
+          </span>
+          <span class="navbar__title-group">
+            <span class="navbar__title navbar__title--light">OlongNotes</span>
+            <span class="navbar__tagline navbar__tagline--light">Knowledge shared, Future shared</span>
+          </span>
+        </a>
+        <p class="footer__desc">A free notes repository for students in Olongapo City.</p>
+      </div>
+
+      <div class="footer__col">
+        <h4>Explore</h4>
+        <a href="notes.html">Browse Notes</a>
+        <a href="schools.html">Schools</a>
+        <a href="subjects.html">Subjects</a>
+        <a href="about.html">About Us</a>
+      </div>
+
+      <div class="footer__col">
+        <h4>Support</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Guidelines</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+
+      <div class="footer__col footer__col--connect">
+        <h4>Stay Connected</h4>
+        <p>Follow us for updates and announcements.</p>
+        <div class="footer__socials">
+          <a href="#" aria-label="Facebook"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 8.5h2.5V5.3S15 5 13.4 5C10.9 5 9.2 6.5 9.2 9.2v2.3H6.5V15h2.7v6h3.1v-6h2.6l.4-3.5h-3v-1.9c0-.9.3-1.1 1.2-1.1Z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17.2" cy="6.8" r="1"/></svg></a>
+          <a href="#" aria-label="Discord"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7.5 16.5c3 1.4 6 1.4 9 0M8.3 8.3c-2.4.6-3.6 2-4 4.3-.4 2.7 0 4.6 1.7 6 1 .8 2.1 1.2 2.1 1.2l.8-1.3M15.7 8.3c2.4.6 3.6 2 4 4.3.4 2.7 0 4.6-1.7 6-1 .8-2.1 1.2-2.1 1.2l-.8-1.3"/><circle cx="9.3" cy="13.2" r="1.1"/><circle cx="14.7" cy="13.2" r="1.1"/></svg></a>
+          <a href="#" aria-label="Email"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m4.5 6.5 7.5 6 7.5-6"/></svg></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>© 2026 OlongNotes. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-drawer.js"></script>
+  <script src="js/file-type-icons.js"></script>
+  <script src="js/community-shared.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    /* Team card name splitter — Frontend (karuta) needs per-letter
+       <span>s so each character can have its own animation-delay via
+       :nth-child(). Designer (flower bloom) animates the whole name
+       as one block, so it stays as plain text. No-op if JS is
+       disabled; cards just show the name without the animation. */
+    (function () {
+      document.querySelectorAll('.about-team__card--frontend .about-team__name-text').forEach(function (el) {
+        var text = el.textContent;
+        el.textContent = '';
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < text.length; i++) {
+          var ch = text.charAt(i);
+          var span = document.createElement('span');
+          span.textContent = ch === ' ' ? ' ' : ch;
+          span.style.animationDelay = (i * 30) + 'ms';
+          frag.appendChild(span);
+        }
+        el.appendChild(frag);
+      });
+    })();
+
+    /* Scroll-in intro — fires each card's name animation once when
+       the team section first becomes visible (IntersectionObserver,
+       threshold 0.15). After the intro plays, hover behaves normally
+       (the same keyframes re-fire on :hover). Implemented by adding
+       a `.is-intro` class on each card; CSS rules above use that
+       class to trigger the same animations scroll-in-only-cards use.
+
+       Belt-and-suspenders:
+       1. If IO is supported, observe and react.
+       2. Also fire the intro after a 600ms timeout regardless — covers
+          browsers where IO silently fails or the section is in the
+          viewport at first paint (Chrome pre-paint, headless, etc.). */
+    (function () {
+      var team = document.querySelector('.about-team__grid');
+      if (!team) return;
+
+      var cards = team.querySelectorAll('.about-team__card');
+      var perCardStagger = 140; /* ms between each card's intro start */
+      var fired = false;
+
+      function fireIntro() {
+        if (fired) return;
+        fired = true;
+        cards.forEach(function (card, idx) {
+          setTimeout(function () {
+            card.classList.add('is-intro');
+          }, idx * perCardStagger);
+        });
+      }
+
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              fireIntro();
+              io.disconnect();
+            }
+          });
+        }, { threshold: 0.15 });
+        io.observe(team);
+      } else {
+        fireIntro();
+        return;
+      }
+
+      /* Guarantee: even if IO never fires, the intro plays 600ms
+         after script load. Keeps cards from staying in initial
+         state if some IO/browser edge case prevents observation. */
+      setTimeout(fireIntro, 600);
+    })();
+  </script>
+</body>
+</html>
