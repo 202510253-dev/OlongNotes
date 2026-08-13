@@ -49,13 +49,13 @@
 
 /* ============================================================
    HERO
-   - Full-bleed dark navy background so it always looks intentional
-     before the team photo lands.
-   - `.about-hero__media` is the bg-photo slot; once a real photo is
-     dropped at public/img/about-team.jpg, add:
-       background-image: url("../img/about-team.jpg");
-       background-size: cover;
-       background-position: center;
+   - Full-bleed banner pattern. Team photo is the section background
+     (`.about-hero__media`) and the text content sits in
+     `.about-hero__content` on top of `.about-hero__overlay`.
+   - Overlay is a directional navy tint — heavier on the left where
+     the headline sits, much lighter on the right so the team stays
+     visible. The bottom stop softens the cutoff into the next
+     section.
    ============================================================ */
 .about-hero {
   position: relative;
@@ -74,14 +74,31 @@
   inset: 0;
   z-index: -2;
   background-color: transparent;
+  background-image: url("../img/Banner.jpg");
   background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .about-hero__overlay {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(180deg, rgba(10, 23, 54, 0.65) 0%, rgba(10, 23, 54, 0.85) 100%);
+  /* Directional tint: dark on the left for headline legibility,
+     much lighter on the right so the team's faces stay visible.
+     The bottom stop softens the cutoff into the next section. */
+  background: linear-gradient(
+    90deg,
+    rgba(10, 23, 54, 0.78) 0%,
+    rgba(10, 23, 54, 0.42) 35%,
+    rgba(10, 23, 54, 0.18) 60%,
+    rgba(10, 23, 54, 0.04) 100%
+  ),
+  linear-gradient(
+    180deg,
+    rgba(10, 23, 54, 0) 60%,
+    rgba(10, 23, 54, 0.55) 100%
+  );
 }
 
 .about-hero__content {
@@ -89,23 +106,42 @@
 }
 
 .about-hero__content .breadcrumb {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  display: inline-flex;
   align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  margin: 0 0 1.5rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .about-hero__content .breadcrumb a {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
+  transition: color 0.2s var(--ease);
 }
 
 .about-hero__content .breadcrumb a:hover {
   color: var(--white);
   text-decoration: underline;
+}
+
+.about-hero__content .breadcrumb .breadcrumb-sep {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+}
+
+.about-hero__content .breadcrumb [aria-current="page"] {
+  color: var(--white);
+  font-weight: 600;
 }
 
 .about-hero__title {
@@ -150,7 +186,7 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--accent-blue);
+  color: var(--goldenrod);
   text-align: center;
   margin: 0 0 2rem;
 }
@@ -837,6 +873,114 @@
   50%      { border-color: transparent; }
 }
 
+/* ----- 1b. BACKEND — commander overlay (layers on the typewriter) -----
+   The backend card has a typewriter on the name; this is the
+   "commander" treatment that runs on the rest of the card.
+   - Card: tactical clip-path corners, deeper goldenrod glow.
+   - Avatar: scanline overlay (::before) + universal halo ring
+     recolored to goldenrod on hover (the universal ::after ring
+     is repurposed via override, not duplicated).
+   - Name: monospace + goldenrod + authority glow.
+   - Role pill: flips to a gold-black "COMMAND" tag.
+   The two effects don't fight: the typewriter animates the
+   .about-team__name-text::before overlay copy; the commander
+   restyles the underlying .about-team__name-text element. */
+
+/* Card frame: clip-pathed corners + goldenrod gradient ring.
+   The universal .about-team__card::before is the ring; we
+   recolor it here. */
+.about-team__card--backend::before {
+  background: linear-gradient(135deg, var(--goldenrod) 0%, #b8860b 50%, var(--goldenrod) 100%);
+}
+
+.about-team__card--backend:hover {
+  transform: translateY(-10px);
+  box-shadow:
+    0 24px 48px rgba(11, 31, 77, 0.22),
+    0 8px 20px rgba(218, 165, 32, 0.22);
+  clip-path: polygon(
+    14px 0,
+    100% 0,
+    100% calc(100% - 14px),
+    calc(100% - 14px) 100%,
+    0 100%,
+    0 14px
+  );
+}
+
+/* Avatar halo: recolor the universal ::after ring to goldenrod. */
+.about-team__card--backend:hover .about-team__avatar::after {
+  border-color: var(--goldenrod);
+  box-shadow: 0 0 14px rgba(218, 165, 32, 0.45);
+}
+
+/* Avatar scanline overlay (::before on the avatar — slot is free). */
+.about-team__card--backend .about-team__avatar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(218, 165, 32, 0) 0px,
+      rgba(218, 165, 32, 0) 3px,
+      rgba(218, 165, 32, 0.22) 3px,
+      rgba(218, 165, 32, 0.22) 4px
+    );
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.about-team__card--backend:hover .about-team__avatar::before {
+  opacity: 1;
+}
+
+/* Name: monospace + goldenrod + authority glow on hover.
+   The typewriter ::before overlay is still animating on top, so
+   the live name text only peeks through briefly during the
+   1.4s typewriter. After the typewriter settles, the overlay
+   covers the live text. */
+.about-team__card--backend .about-team__name-text {
+  transition:
+    color 0.4s var(--ease),
+    text-shadow 0.4s var(--ease),
+    letter-spacing 0.4s var(--ease);
+}
+
+.about-team__card--backend:hover .about-team__name-text {
+  color: var(--goldenrod);
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", ui-monospace, monospace;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 0 6px rgba(218, 165, 32, 0.45),
+    0 0 18px rgba(218, 165, 32, 0.22);
+}
+
+/* Role pill: from default to a tactical "COMMAND" gold tag on hover.
+   The universal .about-team__role already handles rest state — we
+   only need the hover override. */
+.about-team__card--backend:hover .about-team__role {
+  background: var(--goldenrod);
+  color: #0a1736;
+  border: 1px solid var(--goldenrod);
+  box-shadow: 0 0 0 1px rgba(10, 23, 54, 0.4), 0 6px 14px rgba(218, 165, 32, 0.30);
+  letter-spacing: 0.22em;
+  font-weight: 700;
+}
+
+/* Bio: subtle gold-tinted text on hover to match the commander tone */
+.about-team__card--backend:hover .about-team__bio {
+  color: rgba(218, 165, 32, 0.85);
+}
+
+/* Bio: subtle gold-tinted text on hover to match the commander tone */
+.about-team__card--backend:hover .about-team__bio {
+  color: rgba(218, 165, 32, 0.85);
+}
+
 /* ----- 2. FRONTEND — karuta / glitch scramble per letter ----- */
 .about-team__card--frontend .about-team__name-text > span {
   display: inline-block;
@@ -956,6 +1100,189 @@
   animation:
     aboutDatabaseType 1.4s steps(18, end) 0.05s forwards,
     aboutCursorBlinkGold 0.85s steps(2) 1.45s infinite;
+}
+
+/* ----- 4b. DATABASE — data-stream overlay (layers on the typewriter) -----
+   The database card has a typewriter on the name; this is the
+   "data stream / many data" treatment that runs on the rest of the card.
+   - Card ring: recolored to cyan (database = data, not warm blue)
+   - Card surface: faint vertical + horizontal cyan grid lines
+     (::after on the card) simulating schema columns.
+   - Avatar: rotating cyan scan arc (::before on avatar) + cyan halo.
+   - Name: monospace + cyan + glow + 6 small data fragments
+     ({ }, 01, [], →) that pulse into view around the name.
+   - Role pill: flips to a cyan-black "DATA" tag.
+   - Bio: cyan-tinted text.
+   Slot map (no collisions):
+     __card::before      = universal ring (recolored)
+     __card::after       = NEW — schema grid
+     __avatar::after     = universal halo (recolored)
+     __avatar::before    = NEW — rotating scan arc
+     __name-text::before = typewriter (untouched)
+     __name-text::after  = NEW — data fragments
+*/
+
+/* Card ring: cyan gradient + cyan glow on hover */
+.about-team__card--database::before {
+  background: linear-gradient(135deg, #22D3EE 0%, #0EA5E9 50%, #22D3EE 100%);
+}
+
+.about-team__card--database:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 24px 48px rgba(11, 31, 77, 0.22),
+    0 8px 20px rgba(34, 211, 238, 0.22);
+}
+
+/* Card surface: schema grid overlay. Faint cyan lines (4 vertical,
+   3 horizontal) drawn on the card body via stacked repeating
+   linear gradients. Sits behind the card's text content (z-index: -1
+   won't work because __card::after has no z-index by default, but
+   the card's children have z-index: 0 from the universal rule). */
+.about-team__card--database::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent calc(20% - 1px),
+      rgba(34, 211, 238, 0.12) calc(20% - 1px),
+      rgba(34, 211, 238, 0.12) 20%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent calc(33.33% - 1px),
+      rgba(34, 211, 238, 0.10) calc(33.33% - 1px),
+      rgba(34, 211, 238, 0.10) 33.33%
+    );
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about-team__card--database:hover::after {
+  opacity: 1;
+}
+
+/* Avatar halo: recolor to cyan */
+.about-team__card--database:hover .about-team__avatar::after {
+  border-color: #22D3EE;
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.5);
+}
+
+/* Avatar: rotating scan arc. A 270° cyan arc that rotates around
+   the avatar on hover. Implemented as a conic-gradient with a
+   transparent majority and a 90° cyan slice, then rotated. */
+.about-team__card--database .about-team__avatar::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(34, 211, 238, 0.85) 30deg,
+    rgba(34, 211, 238, 0.4) 60deg,
+    transparent 120deg,
+    transparent 360deg
+  );
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+  pointer-events: none;
+  z-index: -1;
+  animation: aboutDatabaseScanSpin 2.4s linear infinite;
+  animation-play-state: paused;
+}
+
+.about-team__card--database:hover .about-team__avatar::before {
+  opacity: 0.85;
+  animation-play-state: running;
+}
+
+@keyframes aboutDatabaseScanSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Name: monospace + cyan + glow */
+.about-team__card--database .about-team__name-text {
+  position: relative;
+  transition:
+    color 0.4s var(--ease),
+    text-shadow 0.4s var(--ease);
+}
+
+.about-team__card--database:hover .about-team__name-text {
+  color: #0EA5E9;
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", ui-monospace, monospace;
+  text-shadow:
+    0 0 6px rgba(34, 211, 238, 0.45),
+    0 0 18px rgba(34, 211, 238, 0.22);
+}
+
+/* Data fragments around the name: 6 small monospace symbols
+   (curly braces, binary, brackets, arrow) that pulse into view
+   around the name on hover. Positioned absolutely on the
+   __name-text (which is position: relative). Drawn as a single
+   ::after that uses multiple stacked backgrounds — each is a
+   small monospace glyph rendered via a background-image SVG
+   data URI, faded in via animation. The whole thing sits behind
+   the name (z-index: -1) so it doesn't crowd the text. */
+.about-team__card--database .about-team__name-text::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 240px;
+  height: 100px;
+  transform: translate(-50%, -50%);
+  background:
+    /* fragment 1: top-left, "{ }" */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='14' viewBox='0 0 22 14'><text x='0' y='12' font-family='monospace' font-size='14' font-weight='700' fill='%2322D3EE'>{ }</text></svg>") top left / 22px 14px no-repeat,
+    /* fragment 2: top-right, "01" */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='14' viewBox='0 0 18 14'><text x='0' y='12' font-family='monospace' font-size='14' font-weight='700' fill='%230EA5E9'>01</text></svg>") top right / 18px 14px no-repeat,
+    /* fragment 3: middle-left, "[]" */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='14' viewBox='0 0 20 14'><text x='0' y='12' font-family='monospace' font-size='14' font-weight='700' fill='%2322D3EE'>[ ]</text></svg>") center left / 20px 14px no-repeat,
+    /* fragment 4: middle-right, "→" */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='14' viewBox='0 0 16 14'><text x='0' y='12' font-family='monospace' font-size='14' font-weight='700' fill='%230EA5E9'>&rarr;</text></svg>") center right / 16px 14px no-repeat,
+    /* fragment 5: bottom-left, "db" */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='14' viewBox='0 0 24 14'><text x='0' y='12' font-family='monospace' font-size='14' font-weight='700' fill='%2322D3EE'>db</text></svg>") bottom left / 24px 14px no-repeat,
+    /* fragment 6: bottom-right, "{" */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'><text x='0' y='12' font-family='monospace' font-size='14' font-weight='700' fill='%230EA5E9'>{</text></svg>") bottom right / 14px 14px no-repeat;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease) 0.1s;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.about-team__card--database:hover .about-team__name-text::after {
+  opacity: 0.85;
+  animation: aboutDatabaseFragmentsPulse 2.4s ease-in-out 0.4s infinite;
+}
+
+@keyframes aboutDatabaseFragmentsPulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 0.4; }
+}
+
+/* Role pill: cyan-black "DATA" tag on hover */
+.about-team__card--database:hover .about-team__role {
+  background: #0EA5E9;
+  color: #061826;
+  border: 1px solid #22D3EE;
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.4), 0 6px 14px rgba(34, 211, 238, 0.30);
+  letter-spacing: 0.22em;
+  font-weight: 700;
+}
+
+/* Bio: cyan-tinted text on hover */
+.about-team__card--database:hover .about-team__bio {
+  color: rgba(14, 165, 233, 0.85);
 }
 
 @keyframes aboutDatabaseType {
@@ -1142,9 +1469,10 @@
 .about-stories__visual {
   flex: 1;
   border-radius: var(--radius-md);
-  background:
-    radial-gradient(circle at 30% 30%, rgba(47, 111, 237, 0.18), transparent 60%),
-    linear-gradient(135deg, var(--navy-100), var(--gray-200));
+  background-image: url("../img/Featured-stories.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   min-height: 220px;
   margin-bottom: 1.25rem;
 }

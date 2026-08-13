@@ -227,11 +227,12 @@
   <main id="siteMain">
 
     <!-- ===================== HERO =====================
-         Team/group photo slot is intentionally left empty — drop the
-         real photo at public/img/about-team.jpg and add `background-image:
-         url("img/about-team.jpg")` to `.about-hero__media` in about.css.
-         Until then, the section shows the same navy gradient as the rest
-         of the site's dark surfaces so it never looks broken. -->
+         Full-bleed banner: team photo lives in `.about-hero__media`
+         (background-image in css/about.css → public/img/Banner.jpg).
+         `.about-hero__overlay` adds a directional navy tint — heavier
+         on the left for headline legibility, lighter on the right
+         so the team stays visible. The bottom stop softens the
+         cutoff into the next section. -->
     <section class="about-hero">
       <div class="about-hero__media" aria-hidden="true"></div>
       <div class="about-hero__overlay" aria-hidden="true"></div>
@@ -239,7 +240,9 @@
       <div class="about-hero__content container">
         <p class="breadcrumb">
           <a href="index.html">Home</a>
-          <span aria-hidden="true">/</span>
+          <span class="breadcrumb-sep" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          </span>
           <span aria-current="page">About</span>
         </p>
 
@@ -255,11 +258,17 @@
           Olongapo City, built by four BSIT-2 students at Gordon College who wanted knowledge to
           outlive a school year, not disappear at the end of one.
         </p>
+        <div class="hero__actions">
+          <a class="btn btn--goldenrod" href="#about-team">
+            Meet the Team
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
       </div>
     </section>
 
     <!-- ===================== THREE-COLUMN INTRO ===================== -->
-    <section class="about-intro">
+    <section class="about-intro" id="about-intro">
       <div class="container">
         <p class="about-intro__kicker">Why We Built This</p>
         <div class="about-intro__grid">
@@ -396,7 +405,7 @@
 
         <article class="about-feature-block">
           <div class="about-feature-block__visual">
-            <img src="img/notes-studying.jpg" alt="Students studying together at a desk" />
+            <img src="img/studying-picts.jpg" alt="Students studying together at a desk" />
           </div>
           <div class="about-feature-block__copy">
             <span class="about-feature-block__eyebrow">Notes Repository</span>
@@ -431,7 +440,7 @@
     </section>
 
     <!-- ===================== TEAM (5 cards, BSIT-2) ===================== -->
-    <section class="about-team">
+    <section class="about-team" id="about-team">
       <div class="container">
         <div class="about-values__intro">
           <h2 class="about-section__title">The Team Behind OlongNotes</h2>
