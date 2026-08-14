@@ -585,7 +585,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (schoolId) params.set('school_id', schoolId);
     if (grade) params.set('grade_level', grade);
-    if (subjectId) params.set('subject_id', subjectId);
+    // subject-notes.html reads `?subject=<id>` (matches the Subjects
+    // catalog link in subjects.js:202). The earlier `subject_id` key
+    // silently failed because the destination page never picked it up.
+    if (subjectId) params.set('subject', subjectId);
 
     window.location.href = `subject-notes.html?${params.toString()}`;
   });
@@ -923,7 +926,7 @@ const noteFileDropText = document.getElementById('noteFileDropText');
     if (uploadCollegeFields) uploadCollegeFields.style.display = 'none';
     resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
     resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
-    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+    resetSelect(uploadCollegeMajorSelect, 'Select a subject', true);
     if (uploadSubjectField) uploadSubjectField.style.display = '';
     await loadSubjectsForLevel(mapGradeLevelToEducationLevel(gradeLevel));
   };
@@ -935,7 +938,7 @@ const noteFileDropText = document.getElementById('noteFileDropText');
     if (uploadCollegeFields) uploadCollegeFields.style.display = 'none';
     resetSelect(uploadCollegeCategorySelect, 'Select a department', true);
     resetSelect(uploadCollegeProgramSelect, 'Select a program', true);
-    resetSelect(uploadCollegeMajorSelect, 'Select a major (optional)', true);
+    resetSelect(uploadCollegeMajorSelect, 'Select a subject', true);
     if (uploadSchoolSelect) {
       uploadSchoolSelect.value = '';
       uploadSchoolSelect.refreshCselect?.();
@@ -1032,14 +1035,30 @@ const openUploadModal = async () => {
       // Subject is optional for K-10/SHS.
       let subjectId = '';
       if (gradeLevel === 'College') {
-        const programOrMajorId = uploadCollegeMajorSelect?.value || uploadCollegeProgramSelect?.value || '';
-        if (programOrMajorId && window.OlongNotes?.api) {
-          try {
-            const subjects = await window.OlongNotes.api.get(`/subjects?program_id=${encodeURIComponent(programOrMajorId)}`);
-            const list = Array.isArray(subjects) ? subjects : [];
-            if (list.length > 0) subjectId = String(list[0].id);
-          } catch (_) {
-            // Lookup failed — fall through with empty subjectId.
+        // The College cascade can populate the Major dropdown with either
+        //   - child majors (programs with parent_program_id = <program>)
+        //   - subjects (when the program has no child majors)
+        // Each <option> carries a data-kind tag from createCollegeCascade
+        // so we can tell which kind the user picked. If the user picked
+        // a subject, use it directly. If they picked a major (or left
+        // the dropdown empty), resolve to the first subject under the
+        // program/major.
+        const majorVal = uploadCollegeMajorSelect?.value || '';
+        const majorKind = uploadCollegeMajorSelect
+          ?.querySelector(`option[value="${CSS.escape(majorVal)}"]`)
+          ?.dataset?.kind || '';
+        if (majorKind === 'subject' && majorVal) {
+          subjectId = String(majorVal);
+        } else {
+          const lookupId = majorVal || uploadCollegeProgramSelect?.value || '';
+          if (lookupId && window.OlongNotes?.api) {
+            try {
+              const subjects = await window.OlongNotes.api.get(`/subjects?program_id=${encodeURIComponent(lookupId)}`);
+              const list = Array.isArray(subjects) ? subjects : [];
+              if (list.length > 0) subjectId = String(list[0].id);
+            } catch (_) {
+              // Lookup failed — fall through with empty subjectId.
+            }
           }
         }
       } else {

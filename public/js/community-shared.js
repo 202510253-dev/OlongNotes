@@ -58,7 +58,14 @@
     items.forEach((item) => {
       const value = item[valueKey];
       const label = item[labelKey] || item[valueKey] || 'Unnamed';
-      select.appendChild(createOption(value, label));
+      const opt = createOption(value, label);
+      // Tag each option with its kind ("major" | "subject") so the
+      // submit handler can tell what was picked. This is set by
+      // callers via item.__kind when needed; defaults to "subject"
+      // because most of the upload cascade values are subject ids.
+      if (item.__kind) opt.dataset.kind = item.__kind;
+      else opt.dataset.kind = 'subject';
+      select.appendChild(opt);
     });
   }
 
@@ -309,22 +316,34 @@
     async function loadMajorsForProgram(programId) {
       if (!majorSelect) return { ok: true, count: 0 };
       if (!programId) {
-        resetSelect(majorSelect, 'Select a major (optional)', true);
+        resetSelect(majorSelect, 'Select a subject', true);
         return { ok: true, count: 0 };
       }
-      resetSelect(majorSelect, 'Loading majors…', true);
+      resetSelect(majorSelect, 'Loading…', true);
       try {
         const data = await api.get(`/programs?parent_program_id=${encodeURIComponent(programId)}`);
         const majors = Array.isArray(data) ? data : [];
         if (majors.length) {
+          // Program has child majors (e.g. BSCE → Structural). Use them.
+          majors.forEach((m) => { m.__kind = 'major'; });
           populateAll(majors, 'id', 'program_name', 'Select a major (optional)', majorSelect);
-        } else {
-          resetSelect(majorSelect, 'No majors available', true);
+          return { ok: true, count: majors.length, kind: 'majors' };
         }
-        return { ok: true, count: majors.length };
+        // No child majors in the `programs` table — fall back to the
+        // subjects linked to this program (e.g. BSIT → Computer
+        // Programming 1, Database Management Systems, …). This is the
+        // common case for most BS / AB programs in the seed data.
+        const subjectsData = await api.get(`/subjects?program_id=${encodeURIComponent(programId)}`);
+        const subjects = Array.isArray(subjectsData) ? subjectsData : [];
+        if (subjects.length) {
+          populateAll(subjects, 'id', 'subject_name', 'Select a subject', majorSelect);
+          return { ok: true, count: subjects.length, kind: 'subjects' };
+        }
+        resetSelect(majorSelect, 'No majors or subjects available', true);
+        return { ok: true, count: 0, kind: 'none' };
       } catch (err) {
-        resetSelect(majorSelect, 'Unable to load majors', true);
-        if (options.onError) options.onError('Could not load majors. Please try again.');
+        resetSelect(majorSelect, 'Unable to load options', true);
+        if (options.onError) options.onError('Could not load majors or subjects. Please try again.');
         console.error('[shared] Failed to load majors for program', programId, err);
         return { ok: false };
       }
