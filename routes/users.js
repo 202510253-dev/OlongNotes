@@ -22,7 +22,7 @@ const router = express.Router()
 const { supabase, supabaseAdmin } = require('../supabase')
 const auth = require('../middleware/auth')
 const multer = require('multer')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 
 // ---------- Constants ----------
 const PROFILE_SELECT =
@@ -191,7 +191,7 @@ async function uploadProfileImageRoute(req, res, { folder, column }) {
   }
 
   const ext = file.originalname.split('.').pop().toLowerCase()
-  const fileName = `${uuidv4()}.${ext}`
+  const fileName = `${randomUUID()}.${ext}`
   const filePath = `${folder}/${req.user.id}/${fileName}`
 
   try {

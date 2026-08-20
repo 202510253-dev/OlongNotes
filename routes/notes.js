@@ -4,7 +4,7 @@ const { supabase, supabaseAdmin } = require('../supabase')
 const { body, validationResult } = require('express-validator')
 const auth = require('../middleware/auth')
 const multer = require('multer')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 const { writeActivity } = require('./activities')
 
 // Status constants — single source of truth
@@ -228,7 +228,7 @@ router.post('/', auth, (req, res, next) => {
   // All files in this request share one group_id so grouped uploads can
   // be stitched back together (e.g. a multi-page image set). Single
   // uploads still get a group_id (harmless) so the schema stays uniform.
-  const groupId = uuidv4()
+  const groupId = randomUUID()
 
   try {
     const createdNotes = []
@@ -239,7 +239,7 @@ router.post('/', auth, (req, res, next) => {
     // and the DB rows already inserted so no orphans remain.
     for (const file of files) {
       const fileExt = file.originalname.split('.').pop()
-      const fileName = `${uuidv4()}.${fileExt}`
+      const fileName = `${randomUUID()}.${fileExt}`
       const filePath = `notes/${fileName}`
 
       const { error: storageError } = await supabase.storage
