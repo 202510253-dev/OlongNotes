@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
+const path = require('path')
 require('dotenv').config()
 
 const app = express()
@@ -37,7 +38,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Serve frontend files
-app.use(express.static('public'))
+app.use(express.static(path.join(__dirname, 'public')))
 
 // Routes
 const authRoutes = require('./routes/auth')
@@ -104,7 +105,11 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 3000
-app.listen(PORT, () => {
-    console.log(`OlongNotes running on http://localhost:${PORT}`)
-})
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`OlongNotes running on http://localhost:${PORT}`)
+    })
+}
+
+module.exports = app
 
