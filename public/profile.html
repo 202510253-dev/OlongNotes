@@ -190,7 +190,7 @@
           <nav class="profile-tabs" aria-label="Profile sections">
             <button class="profile-tab is-active" type="button" data-tab="overview">Overview</button>
             <button class="profile-tab" type="button" data-tab="notes">My Notes</button>
-            <button class="profile-tab" type="button" data-tab="bookmarks">Bookmarks</button>
+            <button class="profile-tab" type="button" data-tab="bookmarks" id="bookmarksTabBtn">Bookmarks</button>
             <button class="profile-tab" type="button" data-tab="activity">Activity</button>
             <button class="profile-tab" type="button" data-tab="settings" id="settingsTabBtn">Settings</button>
           </nav>
@@ -265,7 +265,7 @@
             <div class="profile-panel" data-panel="bookmarks" hidden>
               <label class="search-field search-field--wide">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                <input type="search" placeholder="Search bookmarks..." aria-label="Search bookmarks" />
+                <input type="search" id="bookmarksSearch" placeholder="Search bookmarks..." aria-label="Search bookmarks" />
               </label>
 
               <div class="notes-layout bookmarks-layout">
@@ -273,87 +273,39 @@
                 <!-- Main column -->
                 <div class="bookmarks-main">
 
-                  <!-- Favorite Notes / Bookmarks -->
+                  <!-- Favorite Notes / Bookmarks — live from
+                       GET /api/users/me/bookmarks (profile-page.js). -->
                   <div class="profile-card bookmark-card">
                     <div class="bookmarks-card-header">
                       <h2 class="profile-card__title bookmark-card__title">Favorite Notes / Bookmarks</h2>
-                      <!-- TODO: replace no-op href with a real "view all bookmarks" page once it exists -->
-                      <a class="bookmarks-view-all" href="#">View All</a>
+                      <button class="bookmarks-view-all" type="button" id="bookmarksViewAll" hidden>View All</button>
                     </div>
-
-                    <!-- TODO: replace with GET /api/users/me/bookmarks once Phase 6.2 ships -->
-                    <ul class="bookmark-list">
-                      <li class="bookmark-row">
-                        <span class="bookmark-row__icon" style="--c:#2F6FED;" aria-hidden="true">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z"/></svg>
-                        </span>
-                        <div class="bookmark-row__body">
-                          <p class="bookmark-row__title">General Mathematics</p>
-                          <p class="bookmark-row__sub">Limits and Continuity</p>
-                        </div>
-                        <!-- TODO: wire the ⋮ menu to a real dropdown (no-op for now) -->
-                        <button class="bookmark-row__menu" type="button" aria-label="Bookmark options">⋮</button>
-                      </li>
-
-                      <li class="bookmark-row">
-                        <span class="bookmark-row__icon" style="--c:#22B87A;" aria-hidden="true">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z"/></svg>
-                        </span>
-                        <div class="bookmark-row__body">
-                          <p class="bookmark-row__title">Computer Science 2</p>
-                          <p class="bookmark-row__sub">Data Structures and Algorithms</p>
-                        </div>
-                        <button class="bookmark-row__menu" type="button" aria-label="Bookmark options">⋮</button>
-                      </li>
-
-                      <li class="bookmark-row">
-                        <span class="bookmark-row__icon" style="--c:#9B5DE5;" aria-hidden="true">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z"/></svg>
-                        </span>
-                        <div class="bookmark-row__body">
-                          <p class="bookmark-row__title">Filipino</p>
-                          <p class="bookmark-row__sub">Panitikan — Maikling Kwento</p>
-                        </div>
-                        <button class="bookmark-row__menu" type="button" aria-label="Bookmark options">⋮</button>
-                      </li>
+                    <ul class="bookmark-list" id="bookmarksList">
+                      <li class="profile-card__empty">Loading bookmarks…</li>
                     </ul>
                   </div>
 
-                  <!-- My Collection -->
+                  <!-- My Collection — live from GET /api/users/me/folders.
+                       "+ Add Collection" POSTs a new folder row. -->
                   <div class="profile-card bookmark-card">
                     <div class="bookmarks-card-header">
                       <h2 class="profile-card__title bookmark-card__title">My Collection</h2>
                       <div class="bookmarks-card-actions">
-                        <!-- TODO: wire "+ Add Collection" to open a new-collection modal (no-op for now) -->
-                        <button class="btn btn--primary btn--sm" type="button">+ Add Collection</button>
-                        <!-- TODO: replace no-op href with a real "view all collections" page once it exists -->
-                        <a class="bookmarks-view-all" href="#">View All</a>
+                        <button class="btn btn--primary btn--sm" type="button" id="addCollectionBtn">+ Add Collection</button>
+                        <button class="bookmarks-view-all" type="button" id="collectionsViewAll" hidden>View All</button>
                       </div>
                     </div>
 
-                    <!-- TODO: replace with GET /api/users/me/folders once Phase 6.2 ships -->
-                    <ul class="bookmark-list">
-                      <li class="bookmark-row">
-                        <span class="bookmark-row__icon" style="--c:#2F6FED;" aria-hidden="true">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11Z"/></svg>
-                        </span>
-                        <div class="bookmark-row__body">
-                          <p class="bookmark-row__title">Math Reviewers</p>
-                          <p class="bookmark-row__sub">12 notes</p>
-                        </div>
-                        <button class="bookmark-row__menu" type="button" aria-label="Collection options">⋮</button>
-                      </li>
+                    <form class="collection-create-form" id="collectionCreateForm" hidden>
+                      <input type="text" id="collectionNameInput" maxlength="60" placeholder="Collection name, e.g. Math Reviewers" aria-label="Collection name" />
+                      <div class="collection-create-form__actions">
+                        <button class="btn btn--primary btn--sm" type="submit" id="collectionCreateBtn">Create</button>
+                        <button class="btn btn--outline btn--sm" type="button" id="collectionCancelBtn">Cancel</button>
+                      </div>
+                    </form>
 
-                      <li class="bookmark-row">
-                        <span class="bookmark-row__icon" style="--c:#9B5DE5;" aria-hidden="true">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11Z"/></svg>
-                        </span>
-                        <div class="bookmark-row__body">
-                          <p class="bookmark-row__title">Visual Art Reviewers</p>
-                          <p class="bookmark-row__sub">8 notes</p>
-                        </div>
-                        <button class="bookmark-row__menu" type="button" aria-label="Collection options">⋮</button>
-                      </li>
+                    <ul class="bookmark-list" id="collectionsList">
+                      <li class="profile-card__empty">Loading collections…</li>
                     </ul>
                   </div>
 
@@ -362,65 +314,24 @@
                 <!-- Right column -->
                 <div class="bookmarks-sidebar">
 
-                  <!-- Categories (reuses the same sidebar card style as the My Notes tab) -->
+                  <!-- Categories — counts derived from live bookmarks/folders. -->
                   <div class="profile-card">
                     <h2 class="profile-card__title">Categories</h2>
-                    <!-- TODO: replace counts with GET /api/users/me/bookmarks + /folders once Phase 6.2 ships -->
                     <ul class="category-list category-list--static">
-                      <li><span>All Bookmarks</span><span>124</span></li>
-                      <li><span>All Collections</span><span>8</span></li>
-                      <li><span>All Tags</span><span>32</span></li>
+                      <li><span>All Bookmarks</span><span id="catAllBookmarks">0</span></li>
+                      <li><span>All Collections</span><span id="catAllCollections">0</span></li>
+                      <li><span>Subjects</span><span id="catSubjects">0</span></li>
                     </ul>
                   </div>
 
-                  <!-- Bookmark Activity -->
+                  <!-- Bookmark Activity — live from
+                       GET /api/activities?type=note_bookmarked. -->
                   <div class="profile-card bookmark-card">
                     <h2 class="profile-card__title bookmark-card__title">Bookmark Activity</h2>
-
-                    <!-- TODO: replace with GET /api/users/me/bookmark-activity once Phase 6.2 ships -->
-                    <div class="bookmark-activity">
-                      <div class="activity-item">
-                        <span class="activity-item__icon" style="--c:#9B5DE5;" aria-hidden="true">
-                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z"/></svg>
-                        </span>
-                        <div class="activity-item__main">
-                          <div class="activity-item__top">
-                            <h4>You bookmarked a new note</h4>
-                            <span class="activity-item__date">June 7, 10:50 PM</span>
-                          </div>
-                          <p class="activity-item__desc">Computer Science 2</p>
-                        </div>
-                      </div>
-
-                      <div class="activity-item">
-                        <span class="activity-item__icon" style="--c:#2F6FED;" aria-hidden="true">
-                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="m6 10 6 6 6-6"/><path d="M4 20h16"/></svg>
-                        </span>
-                        <div class="activity-item__main">
-                          <div class="activity-item__top">
-                            <h4>Download count updated</h4>
-                            <span class="activity-item__date">June 6, 9:12 AM</span>
-                          </div>
-                          <p class="activity-item__desc">General Mathematics now has 1.2K downloads</p>
-                        </div>
-                      </div>
-
-                      <div class="activity-item">
-                        <span class="activity-item__icon" style="--c:#E8546B;" aria-hidden="true">
-                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21l8.84-8.61a5.5 5.5 0 0 0 0-7.78Z"/></svg>
-                        </span>
-                        <div class="activity-item__main">
-                          <div class="activity-item__top">
-                            <h4>You received a like</h4>
-                            <span class="activity-item__date">June 5, 4:30 PM</span>
-                          </div>
-                          <p class="activity-item__desc">Your Filipino reviewer was liked</p>
-                        </div>
-                      </div>
+                    <div class="bookmark-activity" id="bookmarkActivityList">
+                      <p class="profile-card__empty">Loading activity…</p>
                     </div>
-
-                    <!-- TODO: replace no-op href with a real "view all activity" page once it exists -->
-                    <a class="bookmark-activity__link" href="#">View All Activity</a>
+                    <a class="bookmark-activity__link" href="recent-activities.html">View All Activity</a>
                   </div>
 
                 </div>
@@ -443,62 +354,273 @@
               <div class="settings-layout">
                 <div class="profile-card settings-nav-card">
                   <ul class="settings-nav">
-                    <li><a href="#" class="is-active" data-settings-nav="profile">Profile Settings</a></li>
-                    <li><a href="#" data-settings-nav="privacy">Privacy</a></li>
-                    <li><a href="#" data-settings-nav="notifications">Notifications</a></li>
-                    <li><a href="#" data-settings-nav="security">Security</a></li>
+                    <li><a href="#" class="is-active" data-settings-nav="profile">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>
+                      Profile Settings</a></li>
+                    <li><a href="#" data-settings-nav="privacy">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-3.4 7-9V6l-7-3-7 3v7c0 5.6 7 9 7 9Z"/><path d="m9 11.5 2 2 4-4"/></svg>
+                      Privacy</a></li>
+                    <li><a href="#" data-settings-nav="notifications">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+                      Notifications</a></li>
+                    <li><a href="#" data-settings-nav="security">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.2"/></svg>
+                      Security</a></li>
                   </ul>
                 </div>
 
-                <div class="profile-card">
-                  <h2 class="profile-card__title">Profile Settings</h2>
-                  <p class="settings-subtitle">Manage your personal information. Saved changes update your profile instantly.</p>
+                <div class="settings-content">
 
-                  <div id="settingsMessage" class="settings-message" hidden></div>
+                  <!-- PROFILE SETTINGS -->
+                  <div class="profile-card" data-settings-panel="profile">
+                    <h2 class="profile-card__title">Profile Settings</h2>
+                    <p class="settings-subtitle">Manage your personal information. Saved changes update your profile instantly.</p>
 
-                  <form class="settings-form" id="settingsForm" autocomplete="off">
-                    <div class="settings-field">
-                      <label for="settingsUsername">Username</label>
-                      <input type="text" id="settingsUsername" name="username" maxlength="20" />
+                    <div id="settingsMessage" class="settings-message" hidden></div>
+
+                    <form class="settings-form" id="settingsForm" autocomplete="off">
+                      <div class="settings-field">
+                        <label for="settingsUsername">Username</label>
+                        <input type="text" id="settingsUsername" name="username" maxlength="20" />
+                      </div>
+
+                      <div class="settings-field">
+                        <label for="settingsBio">Bio</label>
+                        <textarea id="settingsBio" name="bio" rows="3" maxlength="500"></textarea>
+                        <span class="settings-field__hint" id="settingsBioCount">0 / 500</span>
+                      </div>
+
+                      <div class="settings-field">
+                        <label for="settingsLocation">Location</label>
+                        <input type="text" id="settingsLocation" name="location" maxlength="120" placeholder="City, Country" />
+                      </div>
+
+                      <div class="settings-field">
+                        <label for="settingsStrand">Strand</label>
+                        <input type="text" id="settingsStrand" name="strand" maxlength="80" placeholder="STEM, ABM, HUMSS, …" />
+                      </div>
+
+                      <div class="settings-field">
+                        <label for="settingsSchool">School</label>
+                        <select id="settingsSchool" name="school_id">
+                          <option value="">No school</option>
+                        </select>
+                      </div>
+
+                      <div class="settings-field">
+                        <label for="settingsGrade">Grade Level</label>
+                        <select id="settingsGrade" name="grade_level">
+                          <option value="">Select a grade level</option>
+                          <option value="Grade 7">Grade 7</option>
+                          <option value="Grade 8">Grade 8</option>
+                          <option value="Grade 9">Grade 9</option>
+                          <option value="Grade 10">Grade 10</option>
+                          <option value="Grade 11">Grade 11</option>
+                          <option value="Grade 12">Grade 12</option>
+                          <option value="College">College</option>
+                        </select>
+                      </div>
+                    </form>
+                  </div>
+
+                  <!-- PRIVACY -->
+                  <div class="profile-card" data-settings-panel="privacy" hidden>
+                    <div class="settings-panel-head">
+                      <div>
+                        <h2 class="profile-card__title">Privacy</h2>
+                        <p class="settings-subtitle">Control who can see your profile, notes, and activity.</p>
+                      </div>
                     </div>
 
-                    <div class="settings-field">
-                      <label for="settingsBio">Bio</label>
-                      <textarea id="settingsBio" name="bio" rows="3" maxlength="500"></textarea>
-                      <span class="settings-field__hint" id="settingsBioCount">0 / 500</span>
+                    <div id="privacyMessage" class="settings-message" hidden></div>
+
+                    <div class="settings-group">
+                      <h3 class="settings-group__title">Profile visibility</h3>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Public profile</strong>
+                          <span>Anyone can view your profile, stats, and uploaded notes. Turn off to keep your profile private while you prepare it.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="is_private"><span class="settings-toggle__track"></span></label>
+                      </div>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Show email address</strong>
+                          <span>Show your sign-in email on your public profile.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="show_email"><span class="settings-toggle__track"></span></label>
+                      </div>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Show school &amp; grade</strong>
+                          <span>Visible on your hero card and notes.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="show_school_grade"><span class="settings-toggle__track"></span></label>
+                      </div>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Show activity feed</strong>
+                          <span>Uploads, likes, and bookmarks appear on your profile.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="show_activity"><span class="settings-toggle__track"></span></label>
+                      </div>
                     </div>
 
-                    <div class="settings-field">
-                      <label for="settingsLocation">Location</label>
-                      <input type="text" id="settingsLocation" name="location" maxlength="120" placeholder="City, Country" />
+                    <div class="settings-group">
+                      <h3 class="settings-group__title">Data &amp; content</h3>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Allow your notes to be downloaded</strong>
+                          <span>Others can save a copy of your uploaded files.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="allow_downloads"><span class="settings-toggle__track"></span></label>
+                      </div>
+                      <div class="settings-row settings-row--action">
+                        <div class="settings-row__text">
+                          <strong>Download my data</strong>
+                          <span>Export your profile, notes, and activity as a file.</span>
+                        </div>
+                        <button class="btn btn--outline btn--sm" type="button" id="privacyExportBtn">Export</button>
+                      </div>
                     </div>
 
-                    <div class="settings-field">
-                      <label for="settingsStrand">Strand</label>
-                      <input type="text" id="settingsStrand" name="strand" maxlength="80" placeholder="STEM, ABM, HUMSS, …" />
+                    <div class="settings-danger-zone">
+                      <h3 class="settings-group__title">Danger zone</h3>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Delete account</strong>
+                          <span>Permanently remove your profile and all contributions.</span>
+                        </div>
+                        <button class="btn btn--outline btn--danger btn--sm" type="button" disabled title="Coming soon">Coming soon</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- NOTIFICATIONS -->
+                  <div class="profile-card" data-settings-panel="notifications" hidden>
+                    <div class="settings-panel-head">
+                      <div>
+                        <h2 class="profile-card__title">Notifications</h2>
+                        <p class="settings-subtitle">Choose what updates you receive and where you want to get them.</p>
+                      </div>
                     </div>
 
-                    <div class="settings-field">
-                      <label for="settingsSchool">School</label>
-                      <select id="settingsSchool" name="school_id">
-                        <option value="">No school</option>
-                      </select>
+                    <div id="notificationsMessage" class="settings-message" hidden></div>
+
+                    <div class="settings-group">
+                      <h3 class="settings-group__title">In-app updates</h3>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Someone answers my question</strong>
+                          <span>Instant notification when a new answer arrives on your question.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="notify_answers"><span class="settings-toggle__track"></span></label>
+                      </div>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>My answer is accepted</strong>
+                          <span>Let you know when the asker picks your answer as the solution.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="notify_accepted"><span class="settings-toggle__track"></span></label>
+                      </div>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>New likes on my notes</strong>
+                          <span>Notify me when someone likes or bookmarks my uploads.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="notify_likes"><span class="settings-toggle__track"></span></label>
+                      </div>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>New followers</strong>
+                          <span>Notify me when a new student starts following my profile.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="notify_followers"><span class="settings-toggle__track"></span></label>
+                      </div>
                     </div>
 
-                    <div class="settings-field">
-                      <label for="settingsGrade">Grade Level</label>
-                      <select id="settingsGrade" name="grade_level">
-                        <option value="">Select a grade level</option>
-                        <option value="Grade 7">Grade 7</option>
-                        <option value="Grade 8">Grade 8</option>
-                        <option value="Grade 9">Grade 9</option>
-                        <option value="Grade 10">Grade 10</option>
-                        <option value="Grade 11">Grade 11</option>
-                        <option value="Grade 12">Grade 12</option>
-                        <option value="College">College</option>
-                      </select>
+                    <div class="settings-group">
+                      <h3 class="settings-group__title">Email &amp; digest</h3>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Email notifications</strong>
+                          <span>Send a copy of important updates to your email address.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="notify_email"><span class="settings-toggle__track"></span></label>
+                      </div>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Weekly activity digest</strong>
+                          <span>A weekly summary of new notes, questions, and community highlights.</span>
+                        </div>
+                        <label class="settings-toggle"><input type="checkbox" data-setting="notify_digest"><span class="settings-toggle__track"></span></label>
+                      </div>
                     </div>
-                  </form>
+                  </div>
+
+                  <!-- SECURITY -->
+                  <div class="profile-card" data-settings-panel="security" hidden>
+                    <div class="settings-panel-head">
+                      <div>
+                        <h2 class="profile-card__title">Security</h2>
+                        <p class="settings-subtitle">Manage your password, sign-in methods, and account sessions.</p>
+                      </div>
+                    </div>
+
+                    <div id="securityMessage" class="settings-message" hidden></div>
+
+                    <div class="settings-group">
+                      <h3 class="settings-group__title">Sign-in</h3>
+
+                      <div class="settings-field">
+                        <label for="securityCurrentPw">Current password</label>
+                        <input type="password" id="securityCurrentPw" name="current_password" autocomplete="current-password" placeholder="Enter your current password" />
+                      </div>
+                      <div class="settings-field">
+                        <label for="securityNewPw">New password</label>
+                        <input type="password" id="securityNewPw" name="new_password" autocomplete="new-password" placeholder="At least 8 characters" />
+                      </div>
+                      <div class="settings-field">
+                        <label for="securityConfirmPw">Confirm new password</label>
+                        <input type="password" id="securityConfirmPw" name="confirm_password" autocomplete="new-password" placeholder="Repeat the new password" />
+                      </div>
+                      <button class="btn btn--primary btn--sm" type="button" id="securityUpdatePwBtn">Update Password</button>
+
+                      <div class="settings-row settings-row--action">
+                        <div class="settings-row__text">
+                          <strong>Two-factor authentication</strong>
+                          <span>Add an extra layer of security when you sign in.</span>
+                        </div>
+                        <button class="btn btn--outline btn--sm" type="button" disabled title="Coming soon">Coming soon</button>
+                      </div>
+                      <div class="settings-row settings-row--action">
+                        <div class="settings-row__text">
+                          <strong>Change email</strong>
+                          <span>Update the email address used to sign in.</span>
+                        </div>
+                        <button class="btn btn--outline btn--sm" type="button" disabled title="Coming soon">Coming soon</button>
+                      </div>
+                    </div>
+
+                    <div class="settings-group">
+                      <h3 class="settings-group__title">Sessions</h3>
+                      <div class="settings-row">
+                        <div class="settings-row__text">
+                          <strong>Active sessions</strong>
+                          <span>Devices currently signed in to your account.</span>
+                        </div>
+                        <button class="btn btn--outline btn--sm" type="button" disabled title="Coming soon">Coming soon</button>
+                      </div>
+                      <div class="settings-row settings-row--action">
+                        <div class="settings-row__text">
+                          <strong>Sign out of all sessions</strong>
+                          <span>End every session on every device, including this one. You'll need to log in again.</span>
+                        </div>
+                        <button class="btn btn--outline btn--sm" type="button" id="securitySignOutAllBtn">Sign out all</button>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
 
                 <div class="settings-side">
@@ -524,6 +646,84 @@
       </div>
     </section>
 </main>
+
+  <!-- ===================== CONFIRM ACTION MODAL =====================
+       Generic confirmation dialog used for destructive actions in the
+       Bookmarks tab (removing a bookmark). Driven by profile-page.js's
+       confirmDialog(). -->
+  <div class="confirm-modal" id="profileConfirmModal" hidden>
+    <div class="confirm-modal__backdrop" id="profileConfirmBackdrop"></div>
+    <div class="confirm-modal__panel" role="dialog" aria-modal="true" aria-labelledby="profileConfirmTitle" aria-describedby="profileConfirmMessage">
+      <div class="confirm-modal__icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 19h16"/></svg>
+      </div>
+      <h3 class="confirm-modal__title" id="profileConfirmTitle">Are you sure?</h3>
+      <p class="confirm-modal__message" id="profileConfirmMessage"></p>
+      <div class="confirm-modal__actions">
+        <button class="btn btn--outline btn--sm" type="button" id="profileConfirmCancel">Cancel</button>
+        <button class="btn btn--danger btn--sm" type="button" id="profileConfirmOk">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== COLLECTION DETAIL MODAL =====================
+       Clicking a collection row opens this popup to view its notes and
+       add more from the user's own uploads. Driven entirely by
+       profile-page.js (collectionModal). -->
+  <div class="collection-modal" id="collectionModal" hidden>
+    <div class="collection-modal__backdrop" id="collectionBackdrop"></div>
+    <div class="collection-modal__panel" role="dialog" aria-modal="true" aria-labelledby="collectionModalTitle">
+      <div class="collection-modal__head">
+        <div>
+          <h3 class="collection-modal__title" id="collectionModalTitle">Collection</h3>
+          <p class="collection-modal__subtitle" id="collectionModalSubtitle">0 notes</p>
+        </div>
+        <button class="collection-modal__close" type="button" id="collectionClose" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+        </button>
+      </div>
+
+      <div class="collection-modal__body">
+        <!-- Notes currently inside the collection -->
+        <div class="collection-modal__section">
+          <div class="collection-modal__section-head">
+            <h4>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11Z"/></svg>
+              Notes in this collection
+            </h4>
+            <button class="btn btn--outline btn--sm" type="button" id="collectionAddNotesBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Add Notes
+            </button>
+          </div>
+          <ul class="collection-notes-list" id="collectionNotesList">
+            <li class="profile-card__empty">Loading notes…</li>
+          </ul>
+        </div>
+
+        <!-- Add-notes picker (hidden until "+ Add Notes" is clicked) -->
+        <div class="collection-add-picker" id="collectionAddPicker" hidden>
+          <div class="collection-modal__section-head">
+            <h4>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 19h16"/></svg>
+              Choose notes to add
+            </h4>
+          </div>
+          <p class="collection-add-picker__hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 12v4"/></svg>
+            Pick from your uploaded notes. Selected items are added to this collection.
+          </p>
+          <ul class="collection-picker-list" id="collectionPickerList">
+            <li class="profile-card__empty">Loading your notes…</li>
+          </ul>
+          <div class="collection-add-picker__actions">
+            <button class="btn btn--primary btn--sm" type="button" id="collectionAddConfirmBtn">Add Selected</button>
+            <button class="btn btn--outline btn--sm" type="button" id="collectionAddCancelBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ===================== UPLOAD NOTES MODAL =====================
        Reuses the exact same modal from index.html (same IDs, form logic

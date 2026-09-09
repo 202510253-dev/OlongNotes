@@ -68,7 +68,15 @@ router.get('/schools', async (req, res) => {
 router.get('/subjects', async (req, res) => {
   const { education_level, program_id, category_id, id, letter, limit, offset } = req.query
 
-try {
+  // Pagination is opt-in. PostgREST caps a query at 20 rows once `.range()`
+  // is applied, so applying it unconditionally truncated the list to 20
+  // subjects — most of the seed data became unreachable (only 20 of the
+  // 66 senior-high subjects, for instance). Only window the query when the
+  // caller explicitly asks for a limit/offset.
+  const limitSpecified = limit !== undefined && limit !== null && String(limit).trim() !== ''
+  const offsetSpecified = offset !== undefined && offset !== null && String(offset).trim() !== ''
+
+  try {
     let query = supabase
       .from('subjects')
       .select(`
@@ -105,9 +113,12 @@ try {
       query = query.ilike('subject_name', `${letter}%`)
     }
 
+    // Only apply the PostgREST window when the caller asked for one.
     const pageLimit = Math.min(parseInt(limit) || 20, 100)
     const pageOffset = parseInt(offset) || 0
-    query = query.range(pageOffset, pageOffset + pageLimit - 1)
+    if (limitSpecified || offsetSpecified) {
+      query = query.range(pageOffset, pageOffset + pageLimit - 1)
+    }
 
     const { data, error, count } = await query
 
@@ -116,7 +127,7 @@ try {
       return res.status(500).json({ message: 'Could not fetch subjects.' })
     }
 
-    if (limit || offset) {
+    if (limitSpecified || offsetSpecified) {
       return res.status(200).json({
         subjects: data,
         pagination: {

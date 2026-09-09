@@ -150,6 +150,16 @@
       card.addEventListener('scroll', closePanel, { passive: true });
     });
     window.addEventListener('resize', closePanel);
+    // The panel is positioned with position:fixed against the trigger's
+    // viewport rect, so as soon as the page (or any scroll container)
+    // moves under it, the panel is orphaned — a floating "lost puzzle
+    // piece". Close it whenever a scroll happens outside the panel;
+    // scrolling inside the panel (the option list / search) is fine.
+    window.addEventListener('scroll', (e) => {
+      const t = e.target;
+      if (t instanceof Element && panel.contains(t)) return;
+      closePanel();
+    }, { capture: true, passive: true });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !panel.hidden) { closePanel(); trigger.focus(); }
     });
@@ -184,10 +194,16 @@
         const row = document.createElement('div');
         row.className = 'cselect__option';
         if (opt.dataset.action === 'more') row.classList.add('cselect__option--action');
-        row.textContent = opt.textContent;
+        const isSelected = opt.value === selectEl.value;
+        if (isSelected) row.classList.add('cselect__option--selected');
+        row.innerHTML =
+          '<span class="cselect__option-label">' + esc(opt.textContent) + '</span>' +
+          '<span class="cselect__option-check" aria-hidden="true">' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
+          '</span>';
         row.setAttribute('role', 'option');
         row.tabIndex = -1;
-        if (opt.value === selectEl.value) row.setAttribute('aria-selected', 'true');
+        if (isSelected) row.setAttribute('aria-selected', 'true');
         row.addEventListener('click', () => {
           selectEl.value = opt.value;
           rebuild();

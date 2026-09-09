@@ -477,7 +477,7 @@ function renderQuestionDetail(q) {
           '</div>' +
 '<div class="comment-item__text">' + esc(a.content || '') + '</div>' +
           '<div class="comment-item__footer">' +
-            '<button class="answer-like-count" type="button" data-answer-like="' + esc(a.id) + '" data-count="' + esc(a.likes_count || 0) + '" aria-pressed="false">' +
+            '<button class="answer-like-count' + (a.viewer_has_liked ? ' is-liked' : '') + '" type="button" data-answer-like="' + esc(a.id) + '" data-count="' + esc(a.likes_count || 0) + '" aria-pressed="' + (a.viewer_has_liked ? 'true' : 'false') + '">' +
               '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3Zm0 0 4.5-8a2 2 0 0 1 3.6 1.2L14.5 8H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 19H10a3 3 0 0 1-3-3v-5Z"/></svg>' +
               '<span class="answer-like-btn__count">' + esc(a.likes_count || 0) + '</span>' +
             '</button>' +

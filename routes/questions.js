@@ -212,7 +212,7 @@ async function toggleQuestionInteraction(req, res, {
 
       // Record the like in the activity log — ON transition only.
       // writeActivity is fire-and-forget; never throws.
-      writeActivity(userId, activityType, parentId, null)
+      writeActivity(userId, activityType, parentId, null, activityType.startsWith('answer_') ? 'answer' : 'question')
 
       // Points — +1 to the parent owner, unless the liker IS the
       // owner (don't let users farm points from self-likes).
@@ -232,7 +232,7 @@ async function toggleQuestionInteraction(req, res, {
       count = next
     }
 
-    const likeKey = activityType === 'question_liked' ? 'liked' : 'liked'
+    const likeKey = 'liked'
     return res.status(200).json({
       message: existing ? 'Removed.' : 'Recorded.',
       [likeKey]: !existing,
@@ -379,7 +379,7 @@ router.post('/', auth, async (req, res) => {
     }
 
     // Activity log — question_asked. Fire-and-forget.
-    writeActivity(req.user.id, 'question_asked', question.id, `Question: ${question.title}`)
+    writeActivity(req.user.id, 'question_asked', question.id, `Question: ${question.title}`, 'question')
 
     // Points — asker earns +2 for asking. Fire-and-forget.
     awardPoints(req.user.id, 2)
@@ -401,6 +401,8 @@ router.post('/', auth, async (req, res) => {
 //   tag            string (exact match)
 //   tab            'unanswered' | 'answered' | 'my_questions'
 //   user_id        int (explicit; 'my_questions' filters by req.user.id)
+//   sort           'latest' | 'oldest' | 'most-liked' | 'most-answers'
+//                  (server-side ordering so pagination stays correct)
 //   limit          page size (default 20, max 100)
 //   offset         page offset (default 0)
 //
@@ -446,7 +448,7 @@ router.get('/', async (req, res) => {
       .select(`
         id,
         user_id,
-subject_id,
+        subject_id,
         school_id,
         grade_level,
         title,
@@ -459,8 +461,22 @@ subject_id,
         users:user_id ( user_name, role, avatar_url ),
         subjects:subject_id ( subject_name )
       `, { count: 'exact' })
-      .order('created_at', { ascending: false })
       .range(pageOffset, pageOffset + pageLimit - 1)
+
+    // Server-side sort. This must NOT happen client-side (the current
+    // page only carries 20 rows, so a local re-sort can never order the
+    // full result set — older pages were only ever "sorted" within the
+    // fetched window). Fresh ties break on created_at DESC.
+    const sort = String(req.query.sort || '')
+    if (sort === 'oldest') {
+      query = query.order('created_at', { ascending: true })
+    } else if (sort === 'most-liked') {
+      query = query.order('likes_count', { ascending: false }).order('created_at', { ascending: false })
+    } else if (sort === 'most-answers') {
+      query = query.order('answers_count', { ascending: false }).order('created_at', { ascending: false })
+    } else {
+      query = query.order('created_at', { ascending: false })
+    }
 
     if (subject_id) query = query.eq('subject_id', parseInt(subject_id))
     if (school_id) query = query.eq('school_id', parseInt(school_id))
@@ -635,10 +651,13 @@ router.get('/:id', async (req, res) => {
       return res.status(500).json({ message: 'Could not fetch answers.' })
     }
 
-    // Resolve viewer flags (liked / asked this) for authenticated viewers.
+// Resolve viewer flags (liked / asked this / liked-which-answers) for
+    // authenticated viewers.
     const viewerUserId = await resolveViewerUserId(req)
     if (viewerUserId) {
-      const [{ data: liked }, { data: askedThis }] = await Promise.all([
+      const answers = answersResult.data || []
+      const answerIds = answers.map((a) => a.id)
+      const [{ data: liked }, { data: askedThis }, answerLikesResult] = await Promise.all([
         supabase
           .from('question_likes')
           .select('id')
@@ -651,13 +670,24 @@ router.get('/:id', async (req, res) => {
           .eq('id', questionId)
           .eq('user_id', viewerUserId)
           .maybeSingle(),
+        answerIds.length > 0
+          ? supabase
+              .from('answer_likes')
+              .select('answer_id')
+              .in('answer_id', answerIds)
+          : Promise.resolve({ data: [] }),
       ])
       question.viewer_has_liked = Boolean(liked)
       question.viewer_is_asker = Boolean(askedThis)
 
+      // Per-answer liked flags so the answer rows render aria-pressed
+      // correctly on load (was hardcoded 'false' before).
+      const likedAnswerIds = new Set((answerLikesResult.data || []).map((r) => r.answer_id))
+      for (const a of answers) a.viewer_has_liked = likedAnswerIds.has(a.id)
+
       // Record the view in the activity log — authed viewers only.
       // Anonymous viewers don't pollute the log.
-      writeActivity(viewerUserId, 'question_viewed', questionId, null)
+      writeActivity(viewerUserId, 'question_viewed', questionId, null, 'question')
     } else {
       question.viewer_has_liked = false
       question.viewer_is_asker = false
@@ -756,7 +786,7 @@ router.post('/:id/answer', auth, async (req, res) => {
     }
 
     // Activity log — question_answered. Fire-and-forget.
-    writeActivity(req.user.id, 'question_answered', questionId, 'Question answered')
+    writeActivity(req.user.id, 'question_answered', questionId, 'Question answered', 'question')
 
     return res.status(201).json({ message: 'Answer submitted.', answer })
   } catch (err) {
@@ -958,7 +988,7 @@ router.post('/:id/report', auth, async (req, res) => {
     }
 
     // Best-effort activity log entry — does not affect the response.
-    writeActivity(req.user.id, 'question_reported', questionId, reason.trim())
+    writeActivity(req.user.id, 'question_reported', questionId, reason.trim(), 'question')
 
     return res.status(201).json({
       message: 'Report submitted. Our team will review it.',

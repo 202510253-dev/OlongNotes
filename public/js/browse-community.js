@@ -111,6 +111,7 @@
     q.set('offset', String((filterState.page - 1) * PAGE_LIMIT));
 
     if (filterState.level !== 'all') q.set('education_level', filterState.level);
+    if (filterState.sort !== 'latest') q.set('sort', filterState.sort);
 
     return q.toString();
   }
@@ -223,8 +224,6 @@
       filterState.hasMore = Boolean(pagination.has_more);
       filterState.total = pagination.total || 0;
 
-      applySortToRows(list);
-
       if (empty) empty.hidden = list.children.length !== 0;
       ensureLoadMoreButton();
     } catch (err) {
@@ -234,24 +233,6 @@
         empty.hidden = false;
       }
     }
-  }
-
-  function applySortToRows(list) {
-    const rows = Array.prototype.slice.call(list.querySelectorAll('.question-row'));
-    rows.sort((a, b) => {
-      switch (filterState.sort) {
-        case 'oldest':
-          return (parseFloat(a.dataset.timestamp) || 0) - (parseFloat(b.dataset.timestamp) || 0);
-        case 'most-liked':
-          return (parseInt(b.dataset.likesCount, 10) || 0) - (parseInt(a.dataset.likesCount, 10) || 0);
-        case 'most-answers':
-          return (parseInt(b.dataset.answers, 10) || 0) - (parseInt(a.dataset.answers, 10) || 0);
-        case 'latest':
-        default:
-          return (parseFloat(b.dataset.timestamp) || 0) - (parseFloat(a.dataset.timestamp) || 0);
-      }
-    });
-    rows.forEach((r) => list.appendChild(r));
   }
 
   function ensureLoadMoreButton() {

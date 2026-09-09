@@ -1,26 +1,5 @@
 # SPEC — Q&A frontend: `browse-community.js`
 
-**Date:** 2026-08-06
-**From:** Local Claude (read-only analyzer, on behalf of the user)
-**For:** Frontend Claude (code-modifier for the frontend)
-**Repo:** `C:\Users\Opriasa\Desktop\OlongNotes_off\olongnotes\` (Express + Supabase)
-**HEAD at handoff:** `cc9bc0b` (main, in sync with origin/main, working tree clean)
-**Companion spec:** `SPEC — Q&A BACKEND routes.questions.js.md` — must be implemented first (the frontend depends on the API contract)
-
----
-
-## 0. Status — what's already verified
-
-✅ **Backend API** — `routes/questions.js` will be live by the time you start. The 7 routes follow the request/response shapes in §1.3 of the backend spec.
-
-✅ **API wrapper** — `public/js/api.js` (144 lines) exposes `window.OlongNotes.api.get`, `.post`, `.upload`, and `escapeHtml`. Use this consistently — no raw `fetch()` calls.
-
-✅ **Working pattern** — `public/js/document-viewer.js` (449 lines) is the most recent working example of a live-data page. Mirror its structure.
-
-✅ **Auth gating** — `window.OlongNotes.getToken()` returns the JWT, `window.OlongNotes.applyRole(role)` updates the UI. Use these for the auth-gated actions.
-
----
-
 ## 1. Current state
 
 `public/browse-community.js` is 30,859 bytes, reads from a hardcoded `QUESTIONS_DATA` mock. The page (`community.html`) is a single-page layout with question cards inline (no separate detail page). The prototype's tabs (All / Unanswered / Answered / My Questions) and dropdowns (All Grades / All Subjects / Latest) are visual only — no logic.

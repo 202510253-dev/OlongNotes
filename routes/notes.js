@@ -328,14 +328,12 @@ router.post('/', auth, (req, res, next) => {
 // Query params (all optional, combine freely):
 //   limit         page size (default 20, max 100)
 //   offset        page offset (default 0)
-//   school        school NAME (legacy filter; prefer school_id below)
-//   school_id     school ID (used by catalog pages; takes precedence)
-//   subject       subject NAME (legacy filter; prefer subject_id below)
-//   subject_id    subject ID (used by catalog pages; takes precedence)
+//   school_id     school ID (used by catalog pages)
+//   subject_id    subject ID (used by catalog pages)
 //   grade_level   exact-grade filter
 //   file_type     exact-MIME filter
 router.get('/', async (req, res) => {
-  const { school, grade_level, subject, file_type, school_id, subject_id } = req.query
+  const { grade_level, file_type, school_id, subject_id } = req.query
 
   // Pagination — default 20 per page, max 100
   const pageLimit = Math.min(parseInt(req.query.limit) || 20, 100)
@@ -350,7 +348,7 @@ router.get('/', async (req, res) => {
         annotation,
         file_url,
         file_type,
-file_size,
+        file_size,
         grade_level,
         group_id,
         download_count,
@@ -367,16 +365,15 @@ file_size,
       .order('created_at', { ascending: false })
       .range(pageOffset, pageOffset + pageLimit - 1)
 
-    // school_id takes precedence over school (the latter matches by name
-    // and only exists for backward compatibility with older callers).
+    // ID-based filters. (Legacy ?school=/?subject= NAME params were
+    // removed — the modern callers send school_id/subject_id, and
+    // subject-notes.html reads ?subject=<id> itself then sends
+    // subject_id= to this endpoint.)
     if (school_id) query = query.eq('school_id', parseInt(school_id))
-    else if (school) query = query.eq('school_id', parseInt(school))
 
     if (grade_level) query = query.eq('grade_level', grade_level)
 
-    // subject_id takes precedence over subject.
     if (subject_id) query = query.eq('subject_id', parseInt(subject_id))
-    else if (subject) query = query.eq('subject_id', parseInt(subject))
 
     if (file_type) query = query.eq('file_type', file_type)
 

@@ -95,7 +95,7 @@ router.post('/:id/report', auth, async (req, res) => {
     }
 
     // Best-effort activity log entry — does not affect the response.
-    writeActivity(req.user.id, 'answer_reported', answerId, trimmedReason)
+    writeActivity(req.user.id, 'answer_reported', answerId, trimmedReason, 'answer')
 
     return res.status(201).json({
       message: 'Report submitted. Our team will review it.',

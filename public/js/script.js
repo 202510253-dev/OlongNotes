@@ -246,19 +246,6 @@ function createModal({ panel, backdrop, closeBtn, bodyClass = 'modal-open', trig
 // role + username + initials without re-fetching. Cleared on logout.
 const USER_STORAGE_KEY = 'olongnotes_user';
 
-// Fire-and-forget POST to /api/activities. Used after the upload succeeds
-// so the user's Recent Activities feed shows the new note immediately.
-// Same shape as document-viewer's recordActivity — the backend also writes
-// the same row from POST /api/notes (see routes/notes.js wire-up), so this
-// is a safety net. Failures are silent.
-function recordActivity(noteId, type) {
-  const ON = window.OlongNotes || {};
-  if (!ON.api || !ON.getToken || !ON.getToken()) return;
-  ON.api
-    .post('/activities', { note_id: noteId, activity_type: type }, { auth: true })
-    .catch((e) => console.debug('[activities] record skipped:', e && e.message));
-}
-
 function readStoredUser() {
   try {
     const raw = localStorage.getItem(USER_STORAGE_KEY);
@@ -501,9 +488,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // it composes cleanly with theme switches and any future per-page
   // overrides, and the listener is passive so it doesn't block scroll.
   const navbar = document.getElementById('navbar');
+  // Hysteresis collapse: 8px to shrink, 2px to expand. A single 8px
+  // boundary creates a feedback loop — the 28px layout reflow from the
+  // height transition can push window.scrollY back across the line mid-
+  // transition, so the class flipped continuously and the navbar visibly
+  // "shook" near the top on desktop. Two thresholds (collapse > 8,
+  // expand <= 2) let the class flip only once per pass through the top.
+  let navbarCollapsed = false;
   const updateNavbarScrollState = () => {
     if (!navbar) return;
-    navbar.classList.toggle('navbar--scrolled', window.scrollY > 8);
+    const y = window.scrollY;
+    if (!navbarCollapsed && y > 8) {
+      navbarCollapsed = true;
+      navbar.classList.add('navbar--scrolled');
+    } else if (navbarCollapsed && y <= 2) {
+      navbarCollapsed = false;
+      navbar.classList.remove('navbar--scrolled');
+    }
   };
   window.addEventListener('scroll', updateNavbarScrollState, { passive: true });
   updateNavbarScrollState();
@@ -722,7 +723,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadForm = document.getElementById('uploadForm');
   const noteFileInput = document.getElementById('noteFileInput');
   const noteFileDrop = document.getElementById('noteFileDrop');
-const noteFileDropText = document.getElementById('noteFileDropText');
+  const noteFileDropText = document.getElementById('noteFileDropText');
   const noteFileDropCount = document.getElementById('noteFileDropCount');
   const uploadSubjectField = document.getElementById('uploadSubjectField');
   const uploadSubjectSelect = document.getElementById('uploadSubjectSelect');
@@ -734,7 +735,7 @@ const noteFileDropText = document.getElementById('noteFileDropText');
   const uploadSchoolSelect = document.getElementById('uploadSchoolSelect');
   const DEFAULT_NOTE_FILE_TEXT = 'Upload PDF, Word, PowerPoint, or an image';
 
-// Custom-select enhancement is shared (community-shared.js): it works on
+  // Custom-select enhancement is shared (community-shared.js): it works on
   // ANY native <select>, so we resolve it from the shared namespace here.
   const initCustomSelect = (window.OlongNotes?.shared?.initCustomSelect) || (() => {});
 
@@ -874,7 +875,7 @@ const noteFileDropText = document.getElementById('noteFileDropText');
   // Q&A ask modal (community-shared.js → createCollegeCascade). We keep
   // the upload page's own wrappers so callers below don't change, but the
   // fetch/populate/disabled logic lives in ONE place.
-// The college cascade lives in community-shared.js. script.js is also
+  // The college cascade lives in community-shared.js. script.js is also
   // loaded on pages that do NOT include community-shared.js (e.g.
   // subject-notes.html), so guard the whole block: only build the cascade
   // when the shared helper AND the college <select> fields exist. Without
@@ -945,7 +946,7 @@ const noteFileDropText = document.getElementById('noteFileDropText');
     }
   };
 
-const openUploadModal = async () => {
+  const openUploadModal = async () => {
     if (uploadGradeLevel) {
       uploadGradeLevel.value = '';
       uploadGradeLevel.refreshCselect?.();
@@ -1018,7 +1019,7 @@ const openUploadModal = async () => {
     }
   });
 
-// EDIT 5: real upload submit → POST /api/notes via api.upload().
+  // EDIT 5: real upload submit → POST /api/notes via api.upload().
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
 
@@ -1071,7 +1072,7 @@ const openUploadModal = async () => {
         return;
       }
 
-const remapped = new FormData();
+      const remapped = new FormData();
       remapped.append('title', fd.get('title') || '');
       remapped.append('annotation', fd.get('caption') || '');
       remapped.append('grade_level', gradeLevel);
@@ -1108,9 +1109,8 @@ const remapped = new FormData();
       noteFileDrop.classList.remove('has-file');
       if (noteFileDropCount) noteFileDropCount.hidden = true;
       if (firstNote && firstNote.id) {
-
-        // Record the activity.
-        recordActivity(firstNote.id, 'note_uploaded');
+        // The backend already writes the note_uploaded activity row in
+        // routes/notes.js — no client-side duplicate write here.
         window.location.href = `document-viewer.html?id=${encodeURIComponent(firstNote.id)}`;
       }
     } catch (err) {
@@ -1169,7 +1169,7 @@ const remapped = new FormData();
   const legacySignupBtn = document.getElementById('navSignupBtn');
   const legacyProfileIcon = document.querySelector('.profile-icon');
 
-const heroContribBtn = document.getElementById('heroContribBtn');
+  const heroContribBtn = document.getElementById('heroContribBtn');
   const heroUploadBtn = document.getElementById('heroUploadBtn');
   const topContributorsSection = document.getElementById('topContributorsSection');
 

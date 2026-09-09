@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { supabase } = require('../supabase')
+const { supabase, supabaseAdmin } = require('../supabase')
 const { body, validationResult } = require('express-validator')
 const auth = require ('../middleware/auth')
 
@@ -158,6 +158,92 @@ router.post('/logout', auth, async (req, res) => {
 
     } catch (err) {
         console.error('Logout error:', err)
+        return res.status(500).json({ message: 'Server error. Please try again later.' })
+    }
+})
+
+// POST api/auth/change-password
+// PROTECTED - must be logged in to change your password.
+// Verifies the current password against Supabase Auth, then updates the
+// password via the service-role admin API. The existing session stays
+// valid, so no re-login is forced.
+
+router.post('/change-password', auth, [
+    body('current_password')
+        .notEmpty()
+        .withMessage('Current password is required'),
+    body('new_password')
+        .isLength({ min: 8 })
+        .withMessage('New password must be at least 8 characters'),
+], async (req, res) => {
+
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: errors.array()[0].msg })
+    }
+
+    const { current_password, new_password } = req.body
+
+    try {
+        // Step 1 - Look up the user's auth email (auth_id -> users row).
+        const { data: userRow, error: lookupError } = await supabase
+            .from('users')
+            .select('email')
+            .eq('auth_id', req.user.auth_id)
+            .maybeSingle()
+
+        if (lookupError || !userRow || !userRow.email) {
+            console.error('[auth] change-password lookup error:', lookupError)
+            return res.status(400).json({ message: 'Could not look up your account.' })
+        }
+
+        // Step 2 - Verify the current password actually matches.
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: userRow.email,
+            password: current_password,
+        })
+        if (signInError) {
+            return res.status(401).json({ message: 'Current password is incorrect.' })
+        }
+
+        // Step 3 - Update the password (service role, by auth UUID).
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+            req.user.auth_id,
+            { password: new_password }
+        )
+        if (updateError) {
+            console.error('[auth] change-password update error:', updateError)
+            return res.status(500).json({ message: 'Could not update your password. Please try again.' })
+        }
+
+        return res.status(200).json({ message: 'Password updated successfully.' })
+
+    } catch (err) {
+        console.error('[auth] change-password exception:', err)
+        return res.status(500).json({ message: 'Server error. Please try again later.' })
+    }
+})
+
+// POST api/auth/signout-all
+// PROTECTED - ends every active session for this user, including the
+// current one (Supabase Auth admin.signOut with 'global' scope). The
+// frontend clears its token and returns to the home page afterwards.
+
+router.post('/signout-all', auth, async (req, res) => {
+    const token = (req.headers.authorization || '').split(' ')[1]
+    if (!token) {
+        return res.status(400).json({ message: 'No session token found.' })
+    }
+
+    try {
+        const { error } = await supabaseAdmin.auth.admin.signOut(token, 'global')
+        if (error) {
+            console.error('[auth] signout-all error:', error)
+            return res.status(500).json({ message: 'Could not sign out all sessions.' })
+        }
+        return res.status(200).json({ message: 'Signed out of all sessions.' })
+    } catch (err) {
+        console.error('[auth] signout-all exception:', err)
         return res.status(500).json({ message: 'Server error. Please try again later.' })
     }
 })

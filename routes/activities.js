@@ -23,7 +23,10 @@
 // POST endpoint and the helper share the same write path so the row shape
 // is consistent across every caller.
 //
-// activity_log is polymorphic: target_type='note' + target_id=<note_id>.
+// activity_log is polymorphic: target_type='note' | 'question' | 'answer'
+// + target_id=<row id>. Note-targeted writes default to 'note'; question/
+// answer callers pass their own target_type explicitly so the note feed
+// (which filters target_type='note') never sees Q&A rows.
 //
 // TEMPORARY: This module reads and writes via `supabaseAdmin` (service
 // role) to bypass the existing `activity_log_select` /
@@ -54,20 +57,20 @@ const auth = require('../middleware/auth')
 // anon client can't INSERT. The service role bypasses RLS entirely
 // (see supabase.js: "Service role client - bypasses RLS / Used ONLY
 // for activity_log writes and admin operations").
-async function writeActivity(userId, activityType, noteId, description) {
-  if (!userId || !activityType || !noteId) return { skipped: true }
+async function writeActivity(userId, activityType, targetId, description, targetType = 'note') {
+  if (!userId || !activityType || !targetId) return { skipped: true }
   try {
     const { error } = await supabaseAdmin
       .from('activity_log')
       .insert({
         user_id: userId,
-        target_type: 'note',
-        target_id: noteId,
+        target_type: targetType,
+        target_id: targetId,
         activity_type: activityType,
         // activity_log.description is NOT NULL. Callers pass null for
         // events that don't have a useful summary (view/like/bookmark);
         // fall back to a stable placeholder so the row always inserts.
-        description: description || `${activityType} on note ${noteId}`,
+        description: description || `${activityType} on ${targetType} ${targetId}`,
         created_at: new Date().toISOString(),
       })
     if (error) {

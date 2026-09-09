@@ -1,28 +1,4 @@
 # SPEC — Q&A backend: `routes/questions.js`
-
-**Date:** 2026-08-06
-**From:** Local Claude (read-only analyzer, on behalf of the user)
-**For:** Backend Claude (code-modifier for the backend)
-**Repo:** `C:\Users\Opriasa\Desktop\OlongNotes_off\olongnotes\` (Express + Supabase)
-**HEAD at handoff:** `cc9bc0b` (main, in sync with origin/main, working tree clean)
-**Companion spec:** `SPEC — Q&A FRONTEND browse-community.js.md` — must be implemented in parallel after this one ships
-
----
-
-## 0. Status — what's already verified
-
-✅ **Database schema** — fully verified live. `questions`, `answers`, `question_tags`, `question_likes`, `answer_likes` all exist with the columns this spec assumes. `accept_answer` RPC is callable. `answers.status` was dropped; `is_accepted` is the only acceptance flag. Three triggers maintain `likes_count` / `answers_count` automatically.
-
-✅ **Auth middleware** — `middleware/auth.js` already attaches `req.user = { id, auth_id, role }` on every authenticated route. `id` is the public.users bigint. Use this for all FK writes.
-
-✅ **Pattern library** — `routes/notes.js` has `toggleInteraction()` (line 52) and `routes/activities.js` has `writeActivity()` (line 57). Both are the patterns to mirror.
-
-✅ **Server mount** — `server.js` already imports `questionsRoutes` and mounts it at `/api/questions` (line 41 + 56). The stub file just needs to be expanded.
-
-✅ **Companion spec** — `SPEC — Q&A FRONTEND browse-community.js.md` is being implemented in parallel. The frontend depends on the request/response shapes defined in §1.3.
-
----
-
 ## 1. File structure
 
 Replace the 14-line stub at `routes/questions.js` with a ~450-line file structured like `routes/notes.js`:

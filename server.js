@@ -10,8 +10,8 @@ const app = express()
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-defaultSrc: ["'self'"],
-imgSrc: [
+      defaultSrc: ["'self'"],
+      imgSrc: [
         "'self'",
         "data:",
         "https://eqllumjkfkwgikauklth.supabase.co",
@@ -31,8 +31,20 @@ imgSrc: [
     },
   },
 }))
+// CORS — allow any origin listed in ALLOWED_ORIGINS (comma-separated).
+// Defaults to the local dev origin. The API is served same-origin today,
+// but the allowed list must stay configurable so a Vercel deploy (where
+// frontend and backend origins differ) doesn't require a code change.
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
 app.use(cors({
-    origin: 'http://localhost:3000'
+  origin(origin, callback) {
+    // No Origin header (curl, same-origin fetch, server-to-server) → allow.
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+    callback(null, false)
+  },
 }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

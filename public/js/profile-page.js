@@ -82,7 +82,18 @@
   let currentTargetId = null;    // bigint id of the profile being viewed
   let currentUserId = null;      // bigint id of the logged-in viewer (or null)
   let schoolsLoaded = false;
+  let userSettings = null;       // last GET /users/me/settings response
+  let settingsLoaded = false;    // lazy flag for the settings fetch
   const loadedTabs = new Set();
+
+  // Bookmarks tab state (owner only).
+  let allBookmarks = [];        // full fetched GET /users/me/bookmarks list
+  let allCollections = [];      // full fetched GET /users/me/folders list
+  let bookmarkActivity = [];    // fetched GET /activities?type=note_bookmarked
+  let bookmarksExpanded = false;
+  let collectionsExpanded = false;
+  // Rows shown in the list cards before "View All" is clicked.
+  const SKIM_LIMIT = 6;
 
   // ---------- DOM references ----------
 
@@ -129,6 +140,15 @@ const els = {};
     els.settingsSchool = $('settingsSchool');
     els.settingsGrade = $('settingsGrade');
     els.settingsMessage = $('settingsMessage');
+    els.privacyMessage = $('privacyMessage');
+    els.notificationsMessage = $('notificationsMessage');
+    els.securityMessage = $('securityMessage');
+    els.securityCurrentPw = $('securityCurrentPw');
+    els.securityNewPw = $('securityNewPw');
+    els.securityConfirmPw = $('securityConfirmPw');
+    els.securityUpdatePwBtn = $('securityUpdatePwBtn');
+    els.securitySignOutAllBtn = $('securitySignOutAllBtn');
+    els.privacyExportBtn = $('privacyExportBtn');
     els.settingsSaveBtn = $('settingsSaveBtn');
     els.settingsLogoutBtn = $('settingsLogoutBtn');
     els.overviewJoinedSettings = $('overviewJoinedSettings');
@@ -137,6 +157,38 @@ const els = {};
     els.settingsTabBtn = $('settingsTabBtn');
     els.notesSearch = $('notesSearch');
     els.newNoteBtn = $('newNoteBtn');
+    els.bookmarksTabBtn = $('bookmarksTabBtn');
+    els.bookmarksSearch = $('bookmarksSearch');
+    els.bookmarksList = $('bookmarksList');
+    els.bookmarksViewAll = $('bookmarksViewAll');
+    els.addCollectionBtn = $('addCollectionBtn');
+    els.collectionsList = $('collectionsList');
+    els.collectionsViewAll = $('collectionsViewAll');
+    els.collectionCreateForm = $('collectionCreateForm');
+    els.collectionNameInput = $('collectionNameInput');
+    els.collectionCreateBtn = $('collectionCreateBtn');
+    els.collectionCancelBtn = $('collectionCancelBtn');
+    els.bookmarkActivityList = $('bookmarkActivityList');
+    els.catAllBookmarks = $('catAllBookmarks');
+    els.catAllCollections = $('catAllCollections');
+    els.catSubjects = $('catSubjects');
+    els.confirmModal = $('profileConfirmModal');
+    els.confirmBackdrop = $('profileConfirmBackdrop');
+    els.confirmCancel = $('profileConfirmCancel');
+    els.confirmOk = $('profileConfirmOk');
+    els.confirmTitle = $('profileConfirmTitle');
+    els.confirmMessage = $('profileConfirmMessage');
+    els.collectionModal = $('collectionModal');
+    els.collectionBackdrop = $('collectionBackdrop');
+    els.collectionClose = $('collectionClose');
+    els.collectionModalTitle = $('collectionModalTitle');
+    els.collectionModalSubtitle = $('collectionModalSubtitle');
+    els.collectionNotesList = $('collectionNotesList');
+    els.collectionAddNotesBtn = $('collectionAddNotesBtn');
+    els.collectionAddPicker = $('collectionAddPicker');
+    els.collectionPickerList = $('collectionPickerList');
+    els.collectionAddConfirmBtn = $('collectionAddConfirmBtn');
+    els.collectionAddCancelBtn = $('collectionAddCancelBtn');
   }
 
   // ---------- Resolve target user ----------
@@ -192,6 +244,11 @@ const els = {};
     } else if (tabName === 'settings' && !loadedTabs.has('settings')) {
       loadedTabs.add('settings');
       loadSettingsForm();
+    } else if (tabName === 'bookmarks' && !loadedTabs.has('bookmarks')) {
+      // Owner-only (same gate as Settings): loadBookmarks() no-ops for
+      // non-owners, so the panel just stays on its hidden state.
+      loadedTabs.add('bookmarks');
+      loadBookmarks();
     }
   }
 
@@ -227,6 +284,7 @@ const els = {};
       // Don't auto-render Settings form here — it depends on whether
       // the viewer owns the profile and lazy-loads on tab activation.
       updateSettingsTabVisibility();
+      updateBookmarksTabVisibility();
 
       if (els.shell) els.shell.hidden = false;
       if (els.empty) els.empty.hidden = true;
@@ -1038,6 +1096,649 @@ const res = await api.patch(
       '</div>';
   }
 
+  // ---------- Bookmarks tab (owner only) ----------
+
+  // The Bookmarks tab is a personal space backed by auth-scoped reads
+  // (GET /users/me/*), so it only makes sense for the viewer who owns the
+  // profile. Non-owners get the tab hidden, same gate as Settings.
+  function updateBookmarksTabVisibility() {
+    if (!els.bookmarksTabBtn) return;
+    const isOwner = currentUserId != null && currentTargetId === currentUserId;
+    els.bookmarksTabBtn.hidden = !isOwner;
+
+    // Keep the panel itself off a non-owner's screen even if the HTML
+    // somehow has it visible (belt-and-suspenders alongside the deep-link
+    // guard in boot()).
+    if (!isOwner) {
+      document.querySelectorAll('.profile-panel[data-panel="bookmarks"]').forEach((p) => {
+        p.hidden = true;
+      });
+    }
+  }
+
+  function isBookmarksOwner() {
+    return currentUserId != null && currentTargetId === currentUserId;
+  }
+
+  // Fetches bookmarks + collections + bookmark activity in parallel and
+  // renders all three surfaces + the sidebar counts. Reuses the shared
+  // activity renderer (renderOverviewActivityItem) for the activity card.
+  async function loadBookmarks() {
+    if (!api || !isBookmarksOwner()) return;
+    setEmpty(els.bookmarksList, 'Loading bookmarks…');
+    setEmpty(els.collectionsList, 'Loading collections…');
+
+    try {
+      const [bookmarksRes, foldersRes, activityRes] = await Promise.all([
+        api.get('/users/me/bookmarks?limit=100', { auth: true }),
+        api.get('/users/me/folders', { auth: true }),
+        api.get('/activities?type=note_bookmarked&limit=8', { auth: true }),
+      ]);
+
+      allBookmarks = (bookmarksRes && bookmarksRes.bookmarks) || [];
+      allCollections = (foldersRes && foldersRes.folders) || [];
+      bookmarkActivity = (activityRes && activityRes.activities) || [];
+
+      renderBookmarks();
+      renderCollections();
+      renderBookmarkSidebar();
+      renderBookmarkActivity();
+    } catch (err) {
+      console.error('[profile] loadBookmarks failed:', err);
+      setEmpty(els.bookmarksList, 'Could not load bookmarks.');
+      setEmpty(els.collectionsList, 'Could not load collections.');
+      if (err && err.status === 401 && ON.clearToken) ON.clearToken();
+    }
+  }
+
+  // Bookmarks rows call this on any input + toggle change, so the search
+  // filter and the View All / Show Less state always agree.
+  function filteredBookmarks() {
+    const q = els.bookmarksSearch
+      ? (els.bookmarksSearch.value || '').trim().toLowerCase()
+      : '';
+    if (!q) return allBookmarks;
+    return allBookmarks.filter((b) => {
+      const haystack = [
+        b.title,
+        (b.subjects && b.subjects.subject_name) || '',
+        (b.schools && b.schools.school_name) || '',
+        b.grade_level || '',
+      ].join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+  }
+
+  function renderBookmarks() {
+    if (!els.bookmarksList) return;
+    const visible = filteredBookmarks();
+    const rows = bookmarksExpanded ? visible : visible.slice(0, SKIM_LIMIT);
+    const hasMore = visible.length > SKIM_LIMIT;
+
+    if (visible.length === 0) {
+      setEmpty(els.bookmarksList, allBookmarks.length === 0
+        ? 'No bookmarks yet — tap the bookmark icon on any note to save it here.'
+        : 'No bookmarks match your search.');
+    } else {
+      els.bookmarksList.innerHTML = rows.map(renderBookmarkRow).join('');
+    }
+
+    if (els.bookmarksViewAll) {
+      els.bookmarksViewAll.hidden = !hasMore;
+      els.bookmarksViewAll.textContent = bookmarksExpanded ? 'Show Less' : 'View All';
+    }
+  }
+
+  function renderBookmarkRow(b) {
+    const noteId = b.id != null ? String(b.id) : '';
+    const title = b.title || 'Untitled';
+    const subject = (b.subjects && b.subjects.subject_name) || 'General';
+    const school = (b.schools && b.schools.school_name) || '';
+    const sub = [subject, school].filter(Boolean).join(' · ');
+    return (
+      '<li class="bookmark-row" data-open-bookmark="' + escapeHtml(noteId) + '">' +
+        '<span class="bookmark-row__icon" style="--c:' + bookmarkColor(subject) + ';" aria-hidden="true">' + SVG_BOOKMARK_ICON + '</span>' +
+        '<div class="bookmark-row__body">' +
+          '<p class="bookmark-row__title">' + escapeHtml(title) + '</p>' +
+          '<p class="bookmark-row__sub">' + escapeHtml(sub) + '</p>' +
+        '</div>' +
+        '<button class="bookmark-row__menu bookmark-row__menu--remove" type="button" data-unbookmark="' + escapeHtml(noteId) + '" aria-label="Remove bookmark: ' + escapeHtml(title) + '">' + SVG_X_ICON + '</button>' +
+      '</li>'
+    );
+  }
+
+  function renderCollections() {
+    if (!els.collectionsList) return;
+    const rows = collectionsExpanded ? allCollections : allCollections.slice(0, SKIM_LIMIT);
+    const hasMore = allCollections.length > SKIM_LIMIT;
+
+    if (allCollections.length === 0) {
+      setEmpty(els.collectionsList, 'No collections yet — create one with "+ Add Collection".');
+    } else {
+      els.collectionsList.innerHTML = rows.map((f) => {
+        const count = Number(f.note_count) || 0;
+        return (
+          '<li class="bookmark-row" data-open-folder="' + escapeHtml(String(f.id)) + '" role="button" tabindex="0" aria-label="Open collection: ' + escapeHtml(f.folder_name || '') + '">' +
+            '<span class="bookmark-row__icon" style="--c:#2F6FED;" aria-hidden="true">' + SVG_FOLDER_ICON + '</span>' +
+            '<div class="bookmark-row__body">' +
+              '<p class="bookmark-row__title">' + escapeHtml(f.folder_name || 'Untitled') + '</p>' +
+              '<p class="bookmark-row__sub">' + count + ' note' + (count === 1 ? '' : 's') + '</p>' +
+            '</div>' +
+            '<button class="bookmark-row__menu bookmark-row__menu--danger" type="button" data-delete-folder="' + escapeHtml(String(f.id)) + '" aria-label="Delete collection: ' + escapeHtml(f.folder_name || '') + '">' + SVG_TRASH_ICON + '</button>' +
+          '</li>'
+        );
+      }).join('');
+    }
+
+    if (els.collectionsViewAll) {
+      els.collectionsViewAll.hidden = !hasMore;
+      els.collectionsViewAll.textContent = collectionsExpanded ? 'Show Less' : 'View All';
+    }
+  }
+
+  // Sidebar "Categories": All Bookmarks / All Collections / distinct
+  // Subjects, all derived from the live lists.
+  function renderBookmarkSidebar() {
+    const subjects = new Set();
+    for (const b of allBookmarks) {
+      subjects.add((b.subjects && b.subjects.subject_name) || 'General');
+    }
+    if (els.catAllBookmarks) els.catAllBookmarks.textContent = String(allBookmarks.length);
+    if (els.catAllCollections) els.catAllCollections.textContent = String(allCollections.length);
+    if (els.catSubjects) els.catSubjects.textContent = String(subjects.size);
+  }
+
+  function renderBookmarkActivity() {
+    if (!els.bookmarkActivityList) return;
+    if (bookmarkActivity.length === 0) {
+      els.bookmarkActivityList.innerHTML = '<p class="profile-card__empty">No bookmark activity yet.</p>';
+      return;
+    }
+    els.bookmarkActivityList.innerHTML = bookmarkActivity.map(renderOverviewActivityItem).join('');
+  }
+
+  // Returns a modal-driven yes/no dialog (replaces the browser confirm()).
+  // Resolves true on confirm, false on cancel/backdrop/Escape. The message
+  // is plain text (textContent) so user-derived copy never injects HTML.
+  function confirmDialog({ title, message, okText = 'Remove' }) {
+    return new Promise((resolve) => {
+      if (!els.confirmModal) return resolve(false);
+      let settled = false;
+      const finish = (val) => {
+        if (settled) return;
+        settled = true;
+        els.confirmModal.hidden = true;
+        cleanup();
+        resolve(val);
+      };
+      const onCancel = () => finish(false);
+      const onOk = () => finish(true);
+      const onKey = (e) => {
+        if (e.key === 'Escape') finish(false);
+      };
+      const onBackdrop = (e) => {
+        if (e.target === els.confirmBackdrop) finish(false);
+      };
+      const onScroll = () => finish(false);
+      const cleanup = () => {
+        els.confirmOk.removeEventListener('click', onOk);
+        els.confirmCancel.removeEventListener('click', onCancel);
+        els.confirmBackdrop.removeEventListener('click', onBackdrop);
+        document.removeEventListener('keydown', onKey);
+        window.removeEventListener('scroll', onScroll, { capture: true });
+      };
+
+      els.confirmTitle.textContent = title;
+      els.confirmMessage.textContent = message;
+      els.confirmOk.textContent = okText;
+      els.confirmModal.hidden = false;
+
+      els.confirmOk.addEventListener('click', onOk);
+      els.confirmCancel.addEventListener('click', onCancel);
+      els.confirmBackdrop.addEventListener('click', onBackdrop);
+      document.addEventListener('keydown', onKey);
+      // Scrolling under the modal strands it (position:fixed) — treat it
+      // like the backdrop click: the action is dismissed.
+      window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+      els.confirmOk.focus();
+    });
+  }
+
+  // Removes a bookmark via the same toggle endpoint the document viewer
+  // uses (POST /notes/:id/bookmark), then re-renders in place. Confirmed
+  // through the styled dialog (not the default error-styled icon).
+  async function unbookmark(note) {
+    if (!api || !isBookmarksOwner()) return;
+    if (!note) return;
+    const title = note.title || 'this note';
+    const confirmed = await confirmDialog({
+      title: 'Remove bookmark?',
+      message: `Are you sure you want to remove \"${title}\" from your bookmarks?`,
+      okText: 'Remove',
+    });
+    if (!confirmed) return;
+    try {
+      await api.post('/notes/' + encodeURIComponent(note.id) + '/bookmark', {}, { auth: true });
+      allBookmarks = allBookmarks.filter((b) => String(b.id) !== String(note.id));
+      renderBookmarks();
+      renderBookmarkSidebar();
+    } catch (err) {
+      console.error('[profile] unbookmark failed:', err);
+      alert((err && err.message) || 'Could not remove bookmark.');
+    }
+  }
+
+  // Deletes a collection via DELETE /api/folders/:id. Deleting the folder
+  // never touches the notes inside it — folder_items rows are removed, the
+  // notes stay bookmarked as before.
+  async function deleteCollection(folder) {
+    if (!api || !isBookmarksOwner()) return;
+    if (!folder) return;
+    const name = folder.folder_name || 'this collection';
+    const confirmed = await confirmDialog({
+      title: 'Delete collection?',
+      message: `Are you sure you want to delete \"${name}\"? The notes inside it will not be deleted.`,
+      okText: 'Delete',
+    });
+    if (!confirmed) return;
+    try {
+      await api.delete('/folders/' + encodeURIComponent(folder.id), { auth: true });
+      allCollections = allCollections.filter((f) => String(f.id) !== String(folder.id));
+      renderCollections();
+      renderBookmarkSidebar();
+    } catch (err) {
+      console.error('[profile] delete collection failed:', err);
+      alert((err && err.message) || 'Could not delete collection.');
+    }
+  }
+
+  // Creates a collection via POST /api/folders and appends it to the
+  // rendered list. note_count starts at 0 (folders begin empty; notes are
+  // added from the document viewer in a later cut).
+  async function createCollection(name) {
+    const res = await api.post('/folders', { folder_name: name }, { auth: true });
+    const folder = (res && res.folder) || {};
+    if (folder.id == null) {
+      // Defensive: if the shape ever changes, refetch the full list
+      // instead of guessing.
+      await loadBookmarks();
+      return;
+    }
+    allCollections = allCollections.concat({
+      id: folder.id,
+      folder_name: folder.folder_name || name,
+      created_at: folder.created_at || null,
+      note_count: 0,
+    });
+    renderCollections();
+    renderBookmarkSidebar();
+  }
+
+  // ---------- Bookmarks wiring ----------
+
+  // Bookmark list clicks: rows navigate to the document viewer; the X
+  // (remove) button unbookmarks. Delegated so re-renders stay wired.
+  function bindBookmarkListClick() {
+    if (!els.bookmarksList) return;
+    els.bookmarksList.addEventListener('click', (e) => {
+      const removeBtn = e.target.closest('[data-unbookmark]');
+      if (removeBtn) {
+        const id = removeBtn.getAttribute('data-unbookmark');
+        const note = allBookmarks.find((b) => String(b.id) === String(id));
+        unbookmark(note);
+        return;
+      }
+      const row = e.target.closest('[data-open-bookmark]');
+      if (row) {
+        const id = row.getAttribute('data-open-bookmark');
+        if (id) window.location.href = 'document-viewer.html?id=' + encodeURIComponent(id);
+      }
+    });
+  }
+
+  function bindCollectionsListClick() {
+    if (!els.collectionsList) return;
+    els.collectionsList.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-delete-folder]');
+      if (btn) {
+        const id = btn.getAttribute('data-delete-folder');
+        const folder = allCollections.find((f) => String(f.id) === String(id));
+        deleteCollection(folder);
+        return;
+      }
+      const row = e.target.closest('[data-open-folder]');
+      if (row) {
+        const id = row.getAttribute('data-open-folder');
+        const folder = allCollections.find((f) => String(f.id) === String(id));
+        openCollection(folder);
+      }
+    });
+    // Keyboard access for the clickable collection rows.
+    els.collectionsList.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = e.target.closest('[data-open-folder]');
+      if (row) {
+        e.preventDefault();
+        const id = row.getAttribute('data-open-folder');
+        const folder = allCollections.find((f) => String(f.id) === String(id));
+        openCollection(folder);
+      }
+    });
+  }
+
+  // ---------- Collection detail modal ----------
+
+  let activeCollection = null;     // folder object being viewed
+  let collectionNotes = [];        // notes currently inside the folder
+  let userNotesForPicker = [];     // owner uploads offered in the picker
+
+  function openCollection(folder) {
+    if (!folder || !els.collectionModal) return;
+    activeCollection = folder;
+    if (els.collectionModalTitle) {
+      els.collectionModalTitle.textContent = folder.folder_name || 'Collection';
+    }
+    if (els.collectionModalSubtitle) els.collectionModalSubtitle.textContent = 'Loading…';
+    if (els.collectionNotesList) {
+      els.collectionNotesList.innerHTML = '<li class="profile-card__empty">Loading notes…</li>';
+    }
+    if (els.collectionAddPicker) els.collectionAddPicker.hidden = true;
+    els.collectionModal.hidden = false;
+    loadCollectionNotes(folder.id);
+    loadPickerNotes();
+  }
+
+  function closeCollectionModal() {
+    if (!els.collectionModal) return;
+    els.collectionModal.hidden = true;
+    activeCollection = null;
+  }
+
+  // GET /api/folders/:id → folder + its notes.
+  async function loadCollectionNotes(folderId) {
+    if (!api) return;
+    try {
+      const data = await api.get('/folders/' + encodeURIComponent(folderId), { auth: true });
+      collectionNotes = (data && data.notes) || [];
+      renderCollectionNotes();
+      if (els.collectionModalSubtitle) {
+        const n = collectionNotes.length;
+        els.collectionModalSubtitle.textContent = n + ' note' + (n === 1 ? '' : 's');
+      }
+    } catch (err) {
+      console.error('[profile] loadCollectionNotes failed:', err);
+      if (els.collectionNotesList) {
+        els.collectionNotesList.innerHTML =
+          '<li class="profile-card__empty">Could not load collection notes.</li>';
+      }
+    }
+  }
+
+  function renderCollectionNotes() {
+    if (!els.collectionNotesList) return;
+    if (collectionNotes.length === 0) {
+      els.collectionNotesList.innerHTML =
+        '<li class="collection-empty">' +
+          '<span class="collection-empty__icon" aria-hidden="true">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11Z"/></svg>' +
+          '</span>' +
+          '<span>This collection is empty — click "Add Notes" to fill it.</span>' +
+        '</li>';
+      return;
+    }
+    els.collectionNotesList.innerHTML = collectionNotes.map((n) => {
+      const subject = (n.subjects && n.subjects.subject_name) || 'General';
+      const school = (n.schools && n.schools.school_name) || '';
+      const sub = [subject, school].filter(Boolean).join(' · ') || 'Note';
+      return (
+        '<li class="collection-note-row" data-open-collection-note="' + escapeHtml(String(n.id)) + '" role="button" tabindex="0">' +
+          '<div class="collection-note-row__body">' +
+            '<p class="collection-note-row__title">' + escapeHtml(n.title || 'Untitled') + '</p>' +
+            '<p class="collection-note-row__sub">' + escapeHtml(sub) + '</p>' +
+          '</div>' +
+          '<button class="collection-note-row__remove" type="button" data-remove-from-folder="' + escapeHtml(String(n.id)) + '" aria-label="Remove note from collection: ' + escapeHtml(n.title || '') + '">' + SVG_X_ICON + '</button>' +
+        '</li>'
+      );
+    }).join('');
+  }
+
+  // GET /api/users/me/notes → owner's uploads for the picker.
+  async function loadPickerNotes() {
+    if (!api || !currentUserId) return;
+    if (userNotesForPicker.length > 0) return;   // cached after first load
+    if (!els.collectionPickerList) return;
+    els.collectionPickerList.innerHTML = '<li class="profile-card__empty">Loading your notes…</li>';
+    try {
+      const data = await api.get('/users/' + encodeURIComponent(currentUserId) + '/notes?limit=100');
+      userNotesForPicker = (data && data.notes) || [];
+      renderPickerNotes();
+    } catch (err) {
+      console.error('[profile] loadPickerNotes failed:', err);
+      els.collectionPickerList.innerHTML =
+        '<li class="profile-card__empty">Could not load your notes.</li>';
+    }
+  }
+
+  function renderPickerNotes() {
+    if (!els.collectionPickerList) return;
+    if (userNotesForPicker.length === 0) {
+      els.collectionPickerList.innerHTML =
+        '<li class="collection-empty">' +
+          '<span class="collection-empty__icon" aria-hidden="true">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 19h16"/></svg>' +
+          '</span>' +
+          '<span>You haven\'t uploaded any notes yet.</span>' +
+        '</li>';
+      return;
+    }
+    const inCollection = new Set(collectionNotes.map((n) => String(n.id)));
+    els.collectionPickerList.innerHTML = userNotesForPicker.map((n) => {
+      const subject = (n.subjects && n.subjects.subject_name) || 'General';
+      const already = inCollection.has(String(n.id));
+      return (
+        '<li class="collection-picker-row' + (already ? ' is-in-collection' : '') + '" data-picker-note="' + escapeHtml(String(n.id)) + '">' +
+          '<input type="checkbox" data-picker-check="' + escapeHtml(String(n.id)) + '"' + (already ? ' disabled' : '') + ' aria-label="Select note: ' + escapeHtml(n.title || '') + '" />' +
+          '<div class="collection-picker-row__body">' +
+            '<p class="collection-picker-row__title">' + escapeHtml(n.title || 'Untitled') + '</p>' +
+            '<p class="collection-picker-row__sub">' + escapeHtml(subject) + '</p>' +
+          '</div>' +
+        '</li>'
+      );
+    }).join('');
+  }
+
+  async function addSelectedToCollection() {
+    if (!api || !activeCollection) return;
+    if (!els.collectionPickerList) return;
+    const checks = els.collectionPickerList.querySelectorAll('input[data-picker-check]:checked');
+    const ids = Array.from(checks).map((c) => c.getAttribute('data-picker-check'));
+    if (ids.length === 0) {
+      alert('Select at least one note to add.');
+      return;
+    }
+    if (els.collectionAddConfirmBtn) els.collectionAddConfirmBtn.disabled = true;
+    try {
+      await Promise.all(ids.map((noteId) =>
+        api.post('/folders/' + encodeURIComponent(activeCollection.id) + '/items', { note_id: parseInt(noteId, 10) }, { auth: true })
+      ));
+      // Refresh the folder's notes + the collections list counts.
+      await loadCollectionNotes(activeCollection.id);
+      renderPickerNotes();
+      await refreshCollections();
+    } catch (err) {
+      console.error('[profile] addSelectedToCollection failed:', err);
+      alert((err && err.message) || 'Could not add notes to collection.');
+    } finally {
+      if (els.collectionAddConfirmBtn) els.collectionAddConfirmBtn.disabled = false;
+    }
+  }
+
+  async function removeFromCollection(noteId) {
+    if (!api || !activeCollection) return;
+    const confirmed = await confirmDialog({
+      title: 'Remove note?',
+      message: 'Remove this note from the collection? The note itself will not be deleted.',
+      okText: 'Remove',
+    });
+    if (!confirmed) return;
+    try {
+      await api.delete('/folders/' + encodeURIComponent(activeCollection.id) + '/items/' + encodeURIComponent(noteId), { auth: true });
+      await loadCollectionNotes(activeCollection.id);
+      renderPickerNotes();
+      await refreshCollections();
+    } catch (err) {
+      console.error('[profile] removeFromCollection failed:', err);
+      alert((err && err.message) || 'Could not remove note from collection.');
+    }
+  }
+
+  // Re-fetch GET /users/me/folders after add/remove so the sidebar counts
+  // and the row list stay in sync with what the modal changed.
+  async function refreshCollections() {
+    if (!api || !isBookmarksOwner()) return;
+    try {
+      const res = await api.get('/users/me/folders', { auth: true });
+      allCollections = (res && res.folders) || [];
+      renderCollections();
+      renderBookmarkSidebar();
+    } catch (err) {
+      console.error('[profile] refreshCollections failed:', err);
+    }
+  }
+
+  function bindCollectionModal() {
+    if (!els.collectionModal) return;
+    els.collectionClose?.addEventListener('click', closeCollectionModal);
+    els.collectionBackdrop?.addEventListener('click', (e) => {
+      if (e.target === els.collectionBackdrop) closeCollectionModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && els.collectionModal && !els.collectionModal.hidden) {
+        closeCollectionModal();
+      }
+    });
+    // Closing on scroll: the modal is position:fixed, so scrolling the
+    // page (or a container under it) strands it mid-viewport. Capture
+    // phase catches scrolls from every scrollable ancestor, but we
+    // keep scrolling INSIDE the modal's own scrollable body alive.
+    window.addEventListener('scroll', (e) => {
+      const t = e.target;
+      if (t instanceof Element && els.collectionModal && els.collectionModal.contains(t)) return;
+      if (els.collectionModal && !els.collectionModal.hidden) closeCollectionModal();
+    }, { capture: true, passive: true });
+    els.collectionAddNotesBtn?.addEventListener('click', () => {
+      if (els.collectionAddPicker) els.collectionAddPicker.hidden = !els.collectionAddPicker.hidden;
+    });
+    els.collectionAddCancelBtn?.addEventListener('click', () => {
+      if (els.collectionAddPicker) els.collectionAddPicker.hidden = true;
+    });
+    els.collectionAddConfirmBtn?.addEventListener('click', addSelectedToCollection);
+
+    // Notes list: click navigates to the note; the X removes it.
+    els.collectionNotesList?.addEventListener('click', (e) => {
+      const removeBtn = e.target.closest('[data-remove-from-folder]');
+      if (removeBtn) {
+        removeFromCollection(removeBtn.getAttribute('data-remove-from-folder'));
+        return;
+      }
+      const row = e.target.closest('[data-open-collection-note]');
+      if (row) {
+        const id = row.getAttribute('data-open-collection-note');
+        if (id) window.location.href = 'document-viewer.html?id=' + encodeURIComponent(id);
+      }
+    });
+
+    // Picker rows: clicking anywhere on the row toggles its checkbox.
+    els.collectionPickerList?.addEventListener('click', (e) => {
+      const row = e.target.closest('[data-picker-note]');
+      if (!row || e.target.closest('input')) return;
+      const check = row.querySelector('input[data-picker-check]');
+      if (check && !check.disabled) check.checked = !check.checked;
+    });
+  }
+
+  // Search filters the already-fetched bookmark rows client-side (same
+  // approach as the notes search). No backend round-trip per keystroke.
+  function bindBookmarksSearch() {
+    if (!els.bookmarksSearch) return;
+    els.bookmarksSearch.addEventListener('input', () => renderBookmarks());
+  }
+
+  function bindBookmarksToggles() {
+    if (els.bookmarksViewAll) {
+      els.bookmarksViewAll.addEventListener('click', () => {
+        bookmarksExpanded = !bookmarksExpanded;
+        renderBookmarks();
+      });
+    }
+    if (els.collectionsViewAll) {
+      els.collectionsViewAll.addEventListener('click', () => {
+        collectionsExpanded = !collectionsExpanded;
+        renderCollections();
+      });
+    }
+  }
+
+  // "+ Add Collection" toggles an inline form (no modal). Submitting
+  // calls POST /api/folders; Enter or the Create button both submit.
+  function bindCollectionCreate() {
+    if (!els.addCollectionBtn || !els.collectionCreateForm) return;
+
+    els.addCollectionBtn.addEventListener('click', () => {
+      els.collectionCreateForm.hidden = !els.collectionCreateForm.hidden;
+      if (!els.collectionCreateForm.hidden && els.collectionNameInput) {
+        els.collectionNameInput.value = '';
+        els.collectionNameInput.focus();
+      }
+    });
+
+    if (els.collectionCancelBtn) {
+      els.collectionCancelBtn.addEventListener('click', () => {
+        els.collectionCreateForm.hidden = true;
+      });
+    }
+
+    els.collectionCreateForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = (els.collectionNameInput && els.collectionNameInput.value || '').trim();
+      if (!name) {
+        if (els.collectionNameInput) els.collectionNameInput.focus();
+        return;
+      }
+      if (els.collectionCreateBtn) els.collectionCreateBtn.disabled = true;
+      try {
+        await createCollection(name);
+        if (els.collectionCreateForm) els.collectionCreateForm.hidden = true;
+      } catch (err) {
+        console.error('[profile] create collection failed:', err);
+        alert((err && err.message) || 'Could not create collection.');
+      } finally {
+        if (els.collectionCreateBtn) els.collectionCreateBtn.disabled = false;
+      }
+    });
+  }
+
+  // Stable per-subject tint so each bookmark row keeps the varied color
+  // feel of the original static mockup without hardcoding subject names.
+  function bookmarkColor(subject) {
+    let hash = 0;
+    for (let i = 0; i < subject.length; i++) {
+      hash = (hash * 31 + subject.charCodeAt(i)) >>> 0;
+    }
+    return BOOKMARK_PALETTE[hash % BOOKMARK_PALETTE.length];
+  }
+
+  // Inline SVG snippets for the bookmark / collection rows.
+  const BOOKMARK_PALETTE = ['#2F6FED', '#22B87A', '#9B5DE5', '#E07B00', '#E8546B', '#17A2B8'];
+  const SVG_BOOKMARK_ICON =
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z"/></svg>';
+  const SVG_FOLDER_ICON =
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11Z"/></svg>';
+  const SVG_X_ICON =
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+  const SVG_TRASH_ICON =
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="m19 6-1.2 14a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 6"/></svg>';
+
   // ---------- Settings form ----------
 
   // Populates the settings form from the loaded profile + fetched
@@ -1076,13 +1777,176 @@ const res = await api.patch(
       }
     }
     els.settingsSchool.value = currentProfile.school_id ? String(currentProfile.school_id) : '';
+    // The custom-select trigger mirrors the native select's display value;
+    // setting .value directly doesn't mutate the DOM, so sync it manually.
+    if (els.settingsSchool.refreshCselect) els.settingsSchool.refreshCselect();
+    if (els.settingsGrade.refreshCselect) els.settingsGrade.refreshCselect();
     updateBioCount();
+
+    // Pull the Privacy / Notifications settings once so the toggles
+    // reflect the saved values (same owner gate as the form above).
+    await loadUserSettings();
   }
 
   function updateBioCount() {
     if (!els.settingsBioCount || !els.settingsBio) return;
     const len = els.settingsBio.value.length;
     els.settingsBioCount.textContent = len + ' / 500';
+  }
+
+  // ---------- Privacy / Notifications settings ----------
+
+  // Displays feedback inside whichever settings panel owns `el`.
+  function showPanelMessage(el, text, kind) {
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'settings-message settings-message--' + (kind || 'success');
+    el.hidden = false;
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => { el.hidden = true; }, 4000);
+  }
+
+  // Fetches /users/me/settings once and syncs every `[data-setting]`
+  // toggle. `is_private` is stored inverted (checked = public).
+  async function loadUserSettings() {
+    if (!api || !getToken()) return;
+    if (settingsLoaded && userSettings) return;
+    try {
+      const res = await api.get('/users/me/settings', { auth: true });
+      userSettings = (res && res.settings) || {};
+      settingsLoaded = true;
+    } catch (err) {
+      console.warn('[profile] settings load failed:', err);
+      userSettings = {};
+    }
+    document.querySelectorAll('.settings-toggle input[data-setting]').forEach((input) => {
+      const key = input.dataset.setting;
+      if (!(key in userSettings)) return;
+      input.checked = (key === 'is_private') ? !userSettings[key] : !!userSettings[key];
+    });
+  }
+
+  // Persists a single setting toggle. Optimistic: flips first, reverts
+  // on failure. Guest/expired sessions and pre-migration databases both
+  // fall back to an inline error message.
+  function isOwnSettings() {
+    return currentUserId != null && currentTargetId === currentUserId;
+  }
+
+  async function saveSettingToggle(input) {
+    if (!isOwnSettings()) return;
+    const key = input.dataset.setting;
+    const panel = input.closest('[data-settings-panel]');
+    const messageEl = panel ? panel.querySelector('.settings-message') : null;
+    const previous = input.checked;
+    const value = (key === 'is_private') ? !input.checked : input.checked;
+
+    input.disabled = true;
+    try {
+      const res = await api.patch('/users/me/settings', { [key]: value }, { auth: true });
+      userSettings = (res && res.settings) || { ...userSettings, [key]: value };
+      showPanelMessage(messageEl, 'Saved.', 'success');
+    } catch (err) {
+      input.checked = previous;
+      if (err && err.status === 401) {
+        if (ON.clearToken) ON.clearToken();
+        showPanelMessage(messageEl, 'Your session expired. Please log in again.', 'error');
+      } else {
+        showPanelMessage(messageEl, (err && err.message) || 'Could not save this setting.', 'error');
+      }
+    } finally {
+      input.disabled = false;
+    }
+  }
+
+  // Exports the owner's data as a JSON file download.
+  async function exportMyData() {
+    if (!isOwnSettings()) return;
+    if (!els.privacyMessage) return;
+    if (!api || !getToken()) {
+      showPanelMessage(els.privacyMessage, 'Your session has expired. Please log in again.', 'error');
+      return;
+    }
+    els.privacyExportBtn.disabled = true;
+    els.privacyExportBtn.textContent = 'Exporting…';
+    try {
+      const data = await api.get('/users/me/export', { auth: true });
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'olongnotes-export-' + (currentTargetId || 'me') + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showPanelMessage(els.privacyMessage, 'Your data has been exported.', 'success');
+    } catch (err) {
+      console.error('[profile] export failed:', err);
+      showPanelMessage(els.privacyMessage, (err && err.message) || 'Could not export your data.', 'error');
+    } finally {
+      els.privacyExportBtn.disabled = false;
+      els.privacyExportBtn.textContent = 'Export';
+    }
+  }
+
+  // ---------- Security actions ----------
+
+  async function updatePassword() {
+    if (!isOwnSettings()) return;
+    if (!els.securityMessage) return;
+    const current = els.securityCurrentPw ? els.securityCurrentPw.value : '';
+    const next = els.securityNewPw ? els.securityNewPw.value : '';
+    const confirm = els.securityConfirmPw ? els.securityConfirmPw.value : '';
+
+    if (!current) return showPanelMessage(els.securityMessage, 'Enter your current password.', 'error');
+    if (next.length < 8) return showPanelMessage(els.securityMessage, 'New password must be at least 8 characters.', 'error');
+    if (next !== confirm) return showPanelMessage(els.securityMessage, 'New passwords do not match.', 'error');
+
+    els.securityUpdatePwBtn.disabled = true;
+    els.securityUpdatePwBtn.textContent = 'Updating…';
+    try {
+      const res = await api.post('/auth/change-password', {
+        current_password: current,
+        new_password: next,
+      }, { auth: true });
+      if (els.securityCurrentPw) els.securityCurrentPw.value = '';
+      if (els.securityNewPw) els.securityNewPw.value = '';
+      if (els.securityConfirmPw) els.securityConfirmPw.value = '';
+      showPanelMessage(els.securityMessage, (res && res.message) || 'Password updated successfully.', 'success');
+    } catch (err) {
+      showPanelMessage(els.securityMessage, (err && err.message) || 'Could not update your password.', 'error');
+    } finally {
+      els.securityUpdatePwBtn.disabled = false;
+      els.securityUpdatePwBtn.textContent = 'Update Password';
+    }
+  }
+
+  async function signOutAllSessions() {
+    if (!isOwnSettings()) return;
+    if (!els.securityMessage) return;
+    if (!getToken()) {
+      showPanelMessage(els.securityMessage, 'Your session has expired. Please log in again.', 'error');
+      return;
+    }
+    const ok = await confirmDialog({
+      title: 'Sign out of all sessions?',
+      message: 'This ends every session on every device, including this one. You will need to log in again.',
+      okText: 'Sign out all',
+    });
+    if (!ok) return;
+
+    els.securitySignOutAllBtn.disabled = true;
+    try {
+      await api.post('/auth/signout-all', null, { auth: true });
+      if (ON.clearToken) ON.clearToken();
+      try { localStorage.removeItem('olongnotes_user'); } catch (_) {}
+      window.location.href = 'index.html';
+    } catch (err) {
+      console.error('[profile] signout-all failed:', err);
+      showPanelMessage(els.securityMessage, (err && err.message) || 'Could not sign out all sessions.', 'error');
+      els.securitySignOutAllBtn.disabled = false;
+    }
   }
 
   // Show a transient message above the settings form. Used for both
@@ -1151,20 +2015,42 @@ const res = await api.patch(
 
   // The left rail has stub links for Privacy / Notifications / Security
   // in this cut. Only the Profile tab is wired; the others are visual
-  // placeholders that get the .is-active style on click without
-  // navigation. (Settings form lives in the Profile section.)
+  // Switches the visible settings panel on click. The Privacy,
+  // Notifications, and Security panels are static previews, so nothing
+  // is loaded — only the active nav item and the visible panel change.
+  function switchSettingsPanel(name) {
+    document.querySelectorAll('.settings-nav a').forEach((b) => {
+      b.classList.toggle('is-active', b.dataset.settingsNav === name);
+    });
+    document.querySelectorAll('.settings-content [data-settings-panel]').forEach((p) => {
+      p.hidden = p.dataset.settingsPanel !== name;
+    });
+    const actions = document.querySelector('.settings-actions');
+    if (actions) actions.hidden = name !== 'profile';
+  }
+
   function bindSettingsNav() {
     document.querySelectorAll('.settings-nav a').forEach((a) => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        if (a.dataset.settingsNav === 'profile') {
-          // Already the default view — just refocus the bio field for
-          // a small UX nudge.
+        const name = a.dataset.settingsNav;
+        switchSettingsPanel(name);
+        if (name === 'profile') {
           document.querySelector('.settings-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        document.querySelectorAll('.settings-nav a').forEach((b) => b.classList.toggle('is-active', b === a));
       });
     });
+  }
+
+  // Wires the Privacy / Notifications toggles and the Security
+  // actions (password change, sign-out-all, data export).
+  function bindSettingsControls() {
+    document.querySelectorAll('.settings-toggle input[data-setting]').forEach((input) => {
+      input.addEventListener('change', () => saveSettingToggle(input));
+    });
+    els.privacyExportBtn?.addEventListener('click', exportMyData);
+    els.securityUpdatePwBtn?.addEventListener('click', updatePassword);
+    els.securitySignOutAllBtn?.addEventListener('click', signOutAllSessions);
   }
 
   // ---------- Logout from settings ----------
@@ -1186,6 +2072,13 @@ const res = await api.patch(
   function boot() {
     cacheEls();
 
+    // The shared custom-select enhancement (community-shared.js) wraps the
+    // School / Grade dropdowns in the same searchable dropdown UI used
+    // across the app. It re-renders via a MutationObserver whenever the
+    // native options change, so populating them later still works.
+    const initCustomSelect = (window.OlongNotes?.shared?.initCustomSelect) || (() => {});
+    [els.settingsSchool, els.settingsGrade].forEach((el) => el && initCustomSelect(el));
+
     // The current viewer comes from the same localStorage key
     // script.js uses. We need it for the Settings tab visibility check.
     const cached = readJSON('olongnotes_user');
@@ -1205,6 +2098,13 @@ const res = await api.patch(
     bindNotesSearch();
     bindNotesCardClick();
     bindNewNoteButton();
+    bindBookmarkListClick();
+    bindCollectionsListClick();
+    bindBookmarksSearch();
+    bindBookmarksToggles();
+    bindCollectionCreate();
+    bindCollectionModal();
+    bindSettingsControls();
     els.settingsSaveBtn?.addEventListener('click', saveSettings);
     els.settingsLogoutBtn?.addEventListener('click', logoutFromSettings);
     els.settingsBio?.addEventListener('input', updateBioCount);
@@ -1221,10 +2121,14 @@ loadProfile(targetId).then(() => {
       // unhides + binds the buttons; for non-owners it's a no-op so the
       // affordances stay hidden.
       bindImageUploads();
-      // Honor ?tab=<name> deep-link after the shell is up.
+      // Honor ?tab=<name> deep-link after the shell is up. The bookmarks
+      // tab is owner-only, so a non-owner's deep link falls back to
+      // Overview rather than an empty/hidden panel.
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');
-      if (tab && ['overview', 'notes', 'bookmarks', 'activity', 'settings'].includes(tab)) {
+      if (tab === 'bookmarks' && (currentUserId == null || currentTargetId !== currentUserId)) {
+        activate('overview');
+      } else if (tab && ['overview', 'notes', 'bookmarks', 'activity', 'settings'].includes(tab)) {
         activate(tab);
       }
     });

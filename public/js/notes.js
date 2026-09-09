@@ -183,7 +183,7 @@
     // page-load because /api/notes doesn't expose a pop-sort query
     // param yet — fine at 8/page.
     const sorted = [...state.notes].sort(
-      (a, b) => (b.likes + b.downloads) - (a.likes + b.downloads)
+      (a, b) => (b.likes + b.downloads) - (a.likes + a.downloads)
     )
 
     docGrid.innerHTML = ''

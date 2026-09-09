@@ -30,7 +30,7 @@ The design uses a navy (`#0F2A52`) + goldenrod (`#D4A24C`) palette with a fully 
 - `helmet` for security headers
 - `cors` for cross-origin support
 - `multer` for file uploads
-- `bcrypt` + session-based auth
+- Supabase Auth (email/password) — JWT issued and verified via `@supabase/supabase-js`
 - Vercel serverless deployment (`@vercel/speed-insights`)
 
 **Frontend**
@@ -51,10 +51,10 @@ olongnotes/
 ├── vercel.json            # Vercel deployment config
 ├── package.json
 ├── middleware/
-│   ├── auth.js            # Session auth middleware
+│   ├── auth.js            # JWT auth middleware (Bearer token → user)
 │   └── adminOnly.js       # Admin role guard
 ├── routes/
-│   ├── auth.js            # Register, login, logout, session
+│   ├── auth.js            # Register, login, logout, session check (JWT)
 │   ├── users.js           # Profile, avatars, user data
 │   ├── notes.js           # Upload, browse, like, bookmark
 │   ├── questions.js       # Ask, answer, accept
@@ -103,19 +103,20 @@ cd olongnotes
 # Install dependencies
 npm install
 
-# Create a .env file
-cp .env.example .env
-# then fill in your Supabase credentials
+# Create a .env file (no .env.example is shipped — create a new file)
+# then fill in your Supabase credentials (see "Environment Variables" below)
 ```
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root with these variables:
 
 ```env
 SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-public-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-SESSION_SECRET=any-long-random-string
+PORT=3000
+ALLOWED_ORIGINS=http://localhost:3000
 ```
 
 ### Run Locally

@@ -174,6 +174,10 @@
   font-weight: 700;
   color: #ffffff;
   margin: 0;
+  /* Long "single-word" usernames (underscores/hyphens) must never be
+     able to blow past the card. Allow them to break so nothing clips. */
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .profile-badge {
@@ -220,6 +224,8 @@
   font-family: 'Inter', sans-serif;
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.85);
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .profile-hero__meta span em {
   font-style: normal;
@@ -227,12 +233,13 @@
 }
 
 .profile-hero__stats { display: flex; flex-wrap: wrap; gap: 32px; }
-.profile-hero__stats div { display: flex; flex-direction: column; gap: 2px; }
+.profile-hero__stats div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .profile-hero__stats strong {
   font-family: 'Poppins', sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
   color: #ffffff;
+  overflow-wrap: anywhere;
 }
 .profile-hero__stats span {
   font-family: 'Inter', sans-serif;
@@ -241,6 +248,7 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: rgba(255, 255, 255, 0.65);
+  overflow-wrap: anywhere;
 }
 
 /* ---- Tabs ---- */
@@ -883,6 +891,180 @@
   gap: 10px;
 }
 
+/* ---- Settings panels (Profile / Privacy / Notifications / Security) ---- */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.settings-nav a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.settings-nav a svg { flex: none; }
+
+.settings-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settings-panel-head .settings-subtitle { margin-bottom: 0; }
+
+.settings-preview-tag {
+  flex: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  background: rgba(47, 111, 237, 0.1);
+  border: 1px solid rgba(47, 111, 237, 0.25);
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.settings-group { margin: 20px 0 0; padding-top: 20px; border-top: 1px solid var(--gray-100); }
+.settings-group__title {
+  margin: 0 0 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 0;
+  border-top: 1px solid var(--gray-100);
+}
+.settings-row:first-of-type { border-top: none; }
+.settings-row__text { min-width: 0; }
+.settings-row__text strong {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+.settings-row__text span {
+  display: block;
+  margin-top: 2px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--gray-600);
+}
+.settings-row__text strong,
+.settings-row__text span { max-width: 100%; }
+
+.settings-row--action .btn { flex: none; }
+
+/* Toggle switch (static previews use disabled inputs) */
+.settings-toggle { position: relative; display: inline-flex; flex: none; cursor: pointer; }
+.settings-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.settings-toggle .settings-toggle__track {
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--gray-200);
+  position: relative;
+  transition: background 0.18s ease;
+}
+.settings-toggle .settings-toggle__track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(11, 31, 77, 0.25);
+  transition: transform 0.18s ease;
+}
+.settings-toggle input:checked + .settings-toggle__track { background: var(--accent-blue); }
+.settings-toggle input:checked + .settings-toggle__track::after { transform: translateX(16px); }
+.settings-toggle input:disabled { cursor: not-allowed; }
+.settings-toggle input:disabled + .settings-toggle__track { opacity: 0.65; }
+
+.settings-danger-zone {
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(232, 84, 107, 0.3);
+  border-radius: 12px;
+  background: rgba(232, 84, 107, 0.05);
+}
+.settings-danger-zone .settings-group { margin: 0; padding: 0; border-top: none; }
+.settings-danger-zone .settings-group__title { color: #E8546B; }
+
+.btn--sm {
+  padding: 7px 14px;
+  font-size: 0.78rem;
+  border-radius: 8px;
+}
+
+/* ---- Custom select (School / Grade) ----
+   The shared enhancement (community-shared.js) wraps the native <select>
+   in a styled trigger + fixed panel. Two adjustments are needed here:
+   the .settings-field select rule above forces width:100% on the
+   visually-hidden native select, which would let it overlay the trigger
+   and swallow clicks, so it's pinned back to the 1px clip size; and the
+   trigger is restyled to match the settings inputs (same padding,
+   radius, and colors) instead of the upload-form look. */
+.settings-field.cselect .cselect__native {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  background: transparent;
+  appearance: none;
+}
+.settings-field.cselect .cselect__trigger {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--navy);
+}
+.settings-field.cselect .cselect__trigger:hover { border-color: var(--accent-blue); }
+.settings-field.cselect.is-open .cselect__trigger,
+.settings-field.cselect .cselect__trigger:focus-visible {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.14);
+}
+.settings-field.cselect.is-disabled .cselect__trigger {
+  background: var(--gray-100);
+  color: var(--gray-500);
+  cursor: not-allowed;
+}
+
 /* ---- Empty state (no profile to show) ---- */
 .profile-empty { padding: 72px 24px; }
 .profile-empty__card {
@@ -997,6 +1179,33 @@
   background: rgba(47, 111, 237, 0.14);
 }
 
+[data-theme="dark"] .settings-group { border-top-color: var(--gray-200); }
+[data-theme="dark"] .settings-row { border-top-color: var(--gray-200); }
+[data-theme="dark"] .settings-row__text strong { color: var(--text-heading); }
+[data-theme="dark"] .settings-row__text span { color: var(--gray-600); }
+[data-theme="dark"] .settings-toggle .settings-toggle__track { background: var(--gray-500, #6b7280); }
+[data-theme="dark"] .settings-toggle input:checked + .settings-toggle__track { background: var(--accent-blue); }
+[data-theme="dark"] .settings-preview-tag {
+  color: var(--accent-blue);
+  background: rgba(47, 111, 237, 0.16);
+  border-color: rgba(47, 111, 237, 0.35);
+}
+[data-theme="dark"] .settings-danger-zone {
+  border-color: rgba(232, 84, 107, 0.35);
+  background: rgba(232, 84, 107, 0.08);
+}
+
+[data-theme="dark"] .settings-message--success {
+  background: rgba(76, 154, 106, 0.2);
+  color: #6fd69b;
+  border-color: rgba(76, 154, 106, 0.45);
+}
+[data-theme="dark"] .settings-message--error {
+  background: rgba(232, 84, 107, 0.2);
+  color: #ff8fa2;
+  border-color: rgba(232, 84, 107, 0.45);
+}
+
 [data-theme="dark"] .settings-subtitle { color: var(--gray-600); }
 [data-theme="dark"] .settings-field label { color: var(--text-heading); }
 [data-theme="dark"] .settings-field input,
@@ -1004,6 +1213,18 @@
 [data-theme="dark"] .settings-field select {
   background: var(--gray-100);
   border-color: var(--gray-200);
+  color: var(--text-heading);
+}
+[data-theme="dark"] .settings-field.cselect .cselect__trigger {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+  color: var(--text-heading);
+}
+[data-theme="dark"] .settings-field.cselect .cselect__trigger:hover,
+[data-theme="dark"] .settings-field.cselect.is-open .cselect__trigger,
+[data-theme="dark"] .settings-field.cselect .cselect__trigger:focus-visible {
+  border-color: var(--accent-blue);
+  background: var(--gray-100);
   color: var(--text-heading);
 }
 [data-theme="dark"] .settings-field__hint { color: var(--gray-600); }
@@ -1067,13 +1288,31 @@
 
 .bookmarks-view-all {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 14px;
   font-family: 'Inter', sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--accent-blue);
-  text-decoration: none;
+  background: var(--surface);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease),
+              background-color 0.18s var(--ease), color 0.18s var(--ease);
 }
-.bookmarks-view-all:hover { text-decoration: underline; }
+.bookmarks-view-all:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  box-shadow: var(--shadow-sm);
+}
+.bookmarks-view-all:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
 
 /* Bookmark / collection row list. */
 .bookmark-list {
@@ -1091,6 +1330,21 @@
   border-top: 1px solid var(--gray-100);
 }
 .bookmark-row:first-child { border-top: none; }
+
+/* Collection rows are clickable — cursor + hover feedback. */
+.bookmark-row[data-open-folder] {
+  cursor: pointer;
+  border-radius: 10px;
+  margin: 0 -6px;
+  padding: 12px 8px;
+  transition: background-color 0.15s ease;
+}
+.bookmark-row[data-open-folder]:hover { background: var(--gray-50); }
+[data-theme="dark"] .bookmark-row[data-open-folder]:hover { background: var(--gray-100); }
+.bookmark-row[data-open-folder]:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 1px;
+}
 
 .bookmark-row__icon {
   flex-shrink: 0;
@@ -1140,6 +1394,48 @@
 }
 .bookmark-row__menu:hover { background: var(--gray-50); color: var(--navy); }
 
+/* Remove / delete actions on bookmark + collection rows (replaces the
+   old no-op ⋮ button). Removing a favorite is just an X (neutral);
+   only deleting a whole collection is destructive (red). */
+.bookmark-row__menu--danger:hover {
+  background: rgba(232, 84, 107, 0.08);
+  color: #E8546B;
+}
+
+/* Inline "+ Add Collection" form — expands under the My Collection
+   header instead of a modal, so it stacks cleanly at every width. */
+.collection-create-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 2px;
+  padding: 10px 12px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+.collection-create-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-heading);
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+.collection-create-form input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.12);
+}
+.collection-create-form__actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* Bookmark Activity entries (reuses .activity-item markup). */
 .bookmark-activity { margin-top: 4px; }
 .bookmark-activity .activity-item { padding: 14px 0; }
@@ -1162,10 +1458,352 @@
 [data-theme="dark"] .bookmark-row__icon { background: var(--gray-100); }
 [data-theme="dark"] .bookmark-row__menu { color: var(--gray-600); }
 [data-theme="dark"] .bookmark-row__menu:hover { background: var(--gray-100); color: var(--text-heading); }
+[data-theme="dark"] .bookmark-row__menu--danger:hover { background: rgba(232, 84, 107, 0.18); color: #E8546B; }
+[data-theme="dark"] .collection-create-form { background: var(--gray-100); border-color: var(--gray-200); }
+[data-theme="dark"] .collection-create-form input { background: var(--surface); border-color: var(--gray-200); }
+[data-theme="dark"] .bookmarks-view-all {
+  background: var(--surface);
+  border-color: var(--gray-200);
+  color: var(--accent-blue);
+}
+[data-theme="dark"] .bookmarks-view-all:hover {
+  border-color: var(--accent-blue);
+  background: var(--gray-100);
+}
 
 /* ---- Bookmarks responsive ---- */
 @media (max-width: 980px) {
   .bookmarks-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .collection-create-form { flex-direction: column; align-items: stretch; }
+  .collection-create-form__actions { justify-content: flex-end; }
+}
+
+/* =========================================================
+   PROFILE CONFIRM MODAL
+   Generic "are you sure?" dialog used for the Bookmarks tab's
+   destructive actions (removing a bookmark). Mirrors the
+   report-modal pattern in document-viewer.css: fixed overlay,
+   hidden attr, backdrop click + Escape close. Never shows the
+   error-styled inline X — the destructive intent reads in the
+   modal's danger button instead.
+   --------------------------------------------------------- */
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.confirm-modal[hidden] { display: none; }
+.confirm-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 26, 58, 0.45);
+}
+.confirm-modal__panel {
+  position: relative;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 24px 24px 20px;
+  box-shadow: 0 12px 32px rgba(11, 31, 77, 0.22);
+  text-align: center;
+}
+.confirm-modal__icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(232, 84, 107, 0.12);
+  color: #E8546B;
+}
+.confirm-modal__title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 6px;
+}
+.confirm-modal__message {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--gray-600);
+  margin: 0 0 20px;
+  overflow-wrap: anywhere;
+}
+.confirm-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.confirm-modal__actions .btn { min-width: 96px; }
+[data-theme="dark"] .confirm-modal__panel { background: var(--surface); }
+[data-theme="dark"] .confirm-modal__message { color: var(--gray-600); }
+
+/* =========================================================
+   COLLECTION DETAIL MODAL
+   Opens when a collection row is clicked. Shows the notes already
+   in the folder (GET /api/folders/:id) plus an add-notes picker
+   that pulls from the owner's uploads (POST /api/folders/:id/items).
+   Same overlay pattern as the confirm modal.
+   --------------------------------------------------------- */
+.collection-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.collection-modal[hidden] { display: none; }
+.collection-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 26, 58, 0.5);
+}
+.collection-modal__panel {
+  position: relative;
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(11, 31, 77, 0.25);
+  overflow: hidden;
+}
+.collection-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.collection-modal__title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.collection-modal__subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin: 3px 0 0;
+}
+.collection-modal__close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: var(--gray-50);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.collection-modal__close:hover { background: var(--gray-100); color: var(--navy); }
+.collection-modal__body { padding: 16px 20px 20px; overflow-y: auto; }
+
+.collection-modal__section { margin-bottom: 16px; }
+.collection-modal__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.collection-modal__section-head h4 {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+}
+.collection-modal__section-head h4 svg { color: var(--accent-blue); flex-shrink: 0; }
+
+/* Notes already inside the collection. */
+.collection-notes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.collection-notes-list .profile-card__empty { padding: 14px 16px; }
+.collection-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.84rem;
+  color: var(--gray-600);
+}
+.collection-empty__icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-100);
+  color: var(--accent-blue);
+}
+.collection-note-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-top: 1px solid var(--gray-100);
+}
+.collection-note-row:first-child { border-top: none; }
+.collection-note-row__body { flex: 1; min-width: 0; }
+.collection-note-row__title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.collection-note-row__sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+  color: var(--gray-600);
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+.collection-note-row__remove {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.collection-note-row__remove:hover { background: rgba(232, 84, 107, 0.1); color: #E8546B; }
+
+/* Add-notes picker. */
+.collection-add-picker {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  background: var(--gray-50);
+}
+.collection-add-picker__hint {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin: 0 0 10px;
+}
+.collection-add-picker__hint svg { color: var(--accent-blue); flex-shrink: 0; margin-top: 2px; }
+.collection-picker-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.collection-picker-list .profile-card__empty { padding: 12px 14px; }
+.collection-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--gray-100);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.collection-picker-row:first-child { border-top: none; }
+.collection-picker-row:hover { background: var(--gray-50); }
+.collection-picker-row input[type="checkbox"] {
+  flex-shrink: 0;
+  accent-color: var(--accent-blue);
+  width: 16px;
+  height: 16px;
+}
+.collection-picker-row__body { flex: 1; min-width: 0; }
+.collection-picker-row__title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.collection-picker-row__sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+  color: var(--gray-600);
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+.collection-picker-row.is-in-collection { opacity: 0.5; pointer-events: none; }
+.collection-picker-row.is-in-collection .collection-picker-row__sub::after {
+  content: ' — already in this collection';
+  color: var(--gray-600);
+}
+.collection-add-picker__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+[data-theme="dark"] .collection-modal__panel { background: var(--surface); }
+[data-theme="dark"] .collection-modal__head { border-bottom-color: var(--gray-200); }
+[data-theme="dark"] .collection-modal__close { background: var(--gray-100); color: var(--gray-600); }
+[data-theme="dark"] .collection-modal__close:hover { background: var(--gray-200); color: var(--text-heading); }
+[data-theme="dark"] .collection-notes-list { border-color: var(--gray-200); }
+[data-theme="dark"] .collection-note-row { border-top-color: var(--gray-200); }
+[data-theme="dark"] .collection-note-row__title { color: var(--text-heading); }
+[data-theme="dark"] .collection-note-row__sub { color: var(--gray-600); }
+[data-theme="dark"] .collection-add-picker { background: var(--gray-100); border-color: var(--gray-200); }
+[data-theme="dark"] .collection-picker-list { background: var(--surface); border-color: var(--gray-200); }
+[data-theme="dark"] .collection-picker-row { border-top-color: var(--gray-200); }
+[data-theme="dark"] .collection-picker-row:hover { background: var(--gray-100); }
+[data-theme="dark"] .collection-picker-row__title { color: var(--text-heading); }
+[data-theme="dark"] .collection-picker-row__sub { color: var(--gray-600); }
+
+/* ---- Collection modal responsive ---- */
+@media (max-width: 560px) {
+  .collection-modal__panel { max-height: 88vh; }
+  .collection-modal__body { padding: 14px 16px 18px; }
 }
 
 /* ---- Responsive ----
@@ -1222,6 +1860,13 @@
      banner's top-right, clear of the overlapping avatar/content below.
      min-height keeps it a ≥44px tap-friendly touch target on mobile. */
   .profile-hero__banner-edit { top: 12px; bottom: auto; right: 12px; min-height: 44px; }
+  /* Settings rows — stack control under text on any narrow tablet or
+     phone so toggles/buttons never sit squeezed on the same line. */
+  .settings-row { align-items: flex-start; flex-wrap: wrap; }
+  .settings-row__text { flex: 1 1 auto; }
+  .settings-row--action { flex-direction: column; align-items: stretch; }
+  .settings-row--action .btn { width: 100%; }
+  .settings-group > .btn--primary { width: 100%; }
   /* Doc-card (My Notes) — at 320–360px width the auto-fill grid
      collapses to a single column, which is already narrow enough
      that no extra padding adjustment is needed. The .doc-grid
@@ -1234,12 +1879,21 @@
   .search-field { flex: 1; }
   .search-field input { width: 100%; }
   .settings-actions .btn { width: 100%; }
+  .settings-panel-head { flex-wrap: wrap; }
+  .settings-group, .settings-danger-zone { margin-top: 16px; padding-top: 16px; }
+  .settings-row { gap: 12px; }
   /* Keep padding-top at 150px so the avatar still straddles the 200px
      banner on small phones — only tighten the side/bottom padding. */
   .profile-hero__content { padding: 150px 18px 22px; }
   .profile-hero__stats { gap: 16px; }
   .profile-hero__stats strong { font-size: 1rem; }
   .profile-hero__stats span { font-size: 0.62rem; }
+
+  /* Owner tabs + settings sub-nav: stop horizontal-scroll clipping —
+     wrap onto extra lines so no label is ever cut off on a phone. */
+  .profile-tabs { flex-wrap: wrap; overflow-x: visible; }
+  .profile-tab { padding: 10px 12px; }
+  .settings-nav { flex-wrap: wrap; overflow-x: visible; }
 }
 @media (max-width: 480px) {
   .profile-hero__avatar { width: 76px; height: 76px; font-size: 1.3rem; }
@@ -1251,4 +1905,15 @@
   /* Compact the banner edit button on the smallest screens. */
   .profile-hero__banner-edit { padding: 6px 10px; font-size: 0.76rem; gap: 6px; }
   .profile-hero__banner-edit svg { width: 14px; height: 14px; }
+
+  /* Settings — single scrollable tab strip + stacking rows (rows now
+     wrap from the 720px block above; keep the tighter sizing here). */
+  .settings-nav-card { padding: 8px; border-radius: 14px; }
+  .settings-nav a {
+    padding: 9px 12px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+  .settings-danger-zone { padding: 12px 14px; }
+  .settings-preview-tag { font-size: 0.62rem; padding: 3px 8px; }
 }

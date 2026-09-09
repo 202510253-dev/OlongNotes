@@ -27,7 +27,7 @@ const { randomUUID } = require('crypto')
 // ---------- Constants ----------
 const PROFILE_SELECT =
   'id, user_name, role, bio, avatar_url, banner_url, location, strand, school_id, ' +
-  'grade_level, created_at, verified_at, account_status'
+  'grade_level, created_at, verified_at, account_status, email'
 
 const NOTE_SELECT =
   'id, title, subject_id, grade_level, created_at, updated_at, ' +
@@ -46,6 +46,51 @@ const ALLOWED_GRADE_LEVELS = new Set([
   'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10',
   'Grade 11', 'Grade 12', 'College',
 ])
+
+// ---------- User settings (Privacy / Notifications) ----------
+// These live as boolean columns on the `users` row, added by a one-time
+// migration (see the SQL tip in the routes/users.js notes / final summary).
+// Every read here is guarded so a missing column (pre-migration) degrades
+// to these defaults instead of breaking the profile page.
+const DEFAULT_USER_SETTINGS = {
+  is_private: false,
+  show_email: false,
+  show_school_grade: true,
+  show_activity: true,
+  allow_downloads: true,
+  notify_answers: true,
+  notify_accepted: true,
+  notify_likes: true,
+  notify_followers: true,
+  notify_email: true,
+  notify_digest: false,
+}
+
+const SETTINGS_COLUMNS = Object.keys(DEFAULT_USER_SETTINGS)
+
+// Reads a user's settings, always returning a complete settings object.
+// Uses the service-role client scoped to the userId (never leaks other
+// rows). Returns { ok, settings, error } — settings is always the full
+// defaults-overlaid shape; error is non-null if the read failed (most
+// likely the migration columns don't exist yet).
+async function fetchUserSettings(userId) {
+  const fallback = { ok: false, settings: { ...DEFAULT_USER_SETTINGS }, error: null }
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select(SETTINGS_COLUMNS.join(', '))
+      .eq('id', userId)
+      .maybeSingle()
+    if (error) return { ...fallback, error }
+    const settings = { ...DEFAULT_USER_SETTINGS }
+    for (const key of SETTINGS_COLUMNS) {
+      if (data && typeof data[key] === 'boolean') settings[key] = data[key]
+    }
+    return { ok: true, settings, error: null }
+  } catch (err) {
+    return { ...fallback, error: err }
+  }
+}
 
 const PAGE_LIMIT_DEFAULT = 50
 const PAGE_LIMIT_MAX = 100
@@ -327,6 +372,29 @@ function joinedLabel(createdAt) {
   return `${years} year${years === 1 ? '' : 's'} ago`
 }
 
+// Counts the user's PUBLISHED notes for the profile "uploads" hero stat.
+// The profile Notes tab already filters status='published' (GET /:id/notes),
+// so the counter must count the same set — counting every row regardless
+// of status inflated the figure with pending/rejected drafts. Returns 0
+// on error so a single failed count never breaks the stats endpoint.
+async function countPublishedNotes(userId) {
+  try {
+    const { count, error } = await supabaseAdmin
+      .from('notes')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('status', NOTE_STATUS_PUBLISHED)
+    if (error) {
+      console.error('[users] count(published notes) error:', error)
+      return 0
+    }
+    return typeof count === 'number' ? count : 0
+  } catch (err) {
+    console.error('[users] count(published notes) exception:', err)
+    return 0
+  }
+}
+
 // Counts rows matching a filter. Returns 0 on error so a single
 // failed count never breaks the stats endpoint.
 async function safeCount(table, column, value) {
@@ -418,6 +486,25 @@ router.get('/:id', async (req, res) => {
 
     const profile = pickProfile(user, schoolRow)
     profile.joined_label = joinedLabel(user.created_at)
+
+    // Privacy settings live on the user's row (one-time migration).
+    // Missing columns → defaults (show everything), so a pre-migration
+    // database behaves exactly as before. Exposed as user.settings and
+    // enforced here for the fields the profile page renders:
+    //   - show_email:        email is returned ONLY when the toggle is on
+    //                        (never part of the public profile otherwise).
+    //   - show_school_grade: school / strand / grade are blanked when off.
+    const { settings, error: settingsError } = await fetchUserSettings(userId)
+    if (!settingsError) {
+      if (settings.show_email) profile.email = user.email || null
+      if (!settings.show_school_grade) {
+        profile.school_id = null
+        profile.school_name = null
+        profile.strand = null
+        profile.grade_level = null
+      }
+      profile.settings = settings
+    }
 
     return res.status(200).json({ user: profile })
   } catch (err) {
@@ -596,7 +683,7 @@ router.get('/:id/stats', async (req, res) => {
       receivedQuestionLikes,
       receivedAnswerLikes,
     ] = await Promise.all([
-      safeCount('notes', 'user_id', userId),
+      countPublishedNotes(userId),
       safeSum('notes', 'download_count', 'user_id', userId),
       safeCount('likes', 'user_id', userId),
       safeCount('question_likes', 'user_id', userId),
@@ -662,10 +749,21 @@ router.get('/:id/activities', async (req, res) => {
   )
   const pageOffset = parseInt(req.query.offset) || 0
 
+  // Honor the "Show activity feed" privacy toggle. Missing columns
+  // (pre-migration) default to showing activity.
+  const { settings, error: settingsError } = await fetchUserSettings(userId)
+  if (!settingsError && !settings.show_activity) {
+    return res.status(200).json({
+      activities: [],
+      pagination: { total: 0, limit: pageLimit, offset: pageOffset, has_more: false },
+    })
+  }
+
   try {
-    // Uses supabaseAdmin so the activity_log RLS policy doesn't block
-    // — see routes/activities.js:27-37 for the long version of the
-    // same note. Public profiles are intentionally readable by anyone.
+    // Uses the service-role client — activity_log's RLS policy would
+    // block the anon client (see routes/activities.js:27-37 for the long
+    // version of the same note). Public profiles are intentionally
+    // readable by anyone.
     const { data: logRows, error: logError, count } = await supabaseAdmin
       .from('activity_log')
       .select('id, activity_type, target_id, created_at', { count: 'exact' })
@@ -861,6 +959,113 @@ router.patch('/:id', auth, async (req, res) => {
   } catch (err) {
     console.error('[users] PATCH /:id exception:', err)
     return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
+// ===================== USER SETTINGS (Privacy / Notifications) =====================
+// Auth-scoped settings for the signed-in user, backed by the boolean
+// settings columns on the `users` row (one-time migration — see the SQL
+// tip in the session summary). Reads/writes use the service-role client
+// with an explicit .eq('id', req.user.id) filter so RLS column quirks
+// never block the owner, and the write fails gracefully with a clear
+// message if the migration hasn't been applied yet.
+
+// ---------- GET /api/users/me/settings ----------
+//
+// Auth required. Returns the caller's settings object, always complete
+// (missing columns degrade to defaults).
+router.get('/me/settings', auth, async (req, res) => {
+  const { settings, error } = await fetchUserSettings(req.user.id)
+  if (error) {
+    // 42703 = undefined_column — the migration columns don't exist yet.
+    // Return defaults so the UI renders without errors.
+    console.warn('[users] GET /me/settings (pre-migration?):', error.message)
+  }
+  return res.status(200).json({ settings })
+})
+
+// ---------- PATCH /api/users/me/settings ----------
+//
+// Auth required. Partially updates the caller's settings. Only boolean
+// values are accepted; unknown keys are ignored.
+router.patch('/me/settings', auth, async (req, res) => {
+  const body = req.body || {}
+  const patch = {}
+  for (const key of SETTINGS_COLUMNS) {
+    if (typeof body[key] === 'boolean') patch[key] = body[key]
+  }
+  if (Object.keys(patch).length === 0) {
+    return res.status(400).json({ message: 'Nothing to update.' })
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .update(patch)
+      .eq('id', req.user.id)
+      .select(SETTINGS_COLUMNS.join(', '))
+      .maybeSingle()
+    if (error) {
+      if (error.code === '42703' || /column .* does not exist/i.test(error.message || '')) {
+        return res.status(400).json({
+          message: 'Settings storage is not set up yet in the database — run the settings migration SQL first.',
+        })
+      }
+      console.error('[users] PATCH /me/settings error:', error)
+      return res.status(500).json({ message: 'Could not save settings.' })
+    }
+
+    const settings = { ...DEFAULT_USER_SETTINGS }
+    for (const key of SETTINGS_COLUMNS) {
+      if (data && typeof data[key] === 'boolean') settings[key] = data[key]
+    }
+    return res.status(200).json({ settings })
+  } catch (err) {
+    console.error('[users] PATCH /me/settings exception:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
+// ---------- GET /api/users/me/export ----------
+//
+// Auth required. Returns everything the owner rightfully has: profile,
+// published notes, questions, answers, bookmarks, folders, and recent
+// activity. The frontend turns the JSON into a downloadable file. No
+// extra DB columns required.
+router.get('/me/export', auth, async (req, res) => {
+  const uid = req.user.id
+
+  try {
+    const [profileRes, notesRes, questionsRes, answersRes, bookmarksRes, foldersRes, activityRes] =
+      await Promise.all([
+        supabase.from('users').select(PROFILE_SELECT).eq('id', uid).maybeSingle(),
+        supabase.from('notes').select('id, title, annotation, subject_id, grade_level, file_type, file_size, download_count, view_count, likes_count, bookmarks_count, status, created_at, updated_at').eq('user_id', uid).order('created_at', { ascending: false }),
+        supabase.from('questions').select('id, title, body, status, grade_level, created_at, likes_count, answers_count').eq('user_id', uid).order('created_at', { ascending: false }),
+        supabase.from('answers').select('id, question_id, content, created_at, likes_count, is_accepted').eq('user_id', uid).order('created_at', { ascending: false }),
+        supabaseAdmin.from('bookmarks').select('id, note_id, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
+        supabaseAdmin.from('folders').select('id, folder_name, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
+        supabaseAdmin.from('activity_log').select('id, activity_type, target_type, target_id, created_at').eq('user_id', uid).eq('target_type', 'note').order('created_at', { ascending: false }).limit(500),
+      ])
+
+    const userRow = profileRes.data
+    const profile = userRow ? pickProfile(userRow, null) : null
+    if (profile) profile.email = userRow.email || null
+    const { settings } = await fetchUserSettings(uid)
+
+    return res.status(200).json({
+      exported_at: new Date().toISOString(),
+      profile,
+      settings,
+      notes: notesRes.data || [],
+      questions: questionsRes.data || [],
+      answers: answersRes.data || [],
+      bookmarks: (bookmarksRes.data || []).map((b) => ({ id: b.id, note_id: b.note_id, created_at: b.created_at })),
+      folders: foldersRes.data || [],
+      activities: activityRes.data || [],
+    })
+  } catch (err) {
+    console.error('[users] GET /me/export exception:', err)
+    return res.status(500).json({ message: 'Could not export your data.' })
   }
 })
 
