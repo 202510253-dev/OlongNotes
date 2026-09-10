@@ -713,6 +713,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
+  } else {
+    // Pages WITHOUT the auth modal (community.html, question.html,
+    // schools.html, subjects.html, etc.): clicking Log In / Sign Up
+    // routes to the landing page's modal via the ?auth= deep link —
+    // the same mechanism the legacy profile icon uses below. Without
+    // this fallback the buttons render but do nothing when clicked.
+    document.getElementById('navLoginBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'index.html?auth=signin';
+    });
+    document.getElementById('navSignupBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'index.html?auth=signup';
+    });
   }
 
   // EDIT 4 (continued): heroContribBtn now opens auth-modal in signup
