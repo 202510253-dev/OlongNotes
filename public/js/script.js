@@ -689,35 +689,53 @@ document.addEventListener('DOMContentLoaded', () => {
     // After the Google consent screen + redirect, initGoogleAuth()
     // (called on every page load by auth-gateway.js) persists the new
     // session into olongnotes_token + olongnotes_user.
-    authCard.querySelectorAll('[data-provider="google"]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        clearAuthError();
-        const gw = window.OlongNotes && window.OlongNotes.googleAuth;
-        if (!gw) {
-          showAuthError('Google sign-in is not available. Please try again.');
-          return;
-        }
-        try {
-          btn.disabled = true;
-          btn.style.opacity = '0.6';
-          const ready = await gw.initGoogleAuth();
-          if (!ready) throw new Error('Could not initialise Google sign-in.');
-          await gw.signInWithGoogle();
-          // signInWithGoogle() opens the consent screen — on return the
-          // session is handled by auth-gateway.js on the next page load.
-        } catch (err) {
-          // User closed the popup / network error / Supabase error.
-          const msg = (err && err.message) || 'Google sign-in failed.';
-          // Don't show the error if it's just a cancelled popup.
-          if (!/popup_closed|closed_by_user|cancelled/i.test(msg)) {
-            showAuthError(msg);
+    (function initGoogleButtons() {
+      const btns = authCard.querySelectorAll('[data-provider="google"]');
+      if (!btns.length) {
+        console.warn('[OlongNotes] No Google buttons found (data-provider="google").');
+        return;
+      }
+      btns.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          console.log('[OlongNotes] Google button clicked.');
+          clearAuthError();
+
+          const gw = window.OlongNotes && window.OlongNotes.googleAuth;
+          if (!gw || !gw.initGoogleAuth) {
+            console.error('[OlongNotes] googleAuth gateway not loaded.');
+            showAuthError('Google sign-in is loading — please wait a moment and try again.');
+            return;
           }
-        } finally {
-          btn.disabled = false;
-          btn.style.opacity = '';
-        }
+
+          try {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            showAuthError('Connecting to Google\u2026');
+
+            console.log('[OlongNotes] Calling initGoogleAuth()...');
+            const ready = await gw.initGoogleAuth();
+            console.log('[OlongNotes] initGoogleAuth returned:', ready);
+            if (!ready) throw new Error('Could not initialise Google sign-in.');
+
+            console.log('[OlongNotes] Calling signInWithGoogle()...');
+            await gw.signInWithGoogle();
+            console.log('[OlongNotes] signInWithGoogle resolved — redirecting to Google.');
+            // signInWithGoogle() opens the consent screen — on return the
+            // session is handled by auth-gateway.js on the next page load.
+          } catch (err) {
+            console.error('[OlongNotes] Google sign-in error:', err);
+            const msg = (err && err.message) || 'Google sign-in failed.';
+            // Don't confuse the user with low-level popup/abort noise.
+            if (!/popup_closed|closed_by_user|cancelled/i.test(msg)) {
+              showAuthError(msg);
+            }
+          } finally {
+            btn.disabled = false;
+            btn.style.opacity = '';
+          }
+        });
       });
-    });
+    })();
 
     // EDIT 3: real login + signup against /api/auth/*.
     const ON = window.OlongNotes || {};
@@ -726,19 +744,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const setToken = ON.setToken;
 
     const showAuthError = (msg) => {
-      let el = authCard.querySelector('.auth-form__error');
-      if (!el) {
-        el = document.createElement('div');
-        el.className = 'auth-form__error';
-        el.setAttribute('role', 'alert');
-        el.style.cssText = 'color:#c53030;background:#fed7d7;padding:8px 12px;border-radius:4px;margin:0 0 12px;font-size:13px;';
-        authCard.querySelector('h2')?.insertAdjacentElement('afterend', el);
-      }
+      // Remove any stale error first (might be in the wrong form).
+      authCard.querySelectorAll('.auth-form__error').forEach((e) => e.remove());
+      const el = document.createElement('div');
+      el.className = 'auth-form__error';
+      el.setAttribute('role', 'alert');
+      el.style.cssText = 'color:#c53030;background:#fed7d7;padding:8px 12px;border-radius:4px;margin:0 0 12px;font-size:13px;';
+      // Insert into the VISIBLE form's <h2> — not the first one globally.
+      const visibleForm = authCard.querySelector(
+        authCard.classList.contains('is-signup')
+          ? '.auth-form-container--signup'
+          : '.auth-form-container--signin'
+      );
+      const anchor = (visibleForm || authCard).querySelector('h2');
+      anchor?.insertAdjacentElement('afterend', el);
       el.textContent = msg;
     };
     const clearAuthError = () => {
-      const el = authCard.querySelector('.auth-form__error');
-      if (el) el.remove();
+      authCard.querySelectorAll('.auth-form__error').forEach((e) => e.remove());
     };
 
     const [loginForm, createForm] = Array.from(authCard.querySelectorAll('form.auth-form'));

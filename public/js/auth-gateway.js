@@ -37,6 +37,7 @@
   let _supabase = null          // Supabase Client instance (created once)
   let _ready    = null          // resolves when init completes
   let _resolveReady             // attached to _ready
+  let _initialising = null      // Promise while init is in flight (dedup guard)
 
   _ready = new Promise((r) => { _resolveReady = r })
 
@@ -138,50 +139,58 @@
    * Resolves when the session is known (cached or fresh).
    */
   async function initGoogleAuth() {
-    try {
-      const supabaseModule = await loadSupabaseSDK()
+    // If a previous init is still in flight, wait for it instead of
+    // creating a second Supabase client or re-fetching /api/config.
+    if (_initialising) return _initialising
 
-      const cfgRes = await fetch('/api/config')
-      if (!cfgRes.ok) throw new Error('Could not load auth config.')
-      const { supabaseUrl, supabaseAnonKey } = await cfgRes.json()
-      if (!supabaseUrl || !supabaseAnonKey) throw new Error('Auth config incomplete.')
-
-      _supabase = supabaseModule.createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          persistSession:  true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,       // handles code / hash fragments
-          storage: window.localStorage,
-          storageKey: SUPABASE_STORAGE_KEY,
-        },
-      })
-
-      // 1) Exchange an authorization code left in the URL by the OAuth
-      //    redirect (PKCE flow — Supabase default).  This call is a
-      //    no-op when no code is present, so it's safe on every load.
+    _initialising = (async () => {
       try {
-        if (typeof _supabase.auth.exchangeCodeForSession === 'function') {
-          await _supabase.auth.exchangeCodeForSession(window.location.href)
+        const supabaseModule = await loadSupabaseSDK()
+
+        const cfgRes = await fetch('/api/config')
+        if (!cfgRes.ok) throw new Error('Could not load auth config.')
+        const { supabaseUrl, supabaseAnonKey } = await cfgRes.json()
+        if (!supabaseUrl || !supabaseAnonKey) throw new Error('Auth config incomplete.')
+
+        _supabase = supabaseModule.createClient(supabaseUrl, supabaseAnonKey, {
+          auth: {
+            persistSession:  true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,       // handles code / hash fragments
+            storage: window.localStorage,
+            storageKey: SUPABASE_STORAGE_KEY,
+          },
+        })
+
+        // 1) Exchange an authorization code left in the URL by the OAuth
+        //    redirect (PKCE flow — Supabase default).  This call is a
+        //    no-op when no code is present, so it's safe on every load.
+        try {
+          if (typeof _supabase.auth.exchangeCodeForSession === 'function') {
+            await _supabase.auth.exchangeCodeForSession(window.location.href)
+          }
+        } catch (_) {
+          // Expired / invalid code — not fatal, just won't have a session.
         }
-      } catch (_) {
-        // Expired / invalid code — not fatal, just won't have a session.
+
+        // 2) Read the (possibly just-exchanged) session and persist it.
+        const session = await _readSupabaseSession()
+        _persistSession(session)
+
+        // 3) Expose to the rest of the app.
+        window.OlongNotes = window.OlongNotes || {}
+        window.OlongNotes.googleAuth = { signInWithGoogle, isReady: _ready }
+        _resolveReady()
+        return true
+
+      } catch (err) {
+        console.warn('[OlongNotes] Google Auth init failed.', err)
+        _resolveReady()
+        return false
       }
+    })()
 
-      // 2) Read the (possibly just-exchanged) session and persist it.
-      const session = await _readSupabaseSession()
-      _persistSession(session)
-
-      // 3) Expose to the rest of the app.
-      window.OlongNotes = window.OlongNotes || {}
-      window.OlongNotes.googleAuth = { signInWithGoogle, isReady: _ready }
-      _resolveReady()
-      return true
-
-    } catch (err) {
-      console.warn('[OlongNotes] Google Auth init failed.', err)
-      _resolveReady()
-      return false
-    }
+    return _initialising
   }
 
   /**
