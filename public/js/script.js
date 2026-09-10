@@ -683,6 +683,42 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('navLoginBtn')?.addEventListener('click', () => openAuth('signin'));
     document.getElementById('navSignupBtn')?.addEventListener('click', () => openAuth('signup'));
 
+    // ---------- Google Sign-In ----------
+    // auth-gateway.js loads the Supabase JS SDK dynamically (only once,
+    // on first click) and calls signInWithOAuth({ provider: 'google' }).
+    // After the Google consent screen + redirect, initGoogleAuth()
+    // (called on every page load by auth-gateway.js) persists the new
+    // session into olongnotes_token + olongnotes_user.
+    authCard.querySelectorAll('[data-provider="google"]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        clearAuthError();
+        const gw = window.OlongNotes && window.OlongNotes.googleAuth;
+        if (!gw) {
+          showAuthError('Google sign-in is not available. Please try again.');
+          return;
+        }
+        try {
+          btn.disabled = true;
+          btn.style.opacity = '0.6';
+          const ready = await gw.initGoogleAuth();
+          if (!ready) throw new Error('Could not initialise Google sign-in.');
+          await gw.signInWithGoogle();
+          // signInWithGoogle() opens the consent screen — on return the
+          // session is handled by auth-gateway.js on the next page load.
+        } catch (err) {
+          // User closed the popup / network error / Supabase error.
+          const msg = (err && err.message) || 'Google sign-in failed.';
+          // Don't show the error if it's just a cancelled popup.
+          if (!/popup_closed|closed_by_user|cancelled/i.test(msg)) {
+            showAuthError(msg);
+          }
+        } finally {
+          btn.disabled = false;
+          btn.style.opacity = '';
+        }
+      });
+    });
+
     // EDIT 3: real login + signup against /api/auth/*.
     const ON = window.OlongNotes || {};
     const esc = ON.escapeHtml || ((s) => String(s ?? ''));
@@ -744,8 +780,12 @@ document.addEventListener('DOMContentLoaded', () => {
           showAuthError('All fields required.');
           return;
         }
-        if (password.length < 8) {
-          showAuthError('Password must be at least 8 characters.');
+        // Run the same password rules the backend enforces.
+        // This catches weak passwords instantly instead of waiting
+        // for a round-trip to the server.
+        const pwCheck = checkPasswordStrength(password);
+        if (pwCheck.level < 3) {
+          showAuthError('Password must be at least 8 characters with an uppercase letter, a lowercase letter, a number, and a special character (!@#$%^&*…).');
           return;
         }
         // Map full_name → username (server pattern: 3-20 chars, [a-zA-Z0-9_]).
@@ -767,6 +807,68 @@ document.addEventListener('DOMContentLoaded', () => {
           showAuthError(esc((err && err.message) || 'Sign-up failed.'));
         }
       });
+    }
+
+    // ---------- Password strength indicator ----------
+    // Mirrors the exact rules enforced by the backend
+    // (routes/auth.js validateStrongPassword):
+    //   1. At least 8 chars
+    //   2. At most 128 chars
+    //   3. One uppercase letter
+    //   4. One lowercase letter
+    //   5. One digit
+    //   6. One special character
+    // The coloured bar + text hint update on every keystroke so the
+    // user gets immediate feedback before submitting.
+    const PW_RULES = [
+      { test: (v) => v.length >= 8,                    msg: 'Use 8+ characters' },
+      { test: (v) => v.length <= 128,                  msg: 'At most 128 characters' },
+      { test: (v) => /[A-Z]/.test(v),                 msg: 'Add an uppercase letter' },
+      { test: (v) => /[a-z]/.test(v),                 msg: 'Add a lowercase letter' },
+      { test: (v) => /\d/.test(v),                     msg: 'Add a number' },
+      { test: (v) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(v), msg: 'Add a special character (!@#$%^&*…)' },
+    ]
+    function checkPasswordStrength(pw) {
+      const passed = PW_RULES.filter((r) => r.test(pw)).length
+      const total  = PW_RULES.length
+      const suggestions = PW_RULES.filter((r) => !r.test(pw)).map((r) => r.msg)
+      // level 0 = empty, 1 = weak (1-2 rules), 2 = fair (3-4), 3 = good (5), 4 = strong (6/6)
+      let level, label, color
+      if (!pw) {
+        level = 0; label = ''; color = ''
+      } else if (passed <= 2) {
+        level = 1; label = 'Weak'; color = '#e0556f'
+      } else if (passed <= 4) {
+        level = 2; label = 'Fair'; color = '#e0b23c'
+      } else if (passed === 5) {
+        level = 3; label = 'Good'; color = '#3d8bf0'
+      } else {
+        level = 4; label = 'Strong'; color = '#2e9e5b'
+      }
+      return { level, label, color, suggestions }
+    }
+
+    if (createForm) {
+      const pwInput  = createForm.querySelector('input[type="password"]');
+      const pwMeter  = createForm.querySelector('.auth-pw-strength');
+      if (pwInput && pwMeter) {
+        pwInput.addEventListener('input', () => {
+          const { level, label, color, suggestions } = checkPasswordStrength(pwInput.value)
+          if (!pwInput.value) {
+            pwMeter.removeAttribute('data-visible')
+            pwMeter.innerHTML = ''
+            return
+          }
+          pwMeter.setAttribute('data-visible', 'true')
+          const barWidth = level === 0 ? 0 : (level / 4) * 100
+          const ruleHints = suggestions.length > 0
+            ? suggestions.slice(0, 3).map((s) => '· ' + s).join('<br>')
+            : 'All requirements met.'
+          pwMeter.innerHTML =
+            '<span class="auth-pw-strength__bar" style="width:' + barWidth + '%;background:' + color + ';display:block"></span>' +
+            '<span style="color:' + color + ';font-weight:600">' + label + '</span> — ' + ruleHints
+        })
+      }
     }
   } else {
     // Pages WITHOUT the auth modal (community.html, question.html,

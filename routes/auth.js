@@ -3,6 +3,27 @@ const router = express.Router()
 const { supabase, supabaseAdmin } = require('../supabase')
 const { body, validationResult } = require('express-validator')
 const auth = require ('../middleware/auth')
+const { ensureProfile } = require ('../middleware/auth')
+
+// ---------- Strong-password helper ----------
+// Reused by register + change-password.  Returns a human-readable
+// error string if the password fails any rule, null if it passes.
+const STRONG_PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]).+$/
+function validateStrongPassword(value) {
+  if (typeof value !== 'string' || value.length < 8)
+    return 'Password must be at least 8 characters.'
+  if (value.length > 128)
+    return 'Password must be at most 128 characters.'
+  if (!/[A-Z]/.test(value))
+    return 'Password must contain at least one uppercase letter.'
+  if (!/[a-z]/.test(value))
+    return 'Password must contain at least one lowercase letter.'
+  if (!/\d/.test(value))
+    return 'Password must contain at least one number.'
+  if (!STRONG_PASSWORD_REGEX.test(value))
+    return 'Password must contain at least one special character (!@#$%^&* etc.).'
+  return null
+}
 
 // This will acts as the api/auth/register
 // Take note: Public - Anyone can create an account
@@ -12,8 +33,11 @@ router.post('/register', [
         .isEmail()
         .withMessage('Please enter a valid email'),
     body('password')
-        .isLength({ min: 8 })
-        .withMessage('Password must be at least 8 characters'),
+        .custom((value) => {
+            const err = validateStrongPassword(value);
+            if (err) throw new Error(err);
+            return true;
+        }),
     body('username')
         .isLength({ min: 3, max: 20 })
         .withMessage('Username must be between 3 and 20 characters')
@@ -108,11 +132,20 @@ router.post('/login', [
 
         // Step 2 - Retrieve profile using auth_id (uuid), not id (bigint)
         // We also select the internal bigint id - needed for all downstream writes
-        const { data: profile, error: profileError } = await supabase
+        let { data: profile, error: profileError } = await supabase
             .from('users')
             .select('id, user_name, role, account_status, school_id')
             .eq('auth_id', authUserId)
             .single()
+
+        // Edge case: auth entry exists (e.g. Google OAuth created it) but
+        // no public.users row yet — auto-provision the profile here so the
+        // login response succeeds. After this, the auth middleware will
+        // always find the profile on subsequent calls.
+        if ((profileError || !profile) && authUserId) {
+            profile = await ensureProfile(authUserId, { email })
+            if (profile) profileError = null
+        }
 
         if (profileError || !profile) {
             return res.status(401).json({ message: 'Invalid email or password.' })
@@ -173,8 +206,11 @@ router.post('/change-password', auth, [
         .notEmpty()
         .withMessage('Current password is required'),
     body('new_password')
-        .isLength({ min: 8 })
-        .withMessage('New password must be at least 8 characters'),
+        .custom((value) => {
+            const err = validateStrongPassword(value);
+            if (err) throw new Error(err);
+            return true;
+        }),
 ], async (req, res) => {
 
     const errors = validationResult(req)
