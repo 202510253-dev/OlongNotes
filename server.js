@@ -62,6 +62,7 @@ const answersRoutes = require('./routes/answers')
 const usersRoutes = require('./routes/users')
 const adminRoutes = require('./routes/admin')
 const foldersRoutes = require('./routes/folders')
+const statsRoutes = require('./routes/stats')
 
 app.use('/api/auth', authRoutes)
 app.use('/api/notes', notesRoutes)
@@ -72,6 +73,7 @@ app.use('/api/answers', answersRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/folders', foldersRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/stats', statsRoutes)
 
 // Health check
 app.get('/health', (req, res) => {

@@ -85,6 +85,55 @@ function formatCount(n) {
 }
 
 /**
+ * Hydrate the platform counters that pages used to hardcode from
+ * GET /api/stats:
+ *   [data-stat-notes]          discover badge "… Notes" (index.html)
+ *   [data-stat-contributors]   discover badge + both marquee copies
+ *                              (index.html)
+ *   [data-stat-schools]        About-page bullet (about.html)
+ *
+ * The formatStat helper matches the original markup style ("10,000+",
+ * "500+", "78") so the layout never reflows when real values land.
+ * Non-numeric (or missing) values keep the static text untouched, and
+ * any API failure is swallowed — the page stays fully usable offline.
+ */
+async function hydrateStats() {
+  const ON = window.OlongNotes || {};
+  if (!ON.api) return;
+  const formatStat = (n) => {
+    const v = Number(n);
+    if (!Number.isFinite(v) || v < 0) return null;
+    if (v >= 1000) {
+      const k = v / 1000;
+      return `${k % 1 === 0 ? k : k.toFixed(1)}K+`;
+    }
+    return `${v}+`;
+  };
+  try {
+    const stats = await ON.api.get('/stats');
+    const badge = (value, allowNoPlus = false) => {
+      const v = Number(value);
+      if (!Number.isFinite(v) || v < 0) return null;
+      return allowNoPlus ? String(v) : formatStat(v);
+    };
+    if (stats.notes !== undefined) {
+      const label = badge(stats.notes);
+      if (label !== null) document.querySelectorAll('[data-stat-notes]').forEach((el) => { el.textContent = label; });
+    }
+    if (stats.contributors !== undefined) {
+      const label = badge(stats.contributors);
+      if (label !== null) document.querySelectorAll('[data-stat-contributors]').forEach((el) => { el.textContent = label; });
+    }
+    if (stats.schools !== undefined) {
+      const label = badge(stats.schools, true);
+      if (label !== null) document.querySelectorAll('[data-stat-schools]').forEach((el) => { el.textContent = label; });
+    }
+  } catch (e) {
+    console.warn('[OlongNotes] Failed to hydrate platform stats.', e);
+  }
+}
+
+/**
  * Adapt a backend note row (nested: users/schools/subjects) into the
  * flat shape the renderer expects. Backend returns no tint/rating/
  * ratingCount columns — those get stripped.
@@ -371,6 +420,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // FEATURED_NOTES so the page still renders.
   fetchFeaturedNotes().then(renderFeaturedNotes);
 
+  // Hydrate the platform counters (discover badges, marquee, About-page
+  // school count) from GET /api/stats. Never throws — on failure the
+  // static fallback numbers simply stay put, and it deliberately runs
+  // AFTER applyRole() above so nothing timing-sensitive is delayed.
+  hydrateStats();
+
   // Click delegation on the featured grid → navigate to the document
   // viewer by backend note ID. Cards carry data-note-id from Step 3.
   const featuredGrid = document.getElementById('featuredNotesGrid');
@@ -547,7 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Grade levels (static)
     const gradeSelect = document.getElementById('gradeFilter');
     if (gradeSelect) {
-      const grades = ['Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
+      const grades = ['Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12', 'College'];
       const options = '<option value="">All Grade Levels</option>' +
         grades.map(g => `<option value="${g}">${g}</option>`).join('');
       gradeSelect.innerHTML = options;

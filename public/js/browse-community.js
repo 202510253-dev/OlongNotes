@@ -733,6 +733,65 @@
     }, 4000);
   }
 
+  // ---------- Trending Subjects sidebar ----------
+  // Renders subject names + live question counts from
+  // GET /api/questions/trending-subjects. The static markup used to
+  // hardcode "(insert) that stopped matching real usage — now every
+  // subject's number comes straight from the DB. The API call never
+  // throws here: on failure it swaps the container to a friendly
+  // "couldn't load" note instead of an endless spinner.
+  async function loadTrendingSubjects() {
+    const list = document.getElementById('trendingList');
+    const ON = window.OlongNotes || {};
+    const iconChip = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>`;
+    if (!list) return;
+
+    const showEmpty = () => {
+      list.innerHTML = '';
+      const li = document.createElement('li');
+      li.className = 'trending-item trending-item--muted';
+      li.innerHTML = `<span class="trending-item__icon" aria-hidden="true">${iconChip}</span>
+        <span class="trending-item__name">No questions yet — be the first to ask.</span>`;
+      list.appendChild(li);
+      list.setAttribute('aria-busy', 'false');
+    };
+
+    try {
+      if (!ON.api) throw new Error('api unavailable');
+      const subjects = await ON.api.get('/questions/trending-subjects');
+      const rows = Array.isArray(subjects) ? subjects : [];
+      list.innerHTML = '';
+      if (rows.length === 0) {
+        showEmpty();
+        return;
+      }
+      const tint = ['#3d6bf0', '#2e9e5b', '#8b5cf6', '#e0556f', '#e0b23c'];
+      rows.forEach((row, i) => {
+        const li = document.createElement('li');
+        li.className = 'trending-item';
+        const color = tint[i % tint.length];
+        li.innerHTML = `<span class="trending-item__icon" style="--stat-tint:${color}" aria-hidden="true">${iconChip}</span>
+          <span class="trending-item__name">${window.OlongNotes.escapeHtml(row.subject_name || 'General')}</span>
+          <span class="trending-item__count">${formatNum(row.questions || 0)} questions</span>`;
+        list.appendChild(li);
+      });
+      list.setAttribute('aria-busy', 'false');
+    } catch (e) {
+      console.warn('[OlongNotes] Failed to load trending subjects.', e);
+      list.innerHTML = '';
+      const li = document.createElement('li');
+      li.className = 'trending-item trending-item--muted';
+      li.textContent = "Couldn't load trends. Please refresh.";
+      list.appendChild(li);
+      list.setAttribute('aria-busy', 'false');
+    }
+  }
+
+  function formatNum(n) {
+    const v = Math.round(Number(n) || 0);
+    return v.toLocaleString('en-US');
+  }
+
   // ---------- Boot ----------
   document.addEventListener('DOMContentLoaded', () => {
     initDropdownFilters();
@@ -741,6 +800,7 @@
     initAskModal();
 
     loadQuestions();
+    loadTrendingSubjects();
   });
 
   // Expose a tiny test hook so the Q&A verification script in the spec

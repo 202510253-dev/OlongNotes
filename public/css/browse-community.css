@@ -484,6 +484,16 @@
   color: var(--gray-600, #8891a0);
 }
 
+.trending-item--muted .trending-item__icon {
+  color: var(--gray-500, #a8b0bd);
+  background: color-mix(in srgb, var(--gray-500, #a8b0bd) 14%, #ffffff);
+}
+
+.trending-item--muted .trending-item__name {
+  color: var(--gray-600, #8891a0);
+  font-weight: 500;
+}
+
 /* Top contributors list */
 .contributor-list {
   list-style: none;

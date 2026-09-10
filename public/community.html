@@ -197,45 +197,14 @@
           <div class="side-panel">
             <h2 class="side-panel__title">Trending Subjects</h2>
 
-            <ul class="trending-list">
-              <li class="trending-item">
-                <span class="trending-item__icon" style="--stat-tint:#3d6bf0" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+            <!-- Items are rendered from GET /api/questions/trending-subjects
+                 by loadTrendingSubjects() in browse-community.js -->
+            <ul class="trending-list" id="trendingList" aria-busy="true" aria-live="polite">
+              <li class="trending-item trending-item--muted">
+                <span class="trending-item__icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3.5 12 12.5"/></svg>
                 </span>
-                <span class="trending-item__name">Mathematics</span>
-                <span class="trending-item__count">2,845 questions</span>
-              </li>
-
-              <li class="trending-item">
-                <span class="trending-item__icon" style="--stat-tint:#2e9e5b" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3h5l1 4-2 2 3 8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3l3-8-2-2Z"/></svg>
-                </span>
-                <span class="trending-item__name">Physics</span>
-                <span class="trending-item__count">2,317 questions</span>
-              </li>
-
-              <li class="trending-item">
-                <span class="trending-item__icon" style="--stat-tint:#8b5cf6" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c2 2.5 3 5 3 8s-1 5.5-3 8c-2-2.5-3-5-3-8s1-5.5 3-8Z"/><path d="M4 12h16"/></svg>
-                </span>
-                <span class="trending-item__name">Biology</span>
-                <span class="trending-item__count">1,892 questions</span>
-              </li>
-
-              <li class="trending-item">
-                <span class="trending-item__icon" style="--stat-tint:#e0556f" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5h6l-1 5h3l-8 12 1.5-8H7l2-9Z"/></svg>
-                </span>
-                <span class="trending-item__name">Chemistry</span>
-                <span class="trending-item__count">1,620 questions</span>
-              </li>
-
-              <li class="trending-item">
-                <span class="trending-item__icon" style="--stat-tint:#e0b23c" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 12 3l8 3.5v3L12 13 4 9.5v-3Z"/><path d="M7 11v5c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2v-5"/></svg>
-                </span>
-                <span class="trending-item__name">English</span>
-                <span class="trending-item__count">1,256 questions</span>
+                <span class="trending-item__name">Loading trends&hellip;</span>
               </li>
             </ul>
           </div>

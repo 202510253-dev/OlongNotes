@@ -580,6 +580,64 @@ router.get('/', async (req, res) => {
   }
 })
 
+// ---------- GET /api/questions/trending-subjects ----------
+//
+// Public. Powers the "Trending Subjects" sidebar on community.html —
+// previously hardcoded subject names + question counts. Groups questions
+// by subject and returns the most active subjects, most-asked first
+// (ties break alphabetically). Questions without a subject (e.g. College
+// posts that never resolved a subjects row) are skipped.
+//
+// Query params (all optional):
+//   limit    how many subjects to return (default 5, max 10)
+//
+// Returns: [{ subject_id, subject_name, questions }]
+router.get('/trending-subjects', async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 5, 10)
+
+  try {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('subject_id, subjects:subject_id ( subject_name )')
+      .not('subject_id', 'is', null)
+
+    if (error) {
+      console.error('[questions] trending-subjects error:', error)
+      return res.status(500).json({ message: 'Could not fetch trending subjects.' })
+    }
+
+    // Group + count in JS (PostgREST has no GROUP BY). Human-scale data —
+    // a full scan of the questions table is fine for a sidebar widget.
+    const counts = new Map()
+    for (const row of data || []) {
+      const name = row.subjects && row.subjects.subject_name
+      if (!name) continue
+      const entry = counts.get(row.subject_id)
+      if (entry) {
+        entry.questions += 1
+      } else {
+        counts.set(row.subject_id, {
+          subject_id: row.subject_id,
+          subject_name: name,
+          questions: 1,
+        })
+      }
+    }
+
+    const trending = [...counts.values()]
+      .sort((a, b) =>
+        b.questions - a.questions ||
+        String(a.subject_name).localeCompare(String(b.subject_name))
+      )
+      .slice(0, limit)
+
+    return res.status(200).json(trending)
+  } catch (err) {
+    console.error('[questions] trending-subjects error:', err)
+    return res.status(500).json({ message: 'Server error.' })
+  }
+})
+
 // ---------- GET /api/questions/:id ----------
 //
 // Public. Returns the question + its answers (ordered by is_accepted DESC,
