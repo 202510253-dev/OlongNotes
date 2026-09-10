@@ -29,7 +29,7 @@
 ;(function () {
   'use strict'
 
-  const SUPABASE_SDK_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+  const SUPABASE_SDK_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'
   const SUPABASE_STORAGE_KEY = 'sb-' + (location.hostname || 'localhost') + '-auth-token'
   const USER_STORAGE_KEY     = 'olongnotes_user'
   const TOKEN_KEY            = 'olongnotes_token'
@@ -238,5 +238,17 @@
     signInWithGoogle,
     signOutGoogle,
     isReady: _ready,
+  }
+
+  // ---- Auto-init on page load ----
+  // After a Google OAuth redirect, the browser lands back on
+  // index.html (or about.html) with an auth code in the URL.
+  // initGoogleAuth() exchanges it for a Supabase session and
+  // persists the token + user into localStorage — this MUST
+  // run on every page load, not just on button click.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => initGoogleAuth())
+  } else {
+    initGoogleAuth()
   }
 })();
