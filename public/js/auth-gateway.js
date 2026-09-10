@@ -145,22 +145,29 @@
 
     _initialising = (async () => {
       try {
+        console.log('[GG] Step 1: Loading Supabase SDK...')
         const supabaseModule = await loadSupabaseSDK()
+        console.log('[GG] Step 1 done. createClient:', typeof supabaseModule.createClient)
 
+        console.log('[GG] Step 2: Fetching /api/config...')
         const cfgRes = await fetch('/api/config')
-        if (!cfgRes.ok) throw new Error('Could not load auth config.')
+        console.log('[GG] Step 2 done. status:', cfgRes.status)
+        if (!cfgRes.ok) throw new Error('Could not load auth config (HTTP ' + cfgRes.status + ').')
         const { supabaseUrl, supabaseAnonKey } = await cfgRes.json()
         if (!supabaseUrl || !supabaseAnonKey) throw new Error('Auth config incomplete.')
+        console.log('[GG] Step 2 done. URL:', supabaseUrl.substring(0, 30) + '...')
 
+        console.log('[GG] Step 3: Creating Supabase client...')
         _supabase = supabaseModule.createClient(supabaseUrl, supabaseAnonKey, {
           auth: {
             persistSession:  true,
             autoRefreshToken: true,
-            detectSessionInUrl: true,       // handles code / hash fragments
+            detectSessionInUrl: true,
             storage: window.localStorage,
             storageKey: SUPABASE_STORAGE_KEY,
           },
         })
+        console.log('[GG] Step 3 done. auth:', !!_supabase.auth)
 
         // 1) Exchange an authorization code left in the URL by the OAuth
         //    redirect (PKCE flow — Supabase default).  This call is a
@@ -184,7 +191,8 @@
         return true
 
       } catch (err) {
-        console.warn('[OlongNotes] Google Auth init failed.', err)
+        console.error('[OlongNotes] Google Auth init failed.', err)
+        _initialising = null   // allow retry on next click
         _resolveReady()
         return false
       }
