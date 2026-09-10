@@ -1135,6 +1135,15 @@ body.upload-modal-open .footer {
   gap: 12px;
 }
 
+/* Logged-in users hide the Log In / Sign Up buttons via the `hidden`
+   attribute (applyRole sets it in script.js). The `hidden` attribute
+   must ALWAYS win over the mobile display rules below, so it's guarded
+   here with !important — otherwise the UA's `[hidden] { display:none }`
+   would lose to the author `.btn { display:inline-flex }` rule and the
+   buttons would show for signed-in users too. */
+.navbar__guest-actions[hidden],
+.navbar__actions .btn--sm[hidden] { display: none !important; }
+
 .navbar__profile-chip {
   display: inline-flex;
   align-items: center;
@@ -2760,14 +2769,15 @@ body.upload-modal-open .footer {
   }
   .navbar__profile-avatar { width: 34px; height: 34px; font-size: 0.82rem; }
 
-  /* Mobile top bar: the theme toggle moved into the side drawer, and
-     the desktop Log In / Sign Up buttons + guest-action group collapse
-     so only the profile affordance survives next to the hamburger + logo.
-     The drawer carries the full nav + theme toggle + auth CTA. Only the
-     TOP-BAR toggle is hidden ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the drawer's own .theme-toggle stays. */
+  /* Mobile top bar: the theme toggle moved into the side drawer, but the
+     Log In / Sign Up buttons STAY visible so logged-out viewers can sign
+     in from a phone — they sit right where the profile affordance goes.
+     When a user is logged in, applyRole() adds the `hidden` attribute
+     (see the [hidden] guard above), so they disappear and the profile
+     chip/icon remains the only action — exactly like desktop. */
   .navbar__actions .theme-toggle { display: none; }
-  .navbar__guest-actions { display: none; }
-  .navbar__actions .btn--sm { display: none; }
+  .navbar__guest-actions { gap: 8px; }
+  .navbar__actions { gap: 8px; }
 }
 
 @media (max-width: 560px) {
@@ -2777,6 +2787,10 @@ body.upload-modal-open .footer {
   .navbar__brand { margin-right: 10px; gap: 10px; }
   .navbar__logo img { height: 48px; }
   .navbar__title { font-size: 1rem; }
+  /* Phone width is tight once the Log In / Sign Up buttons show next to
+     the hamburger, so drop the "OlongNotes" text and keep the square logo
+     mark — the drawer + footer still carry the full name. */
+  .navbar__inner .navbar__title { display: none; }
   .navbar__inner { height: 64px; }
   .navbar__burger {
     margin-right: 8px;
